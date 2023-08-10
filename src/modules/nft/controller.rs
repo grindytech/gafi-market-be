@@ -1,11 +1,8 @@
 use actix_web::{
     get,
-    http::StatusCode,
-    post,
-    web::{self, Data, Json},
-    Error as AWError, HttpResponse, Responder, Result,
+    web::{self},
+    Responder,
 };
-use serde_json::json;
 
 #[get("/test")]
 pub async fn hello() -> impl Responder {

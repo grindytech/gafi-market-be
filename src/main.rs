@@ -10,15 +10,22 @@ use actix_web::{
 use app_state::AppState;
 use dotenv::dotenv;
 use env_logger::Env;
-use utils::{config::Config, db, route::route_config};
 
 mod app_state;
 mod common;
 mod models;
 mod modules;
 
+pub mod config;
+pub mod constant;
+pub mod db;
+pub mod logger;
+pub mod route;
 mod tests;
-mod utils;
+
+use config::Config;
+use route::route_config;
+
 fn add_error_header<B>(mut res: dev::ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>> {
     res.response_mut().headers_mut().insert(
         header::CONTENT_TYPE,

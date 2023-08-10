@@ -8,11 +8,12 @@ use mongodb::{
 use mongodb::{Client, IndexModel};
 
 use crate::{
+    config::Config,
+    db,
     models::{
         self,
         account::{self, Account, SocialInfo},
     },
-    utils::{config::Config, db},
 };
 #[actix_web::test]
 async fn test() {

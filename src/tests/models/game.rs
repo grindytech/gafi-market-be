@@ -1,10 +1,11 @@
 use crate::{
+    config::Config,
+    db,
     models::{
         self,
         account::{self, Account, SocialInfo},
         game::Game,
     },
-    utils::{config::Config, db},
 };
 use actix_web::test;
 use dotenv::dotenv;

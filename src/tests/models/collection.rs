@@ -1,6 +1,7 @@
 use crate::{
+    config::Config,
+    db,
     models::{self, nft_collection::NFTCollection},
-    utils::{config::Config, db},
 };
 use actix_web::test;
 use dotenv::dotenv;

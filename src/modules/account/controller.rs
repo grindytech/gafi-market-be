@@ -2,8 +2,8 @@ use super::service;
 
 use crate::{
     app_state::AppState,
+    db,
     modules::account::{dto::AccountDTO, service::get_account},
-    utils::db,
 };
 use actix_web::{
     get,
@@ -12,24 +12,15 @@ use actix_web::{
     web::{self, Data, Json, Path},
     Error as AWError, HttpResponse, Responder, Result,
 };
-use serde_json::json;
-use utoipa::OpenApi;
+
 #[utoipa::path(
-        get,
-        path = "/{data_id}",
+        tag = "account",
+        context_path = "/account",
         params(("data_id"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600")),
         responses(
-            (status = 200, description = "Account Find Success", body = AccountDTO,example=json!(AccountDTO{address:String::from("0sxbdfc529688922fb5036d9439a7cd61d61114f600"), balance: "200.00".to_string(),
-                is_verified: true,
-                name: "Who more".to_string(),
-                bio: "A simple description.".to_string(),
-                logo_url:Some( "https://example.com/logo.png".to_string()),
-                banner_url: Some("https://example.com/banner.png".to_string())})),
-               
+            (status = 200, description = "Account Find Success", body = AccountDTO),
             (status = NOT_FOUND, description = "Account was not found")
         ),
-      
-      
     )]
 #[get("/{data_id}")]
 pub async fn get_define_account(
@@ -61,21 +52,3 @@ pub async fn get_define_account(
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
     scope.service(get_define_account)
 }
-
-#[derive(OpenApi)]
-#[openapi(
-    paths(get_define_account),
-    components(
-        schemas(
-            AccountDTO,
-        )
-    ),
-    tags(
-        (name = "account", description = "account API"),
-    ),
-    servers(
-        (url = "/account")
-    )
-)]
-
-pub struct ApiDoc;

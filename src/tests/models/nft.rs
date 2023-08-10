@@ -3,13 +3,11 @@ use dotenv::dotenv;
 use mongodb::{bson::oid::ObjectId, Collection};
 
 use crate::{
+    config::{self, Config},
+    db,
     models::{
         self,
         nft::{self, Propertise, NFT},
-    },
-    utils::{
-        config::{self, Config},
-        db,
     },
 };
 

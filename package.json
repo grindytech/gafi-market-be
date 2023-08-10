@@ -8,9 +8,9 @@
     "run": "cargo run",
     "build": "cargo build",
     "format": "cargo fmt",
-    "dev": "cargo watch -q -c -w src/ -x run"
+    "dev": "cargo watch -q -c -w src/ -x run",
+    "db": "node mongodb-memory.js"
   },
-  
   "keywords": [
     "gafi",
     "gafi-market",
@@ -18,6 +18,8 @@
     "nft-gafi"
   ],
   "author": "grindy",
-  "license": "MIT"
-  
+  "license": "MIT",
+  "dependencies": {
+    "mongodb-memory-server": "^8.14.0"
+  }
 }

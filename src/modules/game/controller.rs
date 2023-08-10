@@ -5,19 +5,12 @@ use actix_web::{
     web::{self, Data, Json},
     Error as AWError, HttpResponse, Responder, Result,
 };
-use serde_json::json;
-use utoipa::OpenApi;
 
-use crate::{
-    app_state::AppState,
-    modules::game::{dto::GameDTO, service::get_game},
-};
-
-use super::dto::SocialDTO;
+use crate::{app_state::AppState, modules::game::service::get_game};
 
 #[utoipa::path(
-    get,
-    path="/{game_id}",
+    tag = "game",
+    context_path = "/game",
     params(("game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ")),
     responses((status=200,description="Find Game Success",
    body=GameDTO),(status=NOT_FOUND,description="Can not found this game"))
@@ -48,21 +41,3 @@ pub async fn get_define_game(
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
     scope.service(get_define_game)
 }
-#[derive(OpenApi)]
-#[openapi(
-    paths(get_define_game),
-    components(
-        schemas(
-            GameDTO,
-            SocialDTO
-        )
-    ),
-    tags(
-        (name = "game", description = "game API"),
-    ),
-    servers(
-        (url = "/game")
-    )
-)]
-
-pub struct ApiDoc;
