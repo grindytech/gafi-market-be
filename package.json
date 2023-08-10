@@ -1,0 +1,23 @@
+{
+  "name": "gafi-market-demo",
+  "version": "0.0.1",
+  "description": "Gafi Market is a decentralized, transparent and flexible marketplace that offers various trading functions.",
+  "main": "index.js",
+  "scripts": {
+    "test": "cargo test",
+    "run": "cargo run",
+    "build": "cargo build",
+    "format": "cargo fmt",
+    "dev": "cargo watch -q -c -w src/ -x run"
+  },
+  
+  "keywords": [
+    "gafi",
+    "gafi-market",
+    "marketplace",
+    "nft-gafi"
+  ],
+  "author": "grindy",
+  "license": "MIT"
+  
+}
