@@ -16,8 +16,8 @@ pub struct Game {
     pub description: String,
     pub logo_url: Option<String>,
     pub banner_url: Option<String>,
-    pub update_at: i32,
-    pub create_at: i32,
+    pub update_at: i64,
+    pub create_at: i64,
 }
 
 pub const NAME: &str = "game";

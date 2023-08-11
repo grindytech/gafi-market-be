@@ -12,9 +12,9 @@ pub struct Auction {
     pub reserve_price: i16,
     pub start_price: i32,
     pub end_price: i32,
-    pub begin_at: i32,
-    pub end_at: i32,
-    pub update_at: i32,
-    pub create_at: i32,
+    pub begin_at: i64,
+    pub end_at: i64,
+    pub update_at: i64,
+    pub create_at: i64,
 }
 pub const NAME: &str = "auction";

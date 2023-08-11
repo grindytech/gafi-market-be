@@ -1,16 +1,9 @@
-use super::service;
-
-use crate::{
-    app_state::AppState,
-    db,
-    modules::account::{dto::AccountDTO, service::get_account},
-};
+use crate::{app_state::AppState, modules::account::service::get_account_dto};
 use actix_web::{
     get,
     http::StatusCode,
-    post,
-    web::{self, Data, Json, Path},
-    Error as AWError, HttpResponse, Responder, Result,
+    web::{self, Data},
+    Error as AWError, HttpResponse, Result,
 };
 
 #[utoipa::path(
@@ -28,7 +21,7 @@ pub async fn get_define_account(
     path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
     let data_id = path.into_inner();
-    let account_detail = get_account(&data_id, app_state.db.clone()).await;
+    let account_detail = get_account_dto(&data_id, app_state.db.clone()).await;
     match account_detail {
         Ok(Some(account_dto)) => {
             // Convert AccountDTO to JSON and build the HTTP response

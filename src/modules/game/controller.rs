@@ -1,9 +1,8 @@
 use actix_web::{
     get,
     http::StatusCode,
-    post,
     web::{self, Data, Json},
-    Error as AWError, HttpResponse, Responder, Result,
+    Error as AWError, HttpResponse, Result,
 };
 
 use crate::{app_state::AppState, modules::game::service::get_game};
@@ -11,9 +10,12 @@ use crate::{app_state::AppState, modules::game::service::get_game};
 #[utoipa::path(
     tag = "game",
     context_path = "/game",
-    params(("game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ")),
-    responses((status=200,description="Find Game Success",
-   body=GameDTO),(status=NOT_FOUND,description="Can not found this game"))
+    params(
+        ("game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ")
+    ),
+    responses(
+        (status=200,description="Find Game Success",body=GameDTO),
+        (status=NOT_FOUND,description="Can not found this game"))
 )]
 #[get("/{game_id}")]
 pub async fn get_define_game(
@@ -27,7 +29,7 @@ pub async fn get_define_game(
             .content_type("application/json")
             .json(game_dto)),
         Ok(None) => {
-            // Account not found, return 404 Not Found response
+            // Game not found, return 404 Not Found response
             Ok(HttpResponse::NotFound().finish())
         }
         Err(e) => {

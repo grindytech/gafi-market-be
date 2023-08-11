@@ -13,8 +13,8 @@ pub struct NFTCollection {
     pub banner_url: Option<String>,
     pub minting_fee: String,
     pub is_verified: bool,
-    pub update_at: i32,
-    pub create_at: i32,
+    pub update_at: i64,
+    pub create_at: i64,
     pub raw: String,
 }
 

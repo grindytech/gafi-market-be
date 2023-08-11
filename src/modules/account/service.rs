@@ -12,7 +12,17 @@ use mongodb::{
     Client, Collection, Database,
 };
 
-use super::dto::AccountDTO;
+use super::dto::{AccountDTO, SocialInfoDto};
+
+pub async fn get_account_dto(
+    address: &String,
+    db: Database,
+) -> Result<Option<Account>, mongodb::error::Error> {
+    let col: Collection<Account> = db.collection(models::account::NAME);
+    let filter = doc! {"address": address};
+    let account = col.find_one(filter, None).await;
+    account.into()
+}
 
 pub async fn get_account(
     address: &String,

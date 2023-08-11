@@ -2,12 +2,9 @@ use crate::{
     app_state::AppState,
     db,
     models::account,
-    modules::{
-        account::{
-            dto::{AccountDTO, SocialInfoDto},
-            service,
-        },
-        game::dto::SocialDTO,
+    modules::account::{
+        dto::{AccountDTO, SocialInfoDto},
+        service,
     },
 };
 use chrono::Utc;

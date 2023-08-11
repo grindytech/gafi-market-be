@@ -13,9 +13,9 @@ pub struct Bundle {
     pub market_type: String,
     pub status: String,
     pub price: i32,
-    pub begin_at: i32,
-    pub end_at: i32,
-    pub update_at: i32,
-    pub create_at: i32,
+    pub begin_at: i64,
+    pub end_at: i64,
+    pub update_at: i64,
+    pub create_at: i64,
 }
 pub const NAME: &str = "bundle";

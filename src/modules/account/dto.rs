@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::models::account::SocialInfo;
+use crate::models::account::{Account, SocialInfo};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct AccountDTO {
@@ -15,6 +15,22 @@ pub struct AccountDTO {
     pub update_at: i64,
     pub create_at: i64,
     pub social: SocialInfoDto,
+}
+impl From<Account> for AccountDTO {
+    fn from(value: Account) -> Self {
+        AccountDTO {
+            address: value.address,
+            balance: value.balance,
+            is_verified: value.is_verified,
+            name: value.name,
+            bio: value.bio,
+            logo_url: value.logo_url,
+            banner_url: value.banner_url,
+            update_at: value.update_at,
+            create_at: value.create_at,
+            social: value.social.into(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
@@ -34,6 +50,18 @@ impl Into<SocialInfo> for SocialInfoDto {
             medium: self.medium,
             twitter: self.twitter,
             web: self.web,
+        }
+    }
+}
+
+impl From<SocialInfo> for SocialInfoDto {
+    fn from(value: SocialInfo) -> Self {
+        SocialInfoDto {
+            twitter: value.twitter,
+            web: value.web,
+            medium: value.medium,
+            facebook: value.facebook,
+            discord: value.discord,
         }
     }
 }
