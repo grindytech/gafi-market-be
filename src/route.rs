@@ -7,7 +7,10 @@ pub fn route_config(cfg: &mut web::ServiceConfig) {
         web::scope("/api/v1")
             .service(modules::nft::controller::endpoints(scope("/nft")))
             .service(modules::game::controller::endpoints(scope("/game")))
-            .service(modules::account::controller::endpoints(scope("/account"))),
+            .service(modules::account::controller::endpoints(scope("/account")))
+            .service(modules::collection::controller::endpoints(scope(
+                "/collection",
+            ))),
     )
     .service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![(
         Url::new("v1", "/api-docs/api.json"),

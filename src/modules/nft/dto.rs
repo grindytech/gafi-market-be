@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::models::nft::Propertise;
+use crate::models::nft::{Propertise, NFT};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct PropertiseDTO {
@@ -24,4 +24,23 @@ pub struct NftDTO {
     pub visitor_count: i32,
     pub favorite_count: i32,
     pub propertise: Vec<Propertise>,
+}
+impl From<NFT> for NftDTO {
+    fn from(value: NFT) -> Self {
+        NftDTO {
+            token_id: value.token_id,
+            collection_id: value.collection_id,
+            amount: value.amount,
+            is_burn: value.is_burn,
+            name: value.name,
+            description: value.description,
+            status: value.status,
+            external_url: value.external_url,
+            weight: value.weight,
+            img_url: value.img_url,
+            visitor_count: value.visitor_count,
+            favorite_count: value.favorite_count,
+            propertise: value.propertise,
+        }
+    }
 }

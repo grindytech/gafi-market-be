@@ -17,11 +17,14 @@ use super::dto::{AccountDTO, SocialInfoDto};
 pub async fn get_account_dto(
     address: &String,
     db: Database,
-) -> Result<Option<Account>, mongodb::error::Error> {
+) -> Result<Option<AccountDTO>, mongodb::error::Error> {
     let col: Collection<Account> = db.collection(models::account::NAME);
     let filter = doc! {"address": address};
-    let account = col.find_one(filter, None).await;
-    account.into()
+    if let Ok(Some(account_detail)) = col.find_one(filter, None).await {
+        Ok(Some(account_detail.into()))
+    } else {
+        Ok(None)
+    }
 }
 
 pub async fn get_account(
