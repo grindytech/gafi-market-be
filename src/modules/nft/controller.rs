@@ -1,4 +1,4 @@
-use crate::{app_state::AppState, modules::nft::service::get_nft};
+use crate::{app_state::AppState, modules::nft::service::get_nft_by_token};
 use actix_web::{
     get,
     http::StatusCode,
@@ -18,12 +18,12 @@ use actix_web::{
         (status=NOT_FOUND,description="Cannot found this nft")
     ))]
 #[get("/{token_id}")]
-pub async fn get_define_nft(
+pub async fn get_nft(
     app_state: Data<AppState>,
     path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
     let token_id = path.into_inner();
-    let nft_detail = get_nft(&token_id, app_state.db.clone()).await;
+    let nft_detail = get_nft_by_token(&token_id, app_state.db.clone()).await;
     match nft_detail {
         Ok(Some(nft_dto)) => Ok(HttpResponse::build(StatusCode::OK)
             .content_type("application;.json")
@@ -41,5 +41,5 @@ pub async fn get_define_nft(
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope.service(get_define_nft)
+    scope.service(get_nft)
 }

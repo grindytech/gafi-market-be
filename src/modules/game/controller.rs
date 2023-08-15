@@ -1,11 +1,11 @@
 use actix_web::{
     get,
     http::StatusCode,
-    web::{self, Data, Json},
+    web::{self, Data},
     Error as AWError, HttpResponse, Result,
 };
 
-use crate::{app_state::AppState, modules::game::service::get_game};
+use crate::{app_state::AppState, modules::game::service::get_game_by_id};
 
 #[utoipa::path(
     tag = "game",
@@ -18,12 +18,12 @@ use crate::{app_state::AppState, modules::game::service::get_game};
         (status=NOT_FOUND,description="Can not found this game"))
 )]
 #[get("/{game_id}")]
-pub async fn get_define_game(
+pub async fn get_game(
     app_state: Data<AppState>,
     path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
     let game_id = path.into_inner();
-    let game_detail = get_game(&game_id, app_state.db.clone()).await;
+    let game_detail = get_game_by_id(&game_id, app_state.db.clone()).await;
     match game_detail {
         Ok(Some(game_dto)) => Ok(HttpResponse::build(StatusCode::OK)
             .content_type("application/json")
@@ -40,6 +40,7 @@ pub async fn get_define_game(
     }
 }
 
+/* pub async fn get_games(app_state: Data<AppState>) -> Result<HttpResponse, AWError> {} */
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope.service(get_define_game)
+    scope.service(get_game)
 }

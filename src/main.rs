@@ -1,9 +1,8 @@
-use actix_cors::Cors;
 use actix_web::{
     dev,
-    http::{self, header, StatusCode},
+    http::{header, StatusCode},
     middleware::{ErrorHandlerResponse, ErrorHandlers, Logger},
-    web::{self, scope},
+    web::{self},
     App, HttpServer, Result,
 };
 

@@ -5,7 +5,7 @@ use super::dto::NFTCollectionDTO;
 use crate::models::nft_collection::{self, NFTCollection};
 use crate::models::{self};
 
-pub async fn get_nft_collection_dto(
+pub async fn get_collection_by_id(
     collection_id: &String,
     db: Database,
 ) -> Result<Option<NFTCollectionDTO>, mongodb::error::Error> {
@@ -14,7 +14,6 @@ pub async fn get_nft_collection_dto(
     if let Ok(Some(collection_detail)) = col.find_one(filter, None).await {
         Ok(Some(collection_detail.into()))
     } else {
-        eprint!("???");
         Ok(None)
     }
 }

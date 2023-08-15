@@ -5,7 +5,7 @@ use mongodb::{
     options::IndexOptions,
     Collection,
 };
-use mongodb::{Client, IndexModel};
+use mongodb::{error::Error, Client, IndexModel};
 
 use crate::{
     config::Config,
@@ -16,7 +16,7 @@ use crate::{
     },
 };
 #[actix_web::test]
-async fn test() {
+async fn test() -> Result<(), Error> {
     dotenv().ok();
     let configuration = Config::init();
     let database = db::get_database(
@@ -47,7 +47,18 @@ async fn test() {
         update_at: 1234567890,
         create_at: 1234567890,
     };
-    col.insert_one(account_test2, None)
-        .await
-        .expect("Create new Account");
+    //Check Existing of address Test
+    let query = doc! { "address": account_test2.address.clone() };
+    let existing_document = col.find_one(query, None).await;
+    if existing_document.is_err() {
+        col.insert_one(account_test2, None)
+            .await
+            .expect("Failed Create new Account");
+        Ok(())
+    } else {
+        Err(Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Unique constraint violation",
+        )))
+    }
 }

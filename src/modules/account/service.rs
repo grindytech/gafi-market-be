@@ -14,7 +14,7 @@ use mongodb::{
 
 use super::dto::{AccountDTO, SocialInfoDto};
 
-pub async fn get_account_dto(
+pub async fn get_account_by_adress(
     address: &String,
     db: Database,
 ) -> Result<Option<AccountDTO>, mongodb::error::Error> {

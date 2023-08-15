@@ -8,6 +8,7 @@ use crate::{
     },
 };
 use chrono::Utc;
+use log::info;
 
 #[actix_web::test]
 async fn test() {

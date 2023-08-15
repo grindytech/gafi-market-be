@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct NFTOwner {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
-    pub token_id: ObjectId,
-    pub collection_id: ObjectId,
-    pub address: ObjectId,
+    pub token_id: String,
+    pub collection_id: String,
+    pub address: String,
     pub amount: i32,
     pub lock: i32,
 }
