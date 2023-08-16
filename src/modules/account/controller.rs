@@ -41,7 +41,7 @@ pub async fn get_account(
         }
     }
 }
-/// returns the endpoints for the Auth service
+
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
     scope.service(get_account)
 }

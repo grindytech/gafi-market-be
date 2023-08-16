@@ -5,6 +5,10 @@ use crate::models::account::{Account, SocialInfo};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct AccountDTO {
+    #[schema(
+        format = "base64",
+        example = "0sxbdfc529688922fb5036d9439a7cd61d61114f700"
+    )]
     pub address: String,
     pub balance: String,
     pub is_verified: bool,

@@ -32,3 +32,8 @@ impl From<Game> for GameDTO {
         }
     }
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+pub struct QueryInfo {
+    pub owner: String,
+}

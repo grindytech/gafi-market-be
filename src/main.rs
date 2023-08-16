@@ -46,8 +46,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
-            .wrap(Logger::new("%a %t %r %s %b %T"))
+            /*    .wrap(Logger::default()) */
+            /*   .wrap(Logger::new("%a %t %r %s %b %T")) */
             .wrap(ErrorHandlers::new().handler(StatusCode::INTERNAL_SERVER_ERROR, add_error_header))
             .app_data(web::Data::new(AppState {
                 db: database.clone(),
