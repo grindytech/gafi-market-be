@@ -10,7 +10,7 @@ pub struct PropertiseDTO {
     pub value: String,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct NftDTO {
+pub struct NFTDTO {
     pub token_id: String,
     pub collection_id: String,
     pub amount: i32,
@@ -25,9 +25,9 @@ pub struct NftDTO {
     pub favorite_count: i32,
     pub propertise: Vec<Propertise>,
 }
-impl From<NFT> for NftDTO {
+impl From<NFT> for NFTDTO {
     fn from(value: NFT) -> Self {
-        NftDTO {
+        NFTDTO {
             token_id: value.token_id,
             collection_id: value.collection_id,
             amount: value.amount,

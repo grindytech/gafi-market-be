@@ -24,16 +24,16 @@ pub async fn get_game_by_id(
 pub async fn find_games_account(
     address: &String,
     db: Database,
-) -> Result<Option<Vec<Game>>, mongodb::error::Error> {
+) -> Result<Option<Vec<GameDTO>>, mongodb::error::Error> {
     let filter = doc! {"owner":address};
     let col: Collection<Game> = db.collection(models::game::NAME);
     /*   let option = options::FindOptions::default(); */
     let mut cursor = col.find(filter, None).await?;
-    let mut list_games: Vec<Game> = Vec::new();
+    let mut list_games: Vec<GameDTO> = Vec::new();
 
     while let Some(game) = cursor.try_next().await? {
-        list_games.push(game)
+        list_games.push(game.into())
     }
-    /* info!("Games {:?}", list_games); */
+
     Ok(Some(list_games))
 }

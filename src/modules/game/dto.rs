@@ -1,9 +1,9 @@
+use crate::{models::game::Game, modules::account::dto::SocialInfoDto};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::{models::game::Game, modules::account::dto::SocialInfoDto};
-
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+
 pub struct GameDTO {
     pub game_id: String,
     pub owner: String,
@@ -36,4 +36,10 @@ impl From<Game> for GameDTO {
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct QueryInfo {
     pub owner: String,
+}
+
+#[derive(Clone, Deserialize, Serialize, ToSchema)]
+#[schema(example = json!({"owner": "0sxbdfc529688922fb5036d9439a7cd61d61114f700"}))]
+pub struct BodyRequestGame {
+    owner: String,
 }

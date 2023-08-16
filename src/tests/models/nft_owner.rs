@@ -24,6 +24,7 @@ async fn test() {
         address: "0sxbdfc529688922fb5036d9439a7cd61d61114f600".to_string(),
         lock: 20,
         amount: 50,
+        create_at: 1234567231,
     };
     col.insert_one(nft_owner_test, None)
         .await

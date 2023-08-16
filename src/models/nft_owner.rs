@@ -10,5 +10,6 @@ pub struct NFTOwner {
     pub address: String,
     pub amount: i32,
     pub lock: i32,
+    pub create_at: i64,
 }
 pub const NAME: &str = "nft_owner";

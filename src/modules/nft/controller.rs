@@ -1,4 +1,10 @@
-use crate::{app_state::AppState, modules::nft::service::get_nft_by_token};
+use crate::{
+    app_state::AppState,
+    modules::{
+        game::dto::QueryInfo,
+        nft::service::{find_list_nft_by_address, get_nft_by_token},
+    },
+};
 use actix_web::{
     get,
     http::StatusCode,
@@ -38,6 +44,26 @@ pub async fn get_nft(
             Ok(HttpResponse::InternalServerError().finish())
         }
     }
+}
+
+#[utoipa::path(
+    post,
+    tag = "nft",
+    context_path="/nft",
+    request_body(content =NftDTO,description="Request Body of find list NFTs by address",content_type="application/json", example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
+    responses(
+        (status=StatusCode::OK,description="Find List Game Success",body=Vec<NftDTO>),
+        (status=StatusCode::NOT_FOUND,description="Can not found List game"))
+)]
+//Get List NFT Follow Address
+#[get("/list")]
+pub async fn get_list_nft(
+    app_state: Data<AppState>,
+    req: web::Json<QueryInfo>,
+) -> Result<HttpResponse, AWError> {
+    let address = req.owner.clone();
+    let list_nft = find_list_nft_by_address(&address, app_state.db.clone());
+    Ok(HttpResponse::InternalServerError().finish())
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {

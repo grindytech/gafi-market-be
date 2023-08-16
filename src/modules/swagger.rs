@@ -1,7 +1,7 @@
 use crate::modules::account::dto::{AccountDTO, SocialInfoDto};
 use crate::modules::collection::dto::NFTCollectionDTO;
-use crate::modules::game::dto::GameDTO;
-use crate::modules::nft::dto::NftDTO;
+use crate::modules::game::dto::{GameDTO};
+use crate::modules::nft::dto::NFTDTO;
 use utoipa::OpenApi;
 
 
@@ -19,8 +19,10 @@ use utoipa::OpenApi;
             AccountDTO,
             GameDTO,
             SocialInfoDto,
-            NftDTO,
+            NFTDTO,
             NFTCollectionDTO
+          
+           
         )
     ),
     servers(

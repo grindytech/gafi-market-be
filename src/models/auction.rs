@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct Auction {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
-    pub aution_id: String,
+    pub auction_id: String,
     pub token_id: String,
     pub creator: String,
     pub method: String,

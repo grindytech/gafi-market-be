@@ -3,12 +3,29 @@ use utoipa::ToSchema;
 
 use crate::models::account::{Account, SocialInfo};
 
+/* #[schema(example=json!(
+    {
+  "address": "0sxbdfc529688922fb5036d9439a7cd61d61114f600",
+  "balance": "200.00",
+  "is_verified": true,
+  "name": "Who more",
+  "bio": "A simple description.",
+  "logo_url": "https://example.com/logo.png",
+  "banner_url": "https://example.com/banner.png",
+  "update_at": 1234567890,
+  "create_at": 1234567890,
+  "social": {
+    "twitter": "karas",
+    "web": null,
+    "medium": null,
+    "facebook": null,
+    "discord": null
+  }
+}
+))] */
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+
 pub struct AccountDTO {
-    #[schema(
-        format = "base64",
-        example = "0sxbdfc529688922fb5036d9439a7cd61d61114f700"
-    )]
     pub address: String,
     pub balance: String,
     pub is_verified: bool,

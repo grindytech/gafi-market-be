@@ -7,12 +7,12 @@ use actix_web::{
 };
 use log::info;
 
+use super::dto::{BodyRequestGame, QueryInfo};
+use crate::common::Page;
 use crate::{
     app_state::AppState,
     modules::game::service::{find_games_account, get_game_by_id},
 };
-
-use super::dto::QueryInfo;
 
 #[utoipa::path(
     tag = "game",
@@ -47,23 +47,22 @@ pub async fn get_game(
         }
     }
 }
-pub struct body_test {
-    owner: String,
-}
+
 #[utoipa::path(
     post,
     tag = "game",
     context_path="/game",
-    request_body(content=body_test,description="Request Body of Find Game of a address",content_type="application/json",example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})),
+    request_body(content =GameDTO,description="Request Body of Find Game of a address",content_type="application/json", example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
     responses(
-        (status=StatusCode::OK,description="Find List Game Success",body=GameDTO),
-        (status=NOT_FOUND,description="Can not found List game"))
+        (status=StatusCode::OK,description="Find List Game Success",body=Vec<GameDTO>),
+        (status=StatusCode::NOT_FOUND,description="Can not found List game"))
 )]
 #[post("/list")]
 pub async fn get_games_by_address(
     app_state: Data<AppState>,
     req: web::Json<QueryInfo>,
 ) -> Result<HttpResponse, AWError> {
+    /*     let fn_test=ObjectBuilder::new().property("owner",String::schema()).require("owner").build(); */
     let owner = req.owner.clone();
     let list_games = find_games_account(&owner, app_state.db.clone()).await;
 

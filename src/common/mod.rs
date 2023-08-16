@@ -24,7 +24,7 @@ impl<T> ResponseBody<T> {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Page<T> {
     pub message: String,
     pub data: Vec<T>,
