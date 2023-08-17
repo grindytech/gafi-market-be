@@ -1,3 +1,4 @@
+use mongodb::bson::Bson;
 //Data Transfer Object
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -9,6 +10,15 @@ pub struct PropertiseDTO {
     pub key: String,
     pub value: String,
 }
+impl From<Propertise> for PropertiseDTO {
+    fn from(value: Propertise) -> Self {
+        PropertiseDTO {
+            key: value.key,
+            value: value.value,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTDTO {
     pub token_id: String,
@@ -23,8 +33,9 @@ pub struct NFTDTO {
     pub img_url: String,
     pub visitor_count: i32,
     pub favorite_count: i32,
-    pub propertise: Vec<Propertise>,
+    pub propertise: Vec<PropertiseDTO>,
 }
+
 impl From<NFT> for NFTDTO {
     fn from(value: NFT) -> Self {
         NFTDTO {
@@ -40,7 +51,11 @@ impl From<NFT> for NFTDTO {
             img_url: value.img_url,
             visitor_count: value.visitor_count,
             favorite_count: value.favorite_count,
-            propertise: value.propertise,
+            propertise: value
+                .propertise
+                .iter()
+                .map(|value| value.clone().into())
+                .collect(),
         }
     }
 }

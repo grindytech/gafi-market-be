@@ -4,6 +4,8 @@ use crate::modules::game::dto::{GameDTO};
 use crate::modules::nft::dto::NFTDTO;
 use utoipa::OpenApi;
 
+use super::nft::dto::PropertiseDTO;
+
 
 #[derive(OpenApi)]
 #[openapi(
@@ -12,6 +14,7 @@ use utoipa::OpenApi;
      crate::modules::game::controller::get_games_by_address,
       crate::modules::game::controller::get_game,
       crate::modules::nft::controller::get_nft,
+      crate::modules::nft::controller::get_list_nft,
       crate::modules::collection::controller::get_collection,
     ),
     components(
@@ -21,6 +24,7 @@ use utoipa::OpenApi;
             SocialInfoDto,
             NFTDTO,
             NFTCollectionDTO
+            ,PropertiseDTO
           
            
         )

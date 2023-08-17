@@ -8,19 +8,21 @@ use crate::{
 use actix_web::{
     get,
     http::StatusCode,
+    post,
     web::{self, Data},
     Error as AWError, HttpResponse, Result,
 };
+use serde::{Deserialize, Serialize};
 
 #[utoipa::path(
     get,
     tag="nft"
-    ,path="/{token_id}"
+    ,path="/nft/{token_id}"
     ,params(
         ("token_id",Path,description="Token ID NFT",
         example="0xd774557b647330c91bf44cfeab205095f7e6c367"))
     ,responses(
-        (status=200,description="Find NFT Success",body=NftDTO),
+        (status=200,description="Find NFT Success",body=NFTDTO),
         (status=NOT_FOUND,description="Cannot found this nft")
     ))]
 #[get("/{token_id}")]
@@ -46,26 +48,40 @@ pub async fn get_nft(
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QueryFindNFts {
+    address: String,
+}
 #[utoipa::path(
     post,
     tag = "nft",
     context_path="/nft",
-    request_body(content =NftDTO,description="Request Body of find list NFTs by address",content_type="application/json", example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
+    request_body(content =NFTDTO,description="Request Body of find list NFTs by address",content_type="application/json", example=json!({"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
     responses(
-        (status=StatusCode::OK,description="Find List Game Success",body=Vec<NftDTO>),
-        (status=StatusCode::NOT_FOUND,description="Can not found List game"))
+        (status=StatusCode::OK,description="Find List NFTs Success",body=Vec<NFTDTO>),
+        (status=StatusCode::NOT_FOUND,description="Can not found NFTs"))
 )]
 //Get List NFT Follow Address
-#[get("/list")]
+#[post("/list")]
 pub async fn get_list_nft(
     app_state: Data<AppState>,
-    req: web::Json<QueryInfo>,
+    req: web::Json<QueryFindNFts>,
 ) -> Result<HttpResponse, AWError> {
-    let address = req.owner.clone();
-    let list_nft = find_list_nft_by_address(&address, app_state.db.clone());
-    Ok(HttpResponse::InternalServerError().finish())
+    let address = req.address.clone();
+    let list_nft = find_list_nft_by_address(&address, app_state.db.clone()).await;
+
+    match list_nft {
+        Ok(Some(nfts)) => Ok(HttpResponse::build(StatusCode::OK)
+            .content_type("application/json")
+            .json(nfts)),
+        Ok(None) => {
+            // Game not found, return 404 Not Found response
+            Ok(HttpResponse::NotFound().finish())
+        }
+        Err(e) => Ok(HttpResponse::InternalServerError().finish()),
+    }
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope.service(get_nft)
+    scope.service(get_nft).service(get_list_nft)
 }

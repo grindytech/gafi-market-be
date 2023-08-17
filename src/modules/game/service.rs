@@ -5,7 +5,7 @@ use crate::{
 
 use super::dto::GameDTO;
 use actix_web::Result;
-use futures_util::TryStreamExt;
+use futures_util::{StreamExt, TryStreamExt};
 /* use futures::stream::StreamExt; */
 use log::info;
 use mongodb::{
@@ -29,6 +29,7 @@ pub async fn find_games_account(
     let col: Collection<Game> = db.collection(models::game::NAME);
     /*   let option = options::FindOptions::default(); */
     let mut cursor = col.find(filter, None).await?;
+
     let mut list_games: Vec<GameDTO> = Vec::new();
 
     while let Some(game) = cursor.try_next().await? {

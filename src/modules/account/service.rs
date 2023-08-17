@@ -1,15 +1,12 @@
 use crate::{
     common::ErrorResponse,
-    models::{
-        self,
-        account::{Account, SocialInfo},
-    },
+    models::{self, account::Account},
 };
 use actix_web::{http, Result};
 use mongodb::{
     bson::{doc, oid::ObjectId},
     results::DeleteResult,
-    Client, Collection, Database,
+    Collection, Database,
 };
 
 use super::dto::{AccountDTO, SocialInfoDto};
