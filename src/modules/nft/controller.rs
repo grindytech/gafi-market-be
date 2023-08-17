@@ -1,8 +1,12 @@
 use crate::{
     app_state::AppState,
+    common::{Page, QueryPage, ResponseBody},
     modules::{
         game::dto::QueryInfo,
-        nft::service::{find_list_nft_by_address, get_nft_by_token},
+        nft::{
+            dto::{QueryFindNFts, NFTDTO},
+            service::{find_nfts, get_nft_by_token},
+        },
     },
 };
 use actix_web::{
@@ -48,37 +52,42 @@ pub async fn get_nft(
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct QueryFindNFts {
-    address: String,
-}
 #[utoipa::path(
     post,
     tag = "nft",
     context_path="/nft",
-    request_body(content =NFTDTO,description="Request Body of find list NFTs by address",content_type="application/json", example=json!({"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
+    request_body(content =QueryNFT,description="Request Body of find list NFTs by address",content_type="application/json") , 
     responses(
-        (status=StatusCode::OK,description="Find List NFTs Success",body=Vec<NFTDTO>),
-        (status=StatusCode::NOT_FOUND,description="Can not found NFTs"))
+        (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
+        (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
+
+    )
 )]
 //Get List NFT Follow Address
 #[post("/list")]
 pub async fn get_list_nft(
     app_state: Data<AppState>,
-    req: web::Json<QueryFindNFts>,
+    req: web::Json<QueryPage<QueryFindNFts>>,
 ) -> Result<HttpResponse, AWError> {
-    let address = req.address.clone();
-    let list_nft = find_list_nft_by_address(&address, app_state.db.clone()).await;
+    let list_nft = find_nfts(req.0, app_state.db.clone()).await;
 
     match list_nft {
         Ok(Some(nfts)) => Ok(HttpResponse::build(StatusCode::OK)
             .content_type("application/json")
             .json(nfts)),
         Ok(None) => {
-            // Game not found, return 404 Not Found response
-            Ok(HttpResponse::NotFound().finish())
+            let rsp: ResponseBody<Option<_>> =
+                ResponseBody::<Option<()>>::new("Not found", None, false);
+            Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+                .content_type("application/json")
+                .json(rsp))
         }
-        Err(e) => Ok(HttpResponse::InternalServerError().finish()),
+        Err(e) => {
+            let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+            Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                .content_type("application/json")
+                .json(rsp))
+        }
     }
 }
 

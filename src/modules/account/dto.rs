@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{PartialSchema, ToSchema};
 
 use crate::models::account::{Account, SocialInfo};
 
@@ -37,6 +37,7 @@ pub struct AccountDTO {
     pub create_at: i64,
     pub social: SocialInfoDto,
 }
+
 impl From<Account> for AccountDTO {
     fn from(value: Account) -> Self {
         AccountDTO {

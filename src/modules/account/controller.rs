@@ -1,4 +1,9 @@
-use crate::{app_state::AppState, modules::account::service::get_account_by_adress};
+use crate::{
+    app_state::AppState,
+    common::ResponseBody,
+    constant::EMPTY_STR,
+    modules::account::{dto::AccountDTO, service::get_account_by_adress},
+};
 use actix_web::{
     get,
     http::StatusCode,
@@ -9,10 +14,9 @@ use actix_web::{
 #[utoipa::path(
         tag = "account",
         context_path = "/account",
-        params(("data_id"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600")),
+        params(("data_id"=String,Path,description="ID of account",example=json!({"query":{"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600"}}))),
         responses(
-            (status = 200, description = "Account Find Success", body = AccountDTO),
-            (status = NOT_FOUND, description = "Account was not found")
+            (status = OK, description = "Account Response", body = AccountObject)
         ),
     )]
 #[get("/{data_id}")]
@@ -23,21 +27,23 @@ pub async fn get_account(
     let data_id = path.into_inner();
     let account_detail = get_account_by_adress(&data_id, app_state.db.clone()).await;
     match account_detail {
-        Ok(Some(account_dto)) => {
-            // Convert AccountDTO to JSON and build the HTTP response
-
+        Ok(Some(account)) => {
+            let rsp = ResponseBody::<Option<AccountDTO>>::new(EMPTY_STR, Some(account), true);
             Ok(HttpResponse::build(StatusCode::OK)
                 .content_type("application/json")
-                .json(account_dto))
+                .json(rsp))
         }
         Ok(None) => {
-            // Account not found, return 404 Not Found response
-            Ok(HttpResponse::NotFound().finish())
+            let rsp = ResponseBody::<Option<AccountDTO>>::new("Not found", None, false);
+            Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+                .content_type("application/json")
+                .json(rsp))
         }
         Err(e) => {
-            // Handle the error case, return 500 Internal Server Error response
-            eprintln!("Error: {:?}", e);
-            Ok(HttpResponse::InternalServerError().finish())
+            let rsp = ResponseBody::<Option<AccountDTO>>::new(e.to_string().as_str(), None, false);
+            Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                .content_type("application/json")
+                .json(rsp))
         }
     }
 }

@@ -6,10 +6,14 @@ use mongodb::{
     Collection, Database,
 };
 
-use crate::models::nft::NFT;
-use crate::models::{self, nft_owner::NFTOwner};
+use crate::{
+    common::Page,
+    constant::EMPTY_STR,
+    models::{self, nft_owner::NFTOwner},
+};
+use crate::{common::QueryPage, models::nft::NFT};
 
-use super::dto::NFTDTO;
+use super::dto::{QueryFindNFts, NFTDTO};
 
 pub async fn get_nft_by_token(token_id: &String, db: Database) -> Result<Option<NFTDTO>, Error> {
     let col: Collection<NFT> = db.collection(models::nft::NAME);
@@ -29,12 +33,15 @@ pub struct LetTestStruct {
     token_id: String,
     collection_id: String,
 }
-pub async fn find_list_nft_by_address(
-    address: &String,
+
+//TODO implement paging, order, find nfts by query, search by name
+pub async fn find_nfts(
+    params: QueryPage<QueryFindNFts>,
     db: Database,
-) -> Result<Option<Vec<NFTDTO>>, mongodb::error::Error> {
+) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
     let col: Collection<NFTOwner> = db.collection(models::nft_owner::NAME);
-    let filter = doc! {"address":address};
+    let address = params.query.address;
+    let filter = doc! {"address": address};
 
     // Get List nftowner of this address
     let cursor = col.find(filter, None).await?;
@@ -63,5 +70,11 @@ pub async fn find_list_nft_by_address(
         list_nfts.push(nft.into())
     }
     log::info!("{:?}", list_nfts);
-    Ok(Some(list_nfts))
+    Ok(Some(Page::<NFTDTO> {
+        data: list_nfts,
+        message: EMPTY_STR.to_string(),
+        page: params.page,
+        size: params.size,
+        total: 0, //TODO get total
+    }))
 }
