@@ -56,7 +56,14 @@ pub async fn get_nft(
     post,
     tag = "nft",
     context_path="/nft",
-    request_body(content =QueryNFT,description="Request Body of find list NFTs by address",content_type="application/json") , 
+    request_body(content =QueryNFT,description="Request Body of find list NFTs by address",content_type="application/json",example=json!({
+        "search":"",
+        "page": 1,
+        "size": 10,
+        "order_by": "createdAt",
+        "desc": true,
+        "query":{"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600"}
+    })) , 
     responses(
         (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
         (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
