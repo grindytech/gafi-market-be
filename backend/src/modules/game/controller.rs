@@ -6,12 +6,13 @@ use actix_web::{
 	Error as AWError, HttpResponse, Result,
 };
 use log::info;
+use shared::constant::EMPTY_STR;
 
-use super::dto::{BodyRequestGame, QueryInfo};
+use super::dto::{BodyRequestGame, GameDTO, QueryInfo};
 use crate::{
 	app_state::AppState,
-	common::Page,
-	modules::game::service::{find_games_account, get_game_by_id},
+	common::{Page, ResponseBody},
+	modules::game::service::{find_game_by_id, find_games_account},
 };
 
 #[utoipa::path(
@@ -30,12 +31,12 @@ pub async fn get_game(
 	path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
 	let game_id = path.into_inner();
-	info!("Game ID: {:?}", game_id);
-	let game_detail = get_game_by_id(&game_id, app_state.db.clone()).await;
+	let game_detail = find_game_by_id(&game_id, app_state.db.clone()).await;
 	match game_detail {
-		Ok(Some(game_dto)) => Ok(HttpResponse::build(StatusCode::OK)
-			.content_type("application/json")
-			.json(game_dto)),
+		Ok(Some(game)) => {
+			let rsp = ResponseBody::<Option<GameDTO>>::new(EMPTY_STR, Some(game), true);
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
+		},
 		Ok(None) => {
 			// Game not found, return 404 Not Found response
 			Ok(HttpResponse::NotFound().finish())
@@ -68,17 +69,16 @@ pub async fn get_games_by_address(
 	let list_games = find_games_account(&owner, app_state.db.clone()).await;
 
 	match list_games {
-		Ok(games) =>
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games)),
+		Ok(games) => {
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games))
+		},
 		Ok(None) => {
-			// Game not found, return 404 Not Found response
-			Ok(HttpResponse::NotFound().finish())
+			let rsp = ResponseBody::<Option<GameDTO>>::new("Game Not found", None, false);
+			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+				.content_type("application/json")
+				.json(rsp))
 		},
-		Err(e) => {
-			// Handle the error case, return 500 Internal Server Error response
-			eprintln!("Error: {:?}", e);
-			Ok(HttpResponse::InternalServerError().finish())
-		},
+		Err(e) => Ok(HttpResponse::InternalServerError().finish()),
 	}
 }
 

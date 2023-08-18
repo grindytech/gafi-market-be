@@ -23,3 +23,6 @@ impl From<NFTCollection> for NFTCollectionDTO {
 		}
 	}
 }
+pub struct QueryFindCollections {
+	pub name: String,
+}

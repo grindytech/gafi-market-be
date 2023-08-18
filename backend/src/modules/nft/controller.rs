@@ -5,7 +5,7 @@ use crate::{
 		game::dto::QueryInfo,
 		nft::{
 			dto::{QueryFindNFts, NFTDTO},
-			service::{find_nfts, get_nft_by_token},
+			service::{find_nft_by_token, find_nfts_by_address},
 		},
 	},
 };
@@ -35,7 +35,7 @@ pub async fn get_nft(
 	path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
 	let token_id = path.into_inner();
-	let nft_detail = get_nft_by_token(&token_id, app_state.db.clone()).await;
+	let nft_detail = find_nft_by_token(&token_id, app_state.db.clone()).await;
 	match nft_detail {
 		Ok(Some(nft_dto)) => Ok(HttpResponse::build(StatusCode::OK)
 			.content_type("application;.json")
@@ -62,7 +62,7 @@ pub async fn get_nft(
         "size": 10,
         "order_by": "createdAt",
         "desc": true,
-        "query":{"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600"}
+        "query":{"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600","name":""}
     })),
     responses(
         (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
@@ -76,11 +76,12 @@ pub async fn get_list_nft(
 	app_state: Data<AppState>,
 	req: web::Json<QueryPage<QueryFindNFts>>,
 ) -> Result<HttpResponse, AWError> {
-	let list_nft = find_nfts(req.0, app_state.db.clone()).await;
+	let list_nft = find_nfts_by_address(req.0, app_state.db.clone()).await;
 
 	match list_nft {
-		Ok(Some(nfts)) =>
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts)),
+		Ok(Some(nfts)) => {
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))
+		},
 		Ok(None) => {
 			let rsp: ResponseBody<Option<_>> =
 				ResponseBody::<Option<()>>::new("Not found", None, false);

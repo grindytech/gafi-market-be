@@ -5,7 +5,7 @@ use shared::models::{self, account::Account};
 
 use super::dto::AccountDTO;
 
-pub async fn get_account_by_adress(
+pub async fn find_account_by_adress(
 	address: &String,
 	db: Database,
 ) -> Result<Option<AccountDTO>, mongodb::error::Error> {

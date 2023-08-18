@@ -6,3 +6,4 @@ pub mod constant;
 pub mod db;
 pub mod logger;
 pub mod tests;
+pub mod utils;

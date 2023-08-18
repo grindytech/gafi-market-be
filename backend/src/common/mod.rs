@@ -41,13 +41,13 @@ impl<T> ResponseBody<T> {
 pub struct Page<T> {
 	pub message: String,
 	pub data: Vec<T>,
-	pub page: i64,
-	pub size: i64,
-	pub total: i64,
+	pub page: u64,
+	pub size: u64,
+	pub total: u64,
 }
 
 impl<T> Page<T> {
-	pub fn new(message: &str, data: Vec<T>, page: i64, size: i64, total: i64) -> Page<T> {
+	pub fn new(message: &str, data: Vec<T>, page: u64, size: u64, total: u64) -> Page<T> {
 		Page {
 			message: message.to_string(),
 			data,
@@ -62,8 +62,8 @@ impl<T> Page<T> {
 #[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
 pub struct QueryPage<T> {
 	pub search: String,
-	pub page: i64,
-	pub size: i64,
+	pub page: u64,
+	pub size: u64,
 	pub order_by: String,
 	pub desc: bool,
 	pub query: T,

@@ -59,4 +59,6 @@ impl From<NFT> for NFTDTO {
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindNFts {
 	pub address: String,
+	pub name: String,
+	pub token_id: String,
 }

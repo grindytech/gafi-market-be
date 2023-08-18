@@ -9,13 +9,18 @@ use mongodb::{
 	bson::{self, doc, Bson, Document},
 	options, Collection, Cursor, Database,
 };
-pub async fn get_game_by_id(
+pub async fn find_game_by_id(
 	game_id: &String,
 	db: Database,
-) -> Result<Option<Game>, mongodb::error::Error> {
+) -> Result<Option<GameDTO>, mongodb::error::Error> {
 	let col: Collection<Game> = db.collection(models::game::NAME);
 	let filter = doc! {"game_id":game_id};
-	col.find_one(filter, None).await
+
+	if let Ok(Some(game_detail)) = col.find_one(filter, None).await {
+		Ok(Some(game_detail.into()))
+	} else {
+		Ok(None)
+	}
 }
 
 pub async fn find_games_account(

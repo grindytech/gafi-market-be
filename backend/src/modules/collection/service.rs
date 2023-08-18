@@ -3,7 +3,7 @@ use mongodb::{bson::doc, Collection, Database};
 use super::dto::NFTCollectionDTO;
 use shared::{models, models::nft_collection::NFTCollection};
 
-pub async fn get_collection_by_id(
+pub async fn find_collection_by_id(
 	collection_id: &String,
 	db: Database,
 ) -> Result<Option<NFTCollectionDTO>, mongodb::error::Error> {

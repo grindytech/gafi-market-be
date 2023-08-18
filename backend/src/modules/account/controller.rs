@@ -1,7 +1,7 @@
 use crate::{
 	app_state::AppState,
 	common::ResponseBody,
-	modules::account::{dto::AccountDTO, service::get_account_by_adress},
+	modules::account::{dto::AccountDTO, service::find_account_by_adress},
 	shared::constant::EMPTY_STR,
 };
 use actix_web::{
@@ -25,7 +25,7 @@ pub async fn get_account(
 	path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
 	let data_id = path.into_inner();
-	let account_detail = get_account_by_adress(&data_id, app_state.db.clone()).await;
+	let account_detail = find_account_by_adress(&data_id, app_state.db.clone()).await;
 	match account_detail {
 		Ok(Some(account)) => {
 			let rsp = ResponseBody::<Option<AccountDTO>>::new(EMPTY_STR, Some(account), true);
@@ -39,9 +39,7 @@ pub async fn get_account(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<AccountDTO>>::new(e.to_string().as_str(), None, false);
-			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-				.content_type("application/json")
-				.json(rsp))
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }
