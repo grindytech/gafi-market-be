@@ -1,5 +1,3 @@
-use mongodb::bson::Bson;
-//Data Transfer Object
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -58,7 +56,8 @@ impl From<NFT> for NFTDTO {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindNFts {
-	pub address: String,
-	pub name: String,
-	pub token_id: String,
+	pub address: Option<String>,
+	pub name: Option<String>,
+	pub token_id: Option<String>,
+	pub market_type: Option<String>,
 }

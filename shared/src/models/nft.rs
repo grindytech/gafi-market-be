@@ -6,6 +6,7 @@ pub struct Propertise {
 	pub key: String,
 	pub value: String,
 }
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct NFT {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]

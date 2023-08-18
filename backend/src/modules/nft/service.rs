@@ -53,7 +53,6 @@ pub async fn find_nfs_by_name(
  * Get NFT by address of account
  */
 
-//TODO implement paging, order, find nfts by query, search by name
 pub async fn find_nfts_by_address(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
@@ -94,6 +93,35 @@ pub async fn find_nfts_by_address(
 		message: EMPTY_STR.to_string(),
 		page: params.page,
 		size: params.size,
-		total, //TODO get total
+		total,
+	}))
+}
+
+//TODO implement paging, order, find nfts by query, search by name
+pub async fn find_nfts_by_query(
+	params: QueryPage<QueryFindNFts>,
+	db: Database,
+) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
+	let col: Collection<NFT> = db.collection(models::nft::NAME);
+
+	let query_find = doc! {
+		"$or":
+		[	doc! {"token_id":params.query.token_id},
+			doc! {"name":params.query.name}
+		]
+	};
+	let mut cursor_nft = col.find(query_find, None).await?;
+	let mut list_nfts: Vec<NFTDTO> = Vec::new();
+	while let Some(nft) = cursor_nft.try_next().await? {
+		list_nfts.push(nft.into())
+	}
+
+	let total = get_total_page(list_nfts.len(), params.size).await;
+	Ok(Some(Page::<NFTDTO> {
+		data: list_nfts,
+		message: EMPTY_STR.to_string(),
+		page: params.page,
+		size: params.size,
+		total,
 	}))
 }

@@ -5,7 +5,7 @@ use crate::{
 		game::dto::QueryInfo,
 		nft::{
 			dto::{QueryFindNFts, NFTDTO},
-			service::{find_nft_by_token, find_nfts_by_address},
+			service::{find_nft_by_token, find_nfts_by_address, find_nfts_by_query},
 		},
 	},
 };
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 
 #[utoipa::path(
     get,
-    tag="nft"
+    tag="NftEndpoints"
     ,path="/nft/{token_id}"
     ,params(
         ("token_id",Path,description="Token ID NFT",
@@ -38,7 +38,7 @@ pub async fn get_nft(
 	let nft_detail = find_nft_by_token(&token_id, app_state.db.clone()).await;
 	match nft_detail {
 		Ok(Some(nft_dto)) => Ok(HttpResponse::build(StatusCode::OK)
-			.content_type("application;.json")
+			.content_type("application/json")
 			.json(nft_dto)),
 		Ok(None) => {
 			// NFT not found, return 404 Not Found response
@@ -54,7 +54,7 @@ pub async fn get_nft(
 
 #[utoipa::path(
     post,
-    tag = "nft",
+    tag = "NftEndpoints",
     context_path="/nft",
     request_body(content =QueryNFT,description="Request Body of find list NFTs by address",content_type="application/json",example=json!({
         "search":"",
@@ -91,13 +91,53 @@ pub async fn get_list_nft(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
-			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
+		},
+	}
+}
+
+#[utoipa::path(
+    post,
+    tag = "NftEndpoints",
+    context_path="/nft",
+    request_body(content =QueryNFT,description=" Search Query",content_type="application/json",example=json!({
+        "search":"",
+        "page": 1,
+        "size": 10,
+        "order_by": "createdAt",
+        "desc": true,
+        "query":{"name":"#189337","token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368"}
+    })),
+    responses(
+        (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
+        (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
+
+    )
+)]
+#[post("/test")]
+pub async fn search_list_nfts(
+	app_state: Data<AppState>,
+	req: web::Json<QueryPage<QueryFindNFts>>,
+) -> Result<HttpResponse, AWError> {
+	let list_nfts = find_nfts_by_query(req.0, app_state.db.clone()).await;
+	match list_nfts {
+		Ok(Some(nfts)) => {
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))
+		},
+		Ok(None) => {
+			let rsp: ResponseBody<Option<_>> =
+				ResponseBody::<Option<()>>::new("Not found", None, false);
+			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
 				.content_type("application/json")
 				.json(rsp))
+		},
+		Err(e) => {
+			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_nft).service(get_list_nft)
+	scope.service(get_nft).service(get_list_nft).service(search_list_nfts)
 }

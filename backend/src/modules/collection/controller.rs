@@ -7,7 +7,7 @@ use actix_web::{
 
 use crate::{app_state::AppState, modules::collection::service::find_collection_by_id};
 #[utoipa::path(
-    tag="collection",
+    tag="CollectionEndpoints",
     context_path="/collection",
     params(("collection_id"=String,Path,description="Collection ID",example="Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc")),
     responses(

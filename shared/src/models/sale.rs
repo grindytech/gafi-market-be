@@ -23,4 +23,5 @@ pub struct Sale {
 	pub update_at: i64,
 	pub create_at: i64,
 }
+//Sale and Offer
 pub const NAME: &str = "sale";

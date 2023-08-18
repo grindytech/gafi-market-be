@@ -3,26 +3,6 @@ use utoipa::ToSchema;
 
 use shared::models::account::{Account, SocialInfo};
 
-/* #[schema(example=json!(
-	{
-  "address": "0sxbdfc529688922fb5036d9439a7cd61d61114f600",
-  "balance": "200.00",
-  "is_verified": true,
-  "name": "Who more",
-  "bio": "A simple description.",
-  "logo_url": "https://example.com/logo.png",
-  "banner_url": "https://example.com/banner.png",
-  "update_at": 1234567890,
-  "create_at": 1234567890,
-  "social": {
-	"twitter": "karas",
-	"web": null,
-	"medium": null,
-	"facebook": null,
-	"discord": null
-  }
-}
-))] */
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 
 pub struct AccountDTO {
@@ -86,4 +66,8 @@ impl From<SocialInfo> for SocialInfoDto {
 			discord: value.discord,
 		}
 	}
+}
+pub struct QueryFindAccount {
+	pub address: String,
+	pub name: String,
 }

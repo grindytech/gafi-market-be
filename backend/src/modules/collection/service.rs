@@ -1,8 +1,10 @@
+use actix_web::web::Query;
 use mongodb::{bson::doc, Collection, Database};
 
 use super::dto::NFTCollectionDTO;
 use shared::{models, models::nft_collection::NFTCollection};
 
+//Find Collection Detail By ID
 pub async fn find_collection_by_id(
 	collection_id: &String,
 	db: Database,

@@ -9,6 +9,8 @@ use mongodb::{
 	bson::{self, doc, Bson, Document},
 	options, Collection, Cursor, Database,
 };
+
+// Find Game Detail By Game ID
 pub async fn find_game_by_id(
 	game_id: &String,
 	db: Database,
@@ -23,6 +25,7 @@ pub async fn find_game_by_id(
 	}
 }
 
+//Find List Game By Address Account
 pub async fn find_games_account(
 	address: &String,
 	db: Database,

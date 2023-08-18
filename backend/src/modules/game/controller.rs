@@ -16,7 +16,7 @@ use crate::{
 };
 
 #[utoipa::path(
-    tag = "game",
+    tag = "GameEndpoints",
     context_path = "/game",
     params(
         ("game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ")
@@ -51,7 +51,7 @@ pub async fn get_game(
 
 #[utoipa::path(
     post,
-    tag = "game",
+    tag = "GameEndpoints",
     context_path="/game",
     request_body(content =GameDTO,description="Request Body of Find Game of a address",content_type="application/json", example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
     responses(

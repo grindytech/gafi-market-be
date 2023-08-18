@@ -19,7 +19,9 @@ use super::nft::dto::{PropertiseDTO, QueryFindNFts};
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
         crate::modules::nft::controller::get_list_nft,
+        crate::modules::nft::controller::search_list_nfts,
         crate::modules::collection::controller::get_collection,
+        
     ),
     components(
         schemas(
