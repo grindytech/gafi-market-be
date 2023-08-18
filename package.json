@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "cargo test",
-    "run": "cargo run",
-    "build": "cargo build",
+    "run": "cargo run -p backend",
+    "run-worker": "cargo run -p worker",
+    "build": "cargo build -p backend",
+    "build-worker": "cargo build -p worker",
     "format": "cargo fmt",
-    "dev": "cargo watch -q -c -w src/ -x run",
+    "dev-be": "cargo watch -q -c -w backend/src/ -x 'run -p backend'",
+    "dev-worker": "cargo watch -q -c -w worker/src/ -x 'run -p worker'",
     "db": "node mongodb-memory.js"
   },
   "keywords": [
