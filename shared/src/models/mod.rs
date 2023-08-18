@@ -1,5 +1,6 @@
 pub mod account;
 pub mod auction;
+pub mod block;
 pub mod bundle;
 pub mod game;
 pub mod history_tx;
