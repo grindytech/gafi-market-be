@@ -24,5 +24,6 @@ pub struct NFT {
 	pub visitor_count: i32,
 	pub favorite_count: i32,
 	pub propertise: Vec<Propertise>,
+	pub create_at: i64,
 }
 pub const NAME: &str = "nft";

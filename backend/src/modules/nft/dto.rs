@@ -39,6 +39,7 @@ pub struct NFTDTO {
 	pub img_url: String,
 	pub visitor_count: i32,
 	pub favorite_count: i32,
+	pub create_at: i64,
 	pub propertise: Vec<PropertiseDTO>,
 }
 impl Into<NFT> for NFTDTO {
@@ -58,6 +59,7 @@ impl Into<NFT> for NFTDTO {
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
 			propertise: self.propertise.iter().map(|value| value.clone().into()).collect(),
+			create_at: self.create_at,
 		}
 	}
 }
@@ -77,6 +79,7 @@ impl From<NFT> for NFTDTO {
 			visitor_count: value.visitor_count,
 			favorite_count: value.favorite_count,
 			propertise: value.propertise.iter().map(|value| value.clone().into()).collect(),
+			create_at: value.create_at,
 		}
 	}
 }

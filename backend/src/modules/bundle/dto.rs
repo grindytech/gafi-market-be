@@ -17,6 +17,25 @@ pub struct BundleDTO {
 	pub update_at: i64,
 	pub create_at: i64,
 }
+impl Into<Bundle> for BundleDTO {
+	fn into(self) -> Bundle {
+		Bundle {
+			id: None,
+			bundle_id: self.bundle_id,
+			creator: self.creator,
+			name: self.name,
+			description: self.description,
+			items: self.items.iter().map(|value| value.clone().into()).collect(),
+			market_type: self.market_type,
+			status: self.status,
+			price: self.price,
+			begin_at: self.begin_at,
+			end_at: self.end_at,
+			update_at: self.update_at,
+			create_at: self.create_at,
+		}
+	}
+}
 impl From<Bundle> for BundleDTO {
 	fn from(value: Bundle) -> Self {
 		BundleDTO {

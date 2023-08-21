@@ -18,9 +18,9 @@ use crate::{
 #[utoipa::path(
     tag = "GameEndpoints",
     context_path = "/game",
-    params(
-        ("game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ")
-    ),
+    params((
+		"game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ"
+	)),
     responses(
         (status=200,description="Find Game Success",body=GameDTO),
         (status=NOT_FOUND,description="Can not found this game"))

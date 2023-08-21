@@ -14,7 +14,9 @@ use crate::{
 #[utoipa::path(
     tag="CollectionEndpoints",
     context_path="/collection",
-    params(("collection_id"=String,Path,description="Collection ID",example="Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc")),
+    params((
+		"collection_id"=String,Path,description="Collection ID",example="Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+	)),
     responses(
         (status= 200 , description="Find Collection Success",body= NFTCollectionDTO),
         (status=NOT_FOUND,description="Collection was not found")

@@ -59,12 +59,12 @@ pub async fn get_nft(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "createdAt",
+        "order_by": "create_at",
         "desc": true,
         "query":
 		{
 			"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600",
-			"name":""
+			
 		}
     })),
     responses(
@@ -73,7 +73,7 @@ pub async fn get_nft(
 
     )
 )]
-//Get List NFT Follow Address
+//Get List NFT Follow Address of Account
 #[post("/list")]
 pub async fn get_list_nft(
 	app_state: Data<AppState>,
@@ -109,7 +109,7 @@ pub async fn get_list_nft(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "createdAt",
+        "order_by": "create_at",
         "desc": true,
         "query":
 		{

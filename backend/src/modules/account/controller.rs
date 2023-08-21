@@ -14,7 +14,9 @@ use actix_web::{
 #[utoipa::path(
         tag = "AccountEndpoints",
         context_path = "/account",
-        params(("data_id"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600")),
+        params((
+			"data_id"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
+		)),
         responses(
             (status = OK, description = "Account Response", body = AccountObject)
         ),

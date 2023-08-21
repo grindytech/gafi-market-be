@@ -11,7 +11,7 @@ use crate::{
 use super::dto::{QueryFindNFts, NFTDTO};
 use shared::{
 	models::{self, nft::NFT, nft_owner::NFTOwner},
-	utils::get_total_page,
+	utils::{get_filter_option, get_total_page},
 };
 
 pub async fn find_nft_by_token(
@@ -27,7 +27,7 @@ pub async fn find_nft_by_token(
 		Ok(None)
 	}
 }
-pub async fn find_nfs_by_name(
+/* pub async fn find_nfs_by_name(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
 ) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
@@ -47,7 +47,7 @@ pub async fn find_nfs_by_name(
 		size: params.size,
 		total,
 	}))
-}
+} */
 
 /***
  * Get NFT by address of account
@@ -79,9 +79,9 @@ pub async fn find_nfts_by_address(
 	let query = doc! {
 		"$or": or_filters
 	};
-
+	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let col_nft: Collection<NFT> = db.collection(models::nft::NAME);
-	let mut cursor_nft = col_nft.find(query, None).await?;
+	let mut cursor_nft = col_nft.find(query, filter_option).await?;
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
 
 	while let Some(nft) = cursor_nft.try_next().await? {

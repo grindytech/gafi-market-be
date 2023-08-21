@@ -22,7 +22,7 @@ use crate::{
         )
     )
      ,responses(
-        (status=OK,description="Find Bundle Success",body=BundleDTO),
+        (status=OK,description="Find Bundle Detail Success",body=BundleDTO),
         (status=StatusCode::NOT_FOUND,description="Cannot found this Bundle")
     ),
 )]
@@ -45,6 +45,7 @@ pub async fn get_bundles(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			log::info!("Error {:?}", e);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
