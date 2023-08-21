@@ -4,8 +4,13 @@ use actix_web::{
 	web::{self, Data},
 	Error as AWError, HttpResponse,
 };
+use shared::constant::EMPTY_STR;
 
-use crate::{app_state::AppState, modules::collection::service::find_collection_by_id};
+use crate::{
+	app_state::AppState,
+	common::ResponseBody,
+	modules::collection::{dto::NFTCollectionDTO, service::find_collection_by_id},
+};
 #[utoipa::path(
     tag="CollectionEndpoints",
     context_path="/collection",
@@ -23,13 +28,24 @@ pub async fn get_collection(
 	let collection_id = path.into_inner();
 	let collection_detail = find_collection_by_id(&collection_id, app_state.db.clone()).await;
 	match collection_detail {
-		Ok(Some(collection_dto)) => Ok(HttpResponse::build(StatusCode::OK)
-			.content_type("application/json")
-			.json(collection_dto)),
-		Ok(None) => Ok(HttpResponse::NotFound().finish()),
+		Ok(Some(collection_dto)) => {
+			let rsp = ResponseBody::<Option<NFTCollectionDTO>>::new(
+				EMPTY_STR,
+				Some(collection_dto),
+				true,
+			);
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
+		},
+		Ok(None) => {
+			let rsp = ResponseBody::<Option<NFTCollectionDTO>>::new("Not found", None, false);
+			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+				.content_type("application/json")
+				.json(rsp))
+		},
 		Err(e) => {
-			eprint!("Error From collection {:?}", e);
-			Ok(HttpResponse::InternalServerError().finish())
+			let rsp =
+				ResponseBody::<Option<NFTCollectionDTO>>::new(e.to_string().as_str(), None, false);
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }

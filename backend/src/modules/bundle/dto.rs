@@ -1,7 +1,8 @@
 use crate::modules::nft::dto::NFTDTO;
 use serde::{Deserialize, Serialize};
 use shared::bundle::Bundle;
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+use utoipa::ToSchema;
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct BundleDTO {
 	pub bundle_id: String,
 	pub creator: String,

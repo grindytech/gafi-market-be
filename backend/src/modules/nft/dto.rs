@@ -8,6 +8,14 @@ pub struct PropertiseDTO {
 	pub key: String,
 	pub value: String,
 }
+impl Into<Propertise> for PropertiseDTO {
+	fn into(self) -> Propertise {
+		Propertise {
+			key: self.key,
+			value: self.value,
+		}
+	}
+}
 impl From<Propertise> for PropertiseDTO {
 	fn from(value: Propertise) -> Self {
 		PropertiseDTO {
@@ -33,7 +41,26 @@ pub struct NFTDTO {
 	pub favorite_count: i32,
 	pub propertise: Vec<PropertiseDTO>,
 }
-
+impl Into<NFT> for NFTDTO {
+	fn into(self) -> NFT {
+		NFT {
+			token_id: self.token_id,
+			id: None,
+			collection_id: self.collection_id,
+			amount: self.amount,
+			is_burn: self.is_burn,
+			name: self.name,
+			description: self.description,
+			status: self.status,
+			external_url: self.external_url,
+			weight: self.weight,
+			img_url: self.img_url,
+			visitor_count: self.visitor_count,
+			favorite_count: self.favorite_count,
+			propertise: self.propertise.iter().map(|value| value.clone().into()).collect(),
+		}
+	}
+}
 impl From<NFT> for NFTDTO {
 	fn from(value: NFT) -> Self {
 		NFTDTO {
@@ -59,5 +86,5 @@ pub struct QueryFindNFts {
 	pub address: Option<String>,
 	pub name: Option<String>,
 	pub token_id: Option<String>,
-	pub market_type: Option<String>,
+	pub collection_id: Option<String>,
 }

@@ -46,7 +46,6 @@ pub async fn get_nft(
 		},
 		Err(e) => {
 			// Handle the error case, return 500 Internal Server Error response
-			eprintln!("Error: {:?}", e);
 			Ok(HttpResponse::InternalServerError().finish())
 		},
 	}
@@ -62,7 +61,11 @@ pub async fn get_nft(
         "size": 10,
         "order_by": "createdAt",
         "desc": true,
-        "query":{"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600","name":""}
+        "query":
+		{
+			"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600",
+			"name":""
+		}
     })),
     responses(
         (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
@@ -100,13 +103,19 @@ pub async fn get_list_nft(
     post,
     tag = "NftEndpoints",
     context_path="/nft",
-    request_body(content =QueryNFT,description=" Search Query",content_type="application/json",example=json!({
+    request_body
+	(content =QueryNFT,description=" Search Query Data",content_type="application/json"
+	,example=json!({
         "search":"",
         "page": 1,
         "size": 10,
         "order_by": "createdAt",
         "desc": true,
-        "query":{"name":"#189337","token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368"}
+        "query":
+		{
+			"name":"","token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368",
+			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+		}
     })),
     responses(
         (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
@@ -114,7 +123,7 @@ pub async fn get_list_nft(
 
     )
 )]
-#[post("/test")]
+#[post("/search")]
 pub async fn search_list_nfts(
 	app_state: Data<AppState>,
 	req: web::Json<QueryPage<QueryFindNFts>>,

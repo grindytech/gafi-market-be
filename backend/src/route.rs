@@ -10,7 +10,8 @@ pub fn route_config(cfg: &mut web::ServiceConfig) {
 			.service(modules::account::controller::endpoints(scope("/account")))
 			.service(modules::collection::controller::endpoints(scope(
 				"/collection",
-			))),
+			)))
+			.service(modules::bundle::controller::endpoints(scope("/bundle"))),
 	)
 	.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![(
 		Url::new("v1", "/api-docs/api.json"),

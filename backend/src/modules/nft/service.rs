@@ -1,7 +1,7 @@
 use actix_web::Result;
 
 use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Collection, Database};
+use mongodb::{bson::doc, options::FindOptions, Collection, Database};
 
 use crate::{
 	common::{Page, QueryPage},
@@ -107,9 +107,11 @@ pub async fn find_nfts_by_query(
 	let query_find = doc! {
 		"$or":
 		[	doc! {"token_id":params.query.token_id},
-			doc! {"name":params.query.name}
+			doc! {"name":params.query.name},
+			doc!{"collection_id":params.query.collection_id}
 		]
 	};
+	/* let find_options=FindOptions::builder().sort() */
 	let mut cursor_nft = col.find(query_find, None).await?;
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
 	while let Some(nft) = cursor_nft.try_next().await? {

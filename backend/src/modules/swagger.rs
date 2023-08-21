@@ -9,7 +9,7 @@ use crate::{
 };
 use utoipa::OpenApi;
 
-use super::nft::dto::{PropertiseDTO, QueryFindNFts};
+use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -21,12 +21,14 @@ use super::nft::dto::{PropertiseDTO, QueryFindNFts};
         crate::modules::nft::controller::get_list_nft,
         crate::modules::nft::controller::search_list_nfts,
         crate::modules::collection::controller::get_collection,
+        crate::modules::bundle::controller::get_bundles,
         
     ),
     components(
         schemas(
             AccountDTO,
             GameDTO,
+            BundleDTO,
             SocialInfoDto,
             NFTDTO,
             NFTCollectionDTO,

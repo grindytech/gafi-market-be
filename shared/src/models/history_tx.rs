@@ -1,5 +1,12 @@
 use mongodb::bson::{self, doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub enum TypeEventTx {
+	Mint,
+	Transfer,
+	Sale,
+	Burn,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct HistoryTx {
