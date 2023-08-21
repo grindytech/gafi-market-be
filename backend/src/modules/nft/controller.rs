@@ -2,7 +2,6 @@ use crate::{
 	app_state::AppState,
 	common::{Page, QueryPage, ResponseBody},
 	modules::{
-		game::dto::QueryInfo,
 		nft::{
 			dto::{QueryFindNFts, NFTDTO},
 			service::{find_nft_by_token, find_nfts_by_address, find_nfts_by_query},
@@ -20,6 +19,7 @@ use serde::{Deserialize, Serialize};
 
 #[utoipa::path(
     get,
+	operation_id="dsad",
     tag="NftEndpoints"
     ,path="/nft/{token_id}"
     ,params(
@@ -28,7 +28,8 @@ use serde::{Deserialize, Serialize};
     ,responses(
         (status=200,description="Find NFT Success",body=NFTDTO),
         (status=NOT_FOUND,description="Cannot found this nft")
-    ))]
+    )
+)]
 #[get("/{token_id}")]
 pub async fn get_nft(
 	app_state: Data<AppState>,
@@ -67,6 +68,7 @@ pub async fn get_nft(
 			
 		}
     })),
+	
     responses(
         (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
         (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)

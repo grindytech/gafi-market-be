@@ -7,7 +7,7 @@ use shared::{bundle::Bundle, models};
 
 use crate::common::{ErrorResponse, Page, QueryPage};
 
-use super::dto::BundleDTO;
+use super::dto::{BundleDTO, QueryFindBundles};
 
 //Find Bundle Detail By id
 pub async fn find_bundle_by_id(
@@ -31,3 +31,10 @@ pub async fn find_bundle_by_id(
 		Ok(None)
 	}
 }
+
+/* pub async fn find_list_bundle_by_query(
+	params: QueryPage<QueryFindBundles>,
+	db: Database,
+) -> Result<Option<Page<BundleDTO>>, mongodb::error::Error> {
+
+} */

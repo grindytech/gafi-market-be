@@ -60,6 +60,7 @@ impl<T> Page<T> {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
+#[aliases(QueryGame = QueryPage<QueryFindGame>)]
 #[aliases(QueryCollection=QueryPage<QueryFindCollections>)]
 pub struct QueryPage<T> {
 	pub search: String,

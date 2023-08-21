@@ -111,8 +111,9 @@ pub async fn find_nfts_by_query(
 			doc!{"collection_id":params.query.collection_id}
 		]
 	};
+	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	/* let find_options=FindOptions::builder().sort() */
-	let mut cursor_nft = col.find(query_find, None).await?;
+	let mut cursor_nft = col.find(query_find, filter_option).await?;
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
 	while let Some(nft) = cursor_nft.try_next().await? {
 		list_nfts.push(nft.into())

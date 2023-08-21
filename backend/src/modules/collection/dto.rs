@@ -23,6 +23,8 @@ impl From<NFTCollection> for NFTCollectionDTO {
 		}
 	}
 }
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindCollections {
 	pub name: String,
 	pub collection_id: String,

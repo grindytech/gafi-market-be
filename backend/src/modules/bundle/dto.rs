@@ -59,4 +59,8 @@ pub struct QueryFindBundles {
 	pub bundle_id: Option<String>,
 	pub creator: Option<String>,
 	pub buyer: Option<String>,
+	pub min_price: Option<i32>,
+	pub max_price: Option<i32>,
+	pub status: Option<String>,
+	pub market_type: Option<String>,
 }

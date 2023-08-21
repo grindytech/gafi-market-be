@@ -35,12 +35,9 @@ impl From<Game> for GameDTO {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct QueryInfo {
+pub struct QueryFindGame {
+	pub game_id: String,
 	pub owner: String,
-}
-
-#[derive(Clone, Deserialize, Serialize, ToSchema)]
-#[schema(example = json!({"owner": "0sxbdfc529688922fb5036d9439a7cd61d61114f700"}))]
-pub struct BodyRequestGame {
-	owner: String,
+	pub category: String,
+	pub is_verified: bool,
 }

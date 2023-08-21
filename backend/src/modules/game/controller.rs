@@ -5,14 +5,17 @@ use actix_web::{
 	web::{self, Data},
 	Error as AWError, HttpResponse, Result,
 };
-use log::info;
+
 use shared::constant::EMPTY_STR;
 
-use super::dto::{BodyRequestGame, GameDTO, QueryInfo};
+use super::dto::GameDTO;
 use crate::{
 	app_state::AppState,
-	common::{Page, ResponseBody},
-	modules::game::service::{find_game_by_id, find_games_account},
+	common::{Page, QueryPage, ResponseBody},
+	modules::game::{
+		dto::QueryFindGame,
+		service::{find_game_by_id, find_games_by_query},
+	},
 };
 
 #[utoipa::path(
@@ -43,7 +46,6 @@ pub async fn get_game(
 		},
 		Err(e) => {
 			// Handle the error case, return 500 Internal Server Error response
-			eprintln!("Error: {:?}", e);
 			Ok(HttpResponse::InternalServerError().finish())
 		},
 	}
@@ -53,7 +55,21 @@ pub async fn get_game(
     post,
     tag = "GameEndpoints",
     context_path="/game",
-    request_body(content =GameDTO,description="Request Body of Find Game of a address",content_type="application/json", example=json!({"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700".to_string()})) , 
+    request_body(content =GameDTO,description="Request Body of Find Game of a address",content_type="application/json", example=json!({
+		"search":"",
+        "page": 1,
+        "size": 10,
+        "order_by": "create_at",
+        "desc": true,
+		 "query":{
+			"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700",
+			"game_id":"",
+			"category":"",
+			"is_verified":true,
+
+		 }
+		
+	})) , 
     responses(
         (status=StatusCode::OK,description="Find List Game Success",body=Vec<GameDTO>),
         (status=StatusCode::NOT_FOUND,description="Can not found List game"))
@@ -61,15 +77,12 @@ pub async fn get_game(
 #[post("/list")]
 pub async fn get_games_by_address(
 	app_state: Data<AppState>,
-	req: web::Json<QueryInfo>,
+	req: web::Json<QueryPage<QueryFindGame>>,
 ) -> Result<HttpResponse, AWError> {
-	/* let fn_test=ObjectBuilder::new().property("owner",String::schema()).require("owner").
-	 * build(); */
-	let owner = req.owner.clone();
-	let list_games = find_games_account(&owner, app_state.db.clone()).await;
+	let list_games = find_games_by_query(req.0, app_state.db.clone()).await;
 
 	match list_games {
-		Ok(games) => {
+		Ok(Some(games)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games))
 		},
 		Ok(None) => {
@@ -78,7 +91,10 @@ pub async fn get_games_by_address(
 				.content_type("application/json")
 				.json(rsp))
 		},
-		Err(e) => Ok(HttpResponse::InternalServerError().finish()),
+		Err(e) => {
+			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
+		},
 	}
 }
 

@@ -21,9 +21,13 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO};
         crate::modules::nft::controller::get_list_nft,
         crate::modules::nft::controller::search_list_nfts,
         crate::modules::collection::controller::get_collection,
+        crate::modules::collection::controller::search_list_collections,
         crate::modules::bundle::controller::get_bundles,
         
     ),
+   /*  tags(
+            (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
+    ), */
     components(
         schemas(
             AccountDTO,
