@@ -7,25 +7,21 @@ use subxt::{events::EventDetails, PolkadotConfig};
 pub struct Task {
 	pub event_name: String,
 	pub pallet_name: String,
-	// pub process: Box<dyn Fn(EventDetails<PolkadotConfig>) -> BoxFuture<'static, ()>>,
-	pub runner: Option<
-		Box<
-			dyn FnOnce(&EventDetails<PolkadotConfig>) -> Pin<Box<dyn Future<Output = ()> + Send>>
-				+ Send,
-		>,
-	>,
+	pub runner: Box<dyn Fn(&EventDetails<PolkadotConfig>) -> BoxFuture<()> + Send + Sync>,
 }
 impl Task {
-	pub async fn run(self, ev: &EventDetails<PolkadotConfig>) {
-		(self.runner.unwrap())(ev).await;
-	}
-
-	pub fn set_runner<Func, Fut>(&mut self, func: Func)
+	pub fn new<Func>(event_name: &str, pallet_name: &str, func: Func) -> Self
 	where
-		Func: Send + 'static + FnOnce(&EventDetails<PolkadotConfig>) -> Fut,
-		Fut: Send + 'static + Future<Output = ()>,
+		Func: Fn(&EventDetails<PolkadotConfig>) -> BoxFuture<()> + Send + Sync + 'static,
 	{
-		self.runner = Some(Box::new(move |ev| Box::pin(func(ev))));
+		Self {
+			event_name: event_name.to_string(),
+			pallet_name: pallet_name.to_string(),
+			runner: Box::new(func),
+		}
+	}
+	pub async fn run(&self, ev: &EventDetails<PolkadotConfig>) {
+		(self.runner)(ev).await;
 	}
 }
 

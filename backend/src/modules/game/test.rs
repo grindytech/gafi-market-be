@@ -5,14 +5,14 @@ use mongodb::{bson::doc, Collection, Database};
 use crate::app_state::AppState;
 
 use log::{info, warn};
-use shared::models::{self, game::Game};
+use shared::{models::{self, game::Game}, BaseDocument};
 
 pub async fn find_games_of_account(
 	address: &String,
 	db: Database,
 ) -> Result<Vec<Game>, mongodb::error::Error> {
 	let filter = doc! {"address":address};
-	let col: Collection<Game> = db.collection(models::game::NAME);
+	let col: Collection<Game> = db.collection(models::Game::name().as_str());
 	/* let mut curror = */
 	let mut cursor = match col.find(filter, None).await {
 		Ok(cursor) => cursor,

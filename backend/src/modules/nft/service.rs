@@ -12,10 +12,10 @@ use crate::{
 };
 
 use super::dto::{QueryFindNFts, NFTDTO};
-use shared::models::{self, nft::NFT, nft_owner::NFTOwner};
+use shared::{models::{self, nft::NFT, nft_owner::NFTOwner}, BaseDocument};
 
 pub async fn get_nft_by_token(token_id: &String, db: Database) -> Result<Option<NFTDTO>, Error> {
-	let col: Collection<NFT> = db.collection(models::nft::NAME);
+	let col: Collection<NFT> = db.collection(models::NFT::name().as_str());
 	let filter = doc! {"token_id": token_id};
 	if let Ok(Some(nft_detail)) = col.find_one(filter, None).await {
 		log::info!("NFT Detail {:?}", nft_detail);
@@ -38,7 +38,7 @@ pub async fn find_nfts(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
 ) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
-	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NAME);
+	let col: Collection<NFTOwner> = db.collection(models::NFTOwner::name().as_str());
 	let address = params.query.address;
 	let filter = doc! {"address": address};
 
@@ -61,7 +61,7 @@ pub async fn find_nfts(
 		"$or": or_filters
 	};
 
-	let col_nft: Collection<NFT> = db.collection(models::nft::NAME);
+	let col_nft: Collection<NFT> = db.collection(models::NFT::name().as_str());
 	let mut cursor_nft = col_nft.find(query, None).await?;
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
 

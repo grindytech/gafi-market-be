@@ -1,5 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
+
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum TypePool {
 	DynamicPool(String),
@@ -18,4 +20,9 @@ pub struct Pool {
 	pub update_at: i64,
 	pub create_at: i64,
 }
-pub const NAME: &str = "pool";
+impl BaseDocument for Pool {
+	fn name() -> String {
+		"pool".to_string()
+	}
+}
+

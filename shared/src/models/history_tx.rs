@@ -1,6 +1,8 @@
 use mongodb::bson::{self, doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+use crate::BaseDocument;
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct HistoryTx {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -17,4 +19,9 @@ pub struct HistoryTx {
 	pub token_id: bson::oid::ObjectId,
 	pub raw: String,
 }
-pub const NAME: &str = "history_tx";
+impl BaseDocument for HistoryTx {
+	fn name() -> String {
+		"history_tx".to_string()
+	}
+}
+

@@ -1,6 +1,8 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+use crate::BaseDocument;
+
 use super::nft;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Bundle {
@@ -18,4 +20,9 @@ pub struct Bundle {
 	pub update_at: i64,
 	pub create_at: i64,
 }
-pub const NAME: &str = "bundle";
+impl BaseDocument for Bundle {
+	fn name() -> String {
+		"bundle".to_string()
+	}
+}
+

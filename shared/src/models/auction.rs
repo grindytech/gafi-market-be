@@ -1,5 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
+
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Auction {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -17,4 +19,8 @@ pub struct Auction {
 	pub update_at: i64,
 	pub create_at: i64,
 }
-pub const NAME: &str = "auction";
+impl BaseDocument for Auction {
+	fn name() -> String {
+		"auction".to_string()
+	}
+}
