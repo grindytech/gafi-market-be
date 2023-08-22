@@ -5,7 +5,7 @@ version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-async-trait = {workspace = true}
+# async-trait = {workspace = true}
 dotenv = {workspace = true}
 env_logger = {workspace = true}
 futures = "0.3.28"
@@ -18,3 +18,5 @@ subxt = {version = "0.31.0", features = ["unstable-metadata", "native", "jsonrps
 subxt-codegen = "0.31.0"
 subxt-metadata = "0.31.0"
 tokio = {version = "1.32.0", features = ["full"]}
+# actix-rt = {workspace = true}
+# actix-web = {workspace = true}

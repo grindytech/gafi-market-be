@@ -1,31 +1,23 @@
-use std::sync::Arc;
-
 use crate::gafi;
 
 use super::*;
-use log::logger;
 use mongodb::{bson::doc, options::FindOneOptions, results::InsertOneResult, Collection, Database};
 use shared::{block, types::Result, BaseDocument, Block};
-use subxt::{events::EventDetails, OnlineClient, PolkadotConfig};
-use tokio::{
-	sync::{Mutex, MutexGuard},
-	time::{sleep, Duration},
-};
+use subxt::{OnlineClient, PolkadotConfig};
+use tokio::time::Duration;
 
 pub struct WorkerState {
 	tasks: Vec<Box<Task>>,
 	current_block: u32,
 	latest_block: u32,
 	db: Database,
-	api: OnlineClient<PolkadotConfig>,
+	api: RpcClient,
 	finalize_delay: u32,
 	rpc: String,
+	enabled: bool,
+	running: bool,
+	max_batch: u32,
 }
-pub struct WorkerRunningStatus {
-	enabled: Arc<bool>,
-	running: Arc<bool>,
-}
-pub type WorkerStateSync = Arc<Mutex<WorkerState>>;
 
 impl WorkerState {
 	pub async fn new(
@@ -33,7 +25,9 @@ impl WorkerState {
 		finalize_delay: Option<u32>,
 		start_block: Option<u32>,
 		rpc: Option<String>,
+		max_batch: Option<u32>,
 	) -> Result<Self> {
+		let max_batch = max_batch.unwrap_or(1000);
 		let finalize_delay = finalize_delay.unwrap_or(3);
 		let start_block = start_block.unwrap_or(0);
 		let rpc = rpc.unwrap_or("wss://rpc-testnet.gafi.network:443".to_string());
@@ -56,10 +50,13 @@ impl WorkerState {
 			api,
 			finalize_delay,
 			rpc,
+			enabled: false,
+			running: false,
+			max_batch,
 		};
 
 		if let Some(b) = last_block {
-			state.current_block = b.height;
+			state.current_block = b.height + 1;
 		}
 
 		Ok(state)
@@ -70,142 +67,162 @@ impl WorkerState {
 	}
 }
 
-mod worker_utils {
-	use super::*;
+pub struct Worker {
+	state: WorkerState,
+}
+impl Worker {
+	pub async fn new(
+		db: Database,
+		finalize_delay: Option<u32>,
+		start_block: Option<u32>,
+		rpc: Option<String>,
+		max_batch: Option<u32>,
+	) -> Result<Self> {
+		let state = WorkerState::new(db, finalize_delay, start_block, rpc, max_batch).await?;
+		Ok(Self { state })
+	}
 
-	async fn save_processed_status(db: Database, block: block::Block) -> Result<InsertOneResult> {
+	pub fn register(&mut self, task: Task) {
+		self.state.register(task)
+	}
+
+	async fn save_processed_status(db: &Database, block: block::Block) -> Result<InsertOneResult> {
 		let collection: Collection<block::Block> = db.collection(block::Block::name().as_str());
 		Ok(collection.insert_one(block, None).await?)
 	}
 
-	async fn get_onchain_latest_block(api: OnlineClient<PolkadotConfig>) -> Result<block::Block> {
+	async fn get_onchain_latest_block(api: &OnlineClient<PolkadotConfig>) -> Result<block::Block> {
 		let onchain_last_block = api.blocks().at_latest().await?;
 		Ok(block::Block {
 			height: onchain_last_block.number(),
-			hash: (&onchain_last_block.hash()).to_string(),
+			hash: hex::encode(onchain_last_block.hash().0),
 		})
 	}
 
-	pub async fn start(root_state: WorkerState, status: &mut WorkerRunningStatus) -> Result<()> {
-		let share_state = Arc::new(Mutex::new(root_state));
-		status.enabled = true;
-		if !status.running {
-			// let t1 = tokio::spawn(run(state_root.clone()));
-			let t2 = tokio::spawn(refetch_latest_block(share_state.clone(), &status, None));
-			// let (r1, r2) = (t1.await?, t2.await?);
-			t2.await?;
-		}
-		status.running = false;
-		Ok(())
-	}
-	pub async fn stop(status: &mut WorkerRunningStatus) -> Result<()> {
-		status.enabled = false;
-		Ok(())
-	}
-
-	async fn refetch_latest_block(
-		state: WorkerStateSync,
-		status: &WorkerRunningStatus,
-		delay_in_ms: Option<u64>,
-	) -> Result<()> {
-		println!("here");
-		let mut state = state.lock().await;
-		let delay_in_ms: u64 = delay_in_ms.unwrap_or(1000);
-		println!("here1");
-
-		while status.enabled {
-			println!("here");
-
-			let block = get_onchain_latest_block(state.api.clone()).await?;
-			state.latest_block = block.height;
-			println!("{}", block.height);
-
-			// sleep(Duration::from_millis(delay_in_ms)).await;
-		}
-		Ok(())
-	}
-
-	async fn run(state_root: WorkerStateSync, status: &mut WorkerRunningStatus) -> Result<()> {
-		println!("run here");
-		let mut state = state_root.lock().await;
-		let mut rs;
-		while status.enabled {
-			status.running = true;
-			log::debug!("Begin process block {}", state.current_block);
-			println!("Begin process block {}", state.current_block);
-
-			rs = process_block(&mut state).await;
-			if state.current_block < state.latest_block {
-				match &rs {
-					Err(err) => {
-						log::warn!("{}", err);
-					},
-					Ok(block) => {
-						log::debug!("Process block {} successfully {}", block.height, block.hash);
-						state.current_block += 1;
-					},
-				}
-			}
-			tokio::time::sleep(Duration::from_millis(100)).await;
-		}
-		status.running = false;
-		Ok(())
-	}
-
-	async fn process_block(state: &mut MutexGuard<'_, WorkerState>) -> Result<Block> {
-		let block_number = state.current_block;
-		let block_hash = state
-			.api
+	async fn process_block(
+		api: &RpcClient,
+		db: &Database,
+		tasks: &Vec<Box<Task>>,
+		block_number: u32,
+	) -> Result<Block> {
+		let block_hash = api
 			.rpc()
 			.block_hash(Some(block_number.into()))
 			.await?
 			.expect(format!("Fail to get block hash of block {}", block_number).as_str());
+		let block_hash_str = hex::encode(block_hash.0.to_vec());
 
-		// Get events for the latest block:
-		let events = state.api.events().at(block_hash).await?;
+		let events = api.events().at(block_hash).await?;
 		for ev in events.iter() {
 			let ev = ev?;
-			log::info!("{}:{}", ev.pallet_name(), ev.variant_name());
+			if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
+				log::debug!("{ev:?}");
+			} else {
+				log::warn!("<Cannot decode event>");
+			}
+			for task in tasks {
+				if task.key == format!("{}:{}", ev.pallet_name(), ev.variant_name()) {
+					task.run(HandleParams {
+						ev: &ev,
+						db,
+						api,
+						block: Block {
+							height: block_number,
+							hash: block_hash_str.clone(),
+						},
+					})
+					.await?; //TODO process in multi threads
+				}
+			}
 		}
 
 		Ok(Block {
-			hash: block_hash.to_string(),
+			hash: block_hash_str,
 			height: block_number,
 		})
 	}
+
+	pub async fn stop(&mut self) -> Result<()> {
+		let state = &mut self.state;
+		state.enabled = false;
+		Ok(())
+	}
+	/// return false if worker disabled
+	async fn run(&mut self) -> Result<bool> {
+		let mut state = &mut self.state;
+		state.running = true;
+
+		let end_block = if (state.latest_block - state.current_block) > state.max_batch {
+			state.current_block + state.max_batch
+		} else {
+			state.latest_block
+		};
+
+		for block_number in state.current_block..end_block {
+			log::info!("Begin process block {}", state.current_block);
+			let block =
+				Self::process_block(&state.api, &state.db, &state.tasks, block_number).await?;
+			log::info!("Process block {} successfully {}", block.height, block.hash);
+			Self::save_processed_status(&state.db, block.clone()).await?;
+			state.current_block += 1;
+
+			if !state.enabled {
+				break
+			}
+		}
+
+		let latest_block = Self::get_onchain_latest_block(&state.api).await?;
+		state.latest_block = latest_block.height;
+		state.running = false;
+		Ok(state.enabled.clone())
+	}
+
+	pub async fn start(&mut self, delay_loop: u64) -> Result<()> {
+		let state = &mut self.state;
+		if state.enabled {
+			return Ok(())
+		}
+		state.enabled = true;
+		loop {
+			let rs = self.run().await;
+			match rs {
+				Ok(enabled) =>
+					if enabled == false {
+						break
+					},
+				Err(err) => {
+					log::error!("Err: {}", err);
+				},
+			}
+			if delay_loop > 0 {
+				tokio::time::sleep(Duration::from_millis(delay_loop)).await;
+			}
+		}
+		Ok(())
+	}
 }
 
-async fn on_new_seed(event: &EventDetails<PolkadotConfig>) {
-	let new_seed = event.as_event::<gafi::game_randomness::events::NewSeed>();
-	match new_seed {
-		Ok(seed) =>
-			if let Some(e) = seed {
-				println!(" seed block: {:?}", e.block_number);
-				println!(" seed seed: {:?}", e.seed);
-			},
-		Err(err) => {
-			println!(" err: {:?}", err);
-		},
-	}
+async fn on_new_seed(params: HandleParams<'_>) -> Result<()> {
+	let new_seed = params.ev.as_event::<gafi::game_randomness::events::NewSeed>()?;
+	if let Some(e) = new_seed {
+		log::info!(" seed block: {:?}", e.block_number);
+		log::info!(" seed seed: {:?}", e.seed);
+	};
+	Ok(())
 }
 
 #[tokio::test]
 async fn test() -> Result<()> {
 	env_logger::init_from_env("info");
-	println!("test");
 	let db = shared::tests::utils::get_database().await;
-	let mut worker_state = WorkerState::new(db, None, None, None).await?;
+	let mut worker = Worker::new(db, None, Some(127200), None, None).await?;
 
-	let task = Task::new("NewSeed", "GameRandomness", move |ev| {
-		Box::pin(on_new_seed(ev))
+	let task = Task::new("GameRandomness:NewSeed", move |params| {
+		Box::pin(on_new_seed(params))
 	});
-	worker_state.register(task);
-	let mut status = WorkerRunningStatus {
-		enabled: Arc::new(true),
-		running: Arc::new(false),
-	};
+	worker.register(task);
 
-	worker_utils::start(worker_state, &mut status).await?;
+	let _ = worker.start(1000).await;
 
 	Ok(())
 }
