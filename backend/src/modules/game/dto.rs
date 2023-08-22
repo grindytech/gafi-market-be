@@ -36,8 +36,8 @@ impl From<Game> for GameDTO {
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindGame {
-	pub game_id: String,
-	pub owner: String,
-	pub category: String,
-	pub is_verified: bool,
+	pub game_id: Option<String>,
+	pub owner: Option<String>,
+	pub category: Option<String>,
+	pub is_verified: Option<bool>,
 }

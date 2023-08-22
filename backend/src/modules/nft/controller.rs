@@ -1,12 +1,10 @@
 use crate::{
 	app_state::AppState,
-	common::{Page, QueryPage, ResponseBody},
-	modules::{
-		nft::{
+	common::{QueryPage, ResponseBody},
+	modules::nft::{
 			dto::{QueryFindNFts, NFTDTO},
 			service::{find_nft_by_token, find_nfts_by_address, find_nfts_by_query},
 		},
-	},
 };
 use actix_web::{
 	get,
@@ -15,7 +13,8 @@ use actix_web::{
 	web::{self, Data},
 	Error as AWError, HttpResponse, Result,
 };
-use serde::{Deserialize, Serialize};
+
+use shared::constant::EMPTY_STR;
 
 #[utoipa::path(
     get,
@@ -38,16 +37,19 @@ pub async fn get_nft(
 	let token_id = path.into_inner();
 	let nft_detail = find_nft_by_token(&token_id, app_state.db.clone()).await;
 	match nft_detail {
-		Ok(Some(nft_dto)) => Ok(HttpResponse::build(StatusCode::OK)
-			.content_type("application/json")
-			.json(nft_dto)),
+		Ok(Some(nft)) => {
+			let rsp = ResponseBody::<Option<NFTDTO>>::new(EMPTY_STR, Some(nft), true);
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
+		},
 		Ok(None) => {
-			// NFT not found, return 404 Not Found response
-			Ok(HttpResponse::NotFound().finish())
+			let rsp = ResponseBody::<Option<NFTDTO>>::new("Not found", None, false);
+			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+				.content_type("application/json")
+				.json(rsp))
 		},
 		Err(e) => {
-			// Handle the error case, return 500 Internal Server Error response
-			Ok(HttpResponse::InternalServerError().finish())
+			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }
@@ -106,7 +108,7 @@ pub async fn get_list_nft(
     tag = "NftEndpoints",
     context_path="/nft",
     request_body
-	(content =QueryNFT,description=" Search Query Data",content_type="application/json"
+	(content =QueryNFT,description=" Find NFTs By Search Query Data",content_type="application/json"
 	,example=json!({
         "search":"",
         "page": 1,

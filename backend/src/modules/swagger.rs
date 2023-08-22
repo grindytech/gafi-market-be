@@ -23,7 +23,7 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, co
         crate::modules::collection::controller::get_collection,
         crate::modules::collection::controller::search_list_collections,
         crate::modules::bundle::controller::get_bundles,
-        
+        crate::modules::bundle::controller::search_list_bundles
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -39,10 +39,11 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, co
             PropertiseDTO,
             ResponseBody<()>,
             Page<()>,
-            QueryPage<()>,
-            QueryFindNFts,
             QueryFindCollections,
             QueryFindGame,
+            QueryFindNFts,
+            
+            QueryPage<()>,
             NoResponse
         )
     ),

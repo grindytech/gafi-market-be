@@ -1,12 +1,15 @@
+use std::collections::HashMap;
+
 use actix_web::web::Query;
 use futures_util::TryStreamExt;
 use mongodb::{
 	bson::{doc, Document},
 	Collection, Database,
 };
+use serde_json::Value;
 
 use crate::common::{
-	utils::{get_filter_option, get_total_page},
+	utils::{create_or_query, get_filter_option, get_total_page},
 	Page, QueryPage,
 };
 
@@ -31,12 +34,7 @@ pub async fn find_collections_by_query(
 	db: Database,
 ) -> Result<Option<Page<NFTCollectionDTO>>, mongodb::error::Error> {
 	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NAME);
-	/* let query_find = doc! {
-		"$or":[
-			doc! {"collection_id":params.query.collection_id},
-			doc! {"name":params.query.name}
-		]
-	}; */
+
 	let query_find = {
 		let mut or_conditions = vec![];
 

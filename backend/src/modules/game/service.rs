@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use super::dto::{GameDTO, QueryFindGame};
 use crate::common::{
-	utils::{create_or_query, get_filter_option, get_total_page},
-	ErrorResponse, Page, QueryPage,
+	utils::{add_criteria, create_and_query, create_or_query, get_filter_option, get_total_page},
+	Page, QueryPage,
 };
 use actix_web::Result;
 use futures_util::TryStreamExt;
-use serde_json::Value;
+
 use shared::{
 	constant::EMPTY_STR,
 	models::{self, game::Game},
@@ -15,8 +15,8 @@ use shared::{
 /* use futures::stream::StreamExt; */
 use log::info;
 use mongodb::{
-	bson::{self, doc, Bson, Document},
-	options, Collection, Cursor, Database,
+	bson::{doc, Bson},
+	Collection, Database,
 };
 //------------
 
@@ -42,14 +42,22 @@ pub async fn find_games_by_query(
 ) -> Result<Option<Page<GameDTO>>, mongodb::error::Error> {
 	let col: Collection<Game> = db.collection(models::game::NAME);
 
-	let mut criteria: HashMap<String, Value> = HashMap::new();
-	criteria.insert("game_id".to_string(), Value::String(params.query.game_id));
-	criteria.insert(
-		"is_verified".to_string(),
-		Value::Bool(params.query.is_verified),
+	let mut criteria: HashMap<String, Option<Bson>> = HashMap::new();
+	add_criteria(&mut criteria, "game_id", params.query.game_id, |v| {
+		Bson::String(v.clone())
+	});
+	add_criteria(
+		&mut criteria,
+		"is_verified",
+		params.query.is_verified,
+		Bson::Boolean,
 	);
-	criteria.insert("owner".to_string(), Value::String(params.query.owner));
-	criteria.insert("category".to_string(), Value::String(params.query.category));
+	add_criteria(&mut criteria, "owner", params.query.owner, |v| {
+		Bson::String(v.clone())
+	});
+	add_criteria(&mut criteria, "category", params.query.category, |v| {
+		Bson::String(v.clone())
+	});
 
 	let query_find = create_or_query(criteria).await;
 

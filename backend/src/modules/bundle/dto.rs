@@ -54,7 +54,7 @@ impl From<Bundle> for BundleDTO {
 		}
 	}
 }
-
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindBundles {
 	pub bundle_id: Option<String>,
 	pub creator: Option<String>,

@@ -61,8 +61,7 @@ impl<T> Page<T> {
 		}
 	}
 }
-type QueryGame = QueryPage<QueryFindGame>;
-type QueryCollection = QueryPage<QueryFindCollections>;
+
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
 /* #[aliases(QueryGame = QueryPage<QueryFindGame>)]

@@ -11,12 +11,15 @@ use shared::constant::EMPTY_STR;
 use super::dto::GameDTO;
 use crate::{
 	app_state::AppState,
-	common::{Page, QueryPage, ResponseBody},
+	common::{ QueryPage, ResponseBody},
 	modules::game::{
 		dto::QueryFindGame,
 		service::{find_game_by_id, find_games_by_query},
 	},
 };
+
+
+
 
 #[utoipa::path(
     tag = "GameEndpoints",
@@ -41,12 +44,14 @@ pub async fn get_game(
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 		},
 		Ok(None) => {
-			// Game not found, return 404 Not Found response
-			Ok(HttpResponse::NotFound().finish())
+			let rsp = ResponseBody::<Option<GameDTO>>::new("Not found", None, false);
+			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+				.content_type("application/json")
+				.json(rsp))
 		},
 		Err(e) => {
-			// Handle the error case, return 500 Internal Server Error response
-			Ok(HttpResponse::InternalServerError().finish())
+			let rsp = ResponseBody::<Option<GameDTO>>::new(e.to_string().as_str(), None, false);
+			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }

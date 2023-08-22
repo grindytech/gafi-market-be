@@ -28,4 +28,5 @@ impl From<NFTCollection> for NFTCollectionDTO {
 pub struct QueryFindCollections {
 	pub name: Option<String>,
 	pub collection_id: Option<String>,
+	pub game_id: Option<String>,
 }

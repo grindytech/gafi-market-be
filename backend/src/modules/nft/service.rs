@@ -1,11 +1,8 @@
-use std::collections::HashMap;
-
 use actix_web::Result;
 
 use futures_util::TryStreamExt;
 use mongodb::{
 	bson::{doc, Document},
-	options::FindOptions,
 	Collection, Database,
 };
 
