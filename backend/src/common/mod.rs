@@ -1,3 +1,5 @@
+pub mod utils;
+
 use serde::{Deserialize, Serialize};
 use utoipa::{
 	openapi::{Object, ObjectBuilder},
@@ -6,6 +8,8 @@ use utoipa::{
 
 use crate::modules::{
 	account::dto::AccountDTO,
+	collection::dto::QueryFindCollections,
+	game::dto::QueryFindGame,
 	nft::dto::{QueryFindNFts, NFTDTO},
 };
 
@@ -57,11 +61,12 @@ impl<T> Page<T> {
 		}
 	}
 }
-
+type QueryGame = QueryPage<QueryFindGame>;
+type QueryCollection = QueryPage<QueryFindCollections>;
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
-#[aliases(QueryGame = QueryPage<QueryFindGame>)]
-#[aliases(QueryCollection=QueryPage<QueryFindCollections>)]
+/* #[aliases(QueryGame = QueryPage<QueryFindGame>)]
+#[aliases(QueryCollection=QueryPage<QueryFindCollections>)] */
 pub struct QueryPage<T> {
 	pub search: String,
 	pub page: u64,

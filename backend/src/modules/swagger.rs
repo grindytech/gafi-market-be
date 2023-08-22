@@ -9,7 +9,7 @@ use crate::{
 };
 use utoipa::OpenApi;
 
-use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO};
+use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, collection::dto::QueryFindCollections, game::dto::QueryFindGame};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -41,6 +41,8 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO};
             Page<()>,
             QueryPage<()>,
             QueryFindNFts,
+            QueryFindCollections,
+            QueryFindGame,
             NoResponse
         )
     ),

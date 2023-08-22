@@ -1,11 +1,16 @@
+use std::collections::HashMap;
+
 use super::dto::{GameDTO, QueryFindGame};
-use crate::common::{ErrorResponse, Page, QueryPage};
+use crate::common::{
+	utils::{create_or_query, get_filter_option, get_total_page},
+	ErrorResponse, Page, QueryPage,
+};
 use actix_web::Result;
 use futures_util::TryStreamExt;
+use serde_json::Value;
 use shared::{
 	constant::EMPTY_STR,
 	models::{self, game::Game},
-	utils::{get_filter_option, get_total_page},
 };
 /* use futures::stream::StreamExt; */
 use log::info;
@@ -13,6 +18,7 @@ use mongodb::{
 	bson::{self, doc, Bson, Document},
 	options, Collection, Cursor, Database,
 };
+//------------
 
 // Find Game Detail By Game ID
 pub async fn find_game_by_id(
@@ -35,16 +41,17 @@ pub async fn find_games_by_query(
 	db: Database,
 ) -> Result<Option<Page<GameDTO>>, mongodb::error::Error> {
 	let col: Collection<Game> = db.collection(models::game::NAME);
-	let query_find = doc! {
-		"$or":
-		[
-			doc! {"game_id":params.query.game_id},
-			doc! {"is_verified":params.query.is_verified},
-			doc! {"owner":params.query.owner},
-			doc! {"category":params.query.category},
 
-		]
-	};
+	let mut criteria: HashMap<String, Value> = HashMap::new();
+	criteria.insert("game_id".to_string(), Value::String(params.query.game_id));
+	criteria.insert(
+		"is_verified".to_string(),
+		Value::Bool(params.query.is_verified),
+	);
+	criteria.insert("owner".to_string(), Value::String(params.query.owner));
+	criteria.insert("category".to_string(), Value::String(params.query.category));
+
+	let query_find = create_or_query(criteria).await;
 
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;

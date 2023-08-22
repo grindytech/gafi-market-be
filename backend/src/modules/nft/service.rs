@@ -1,18 +1,24 @@
+use std::collections::HashMap;
+
 use actix_web::Result;
 
 use futures_util::TryStreamExt;
-use mongodb::{bson::doc, options::FindOptions, Collection, Database};
+use mongodb::{
+	bson::{doc, Document},
+	options::FindOptions,
+	Collection, Database,
+};
 
 use crate::{
-	common::{Page, QueryPage},
+	common::{
+		utils::{get_filter_option, get_total_page},
+		Page, QueryPage,
+	},
 	shared::constant::EMPTY_STR,
 };
 
 use super::dto::{QueryFindNFts, NFTDTO};
-use shared::{
-	models::{self, nft::NFT, nft_owner::NFTOwner},
-	utils::{get_filter_option, get_total_page},
-};
+use shared::models::{self, nft::NFT, nft_owner::NFTOwner};
 
 pub async fn find_nft_by_token(
 	token_id: &String,
@@ -103,17 +109,44 @@ pub async fn find_nfts_by_query(
 	db: Database,
 ) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
 	let col: Collection<NFT> = db.collection(models::nft::NAME);
-
-	let query_find = doc! {
-		"$or":
-		[	doc! {"token_id":params.query.token_id},
-			doc! {"name":params.query.name},
-			doc!{"collection_id":params.query.collection_id}
-		]
-	};
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
-	/* let find_options=FindOptions::builder().sort() */
+
+	let query_find = {
+		let mut or_conditions = vec![];
+
+		if let Some(token) = params.query.token_id.clone() {
+			if !token.is_empty() {
+				or_conditions.push(doc! {"token_id": token});
+			}
+		}
+
+		if let Some(name) = params.query.name.clone() {
+			if !name.is_empty() {
+				or_conditions.push(doc! {"name": name});
+			}
+		}
+
+		if let Some(collection_id) = params.query.collection_id.clone() {
+			if !collection_id.is_empty() {
+				or_conditions.push(doc! {"collection_id": collection_id});
+			}
+		}
+
+		if !or_conditions.is_empty() {
+			doc! {"$or": or_conditions}
+		} else {
+			Document::new()
+		}
+	};
+	// create query optional => pass criteria
+	/* let mut criteria = HashMap::new();
+	criteria.insert("token_id".to_string(), params.query.token_id);
+	criteria.insert("name".to_string(), params.query.name);
+	criteria.insert("collection_id".to_string(), params.query.collection_id);
+
+	let query_find = create_or_query(criteria).await; */
 	let mut cursor_nft = col.find(query_find, filter_option).await?;
+
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
 	while let Some(nft) = cursor_nft.try_next().await? {
 		list_nfts.push(nft.into())

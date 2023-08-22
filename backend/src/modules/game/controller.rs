@@ -55,7 +55,7 @@ pub async fn get_game(
     post,
     tag = "GameEndpoints",
     context_path="/game",
-    request_body(content =GameDTO,description="Request Body of Find Game of a address",content_type="application/json", example=json!({
+    request_body(content =QueryGame,description="Find List Games Follow Query",content_type="application/json", example=json!({
 		"search":"",
         "page": 1,
         "size": 10,

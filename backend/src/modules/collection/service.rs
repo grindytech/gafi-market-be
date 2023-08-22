@@ -1,16 +1,17 @@
 use actix_web::web::Query;
 use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Collection, Database};
+use mongodb::{
+	bson::{doc, Document},
+	Collection, Database,
+};
 
-use crate::common::{Page, QueryPage};
+use crate::common::{
+	utils::{get_filter_option, get_total_page},
+	Page, QueryPage,
+};
 
 use super::dto::{NFTCollectionDTO, QueryFindCollections};
-use shared::{
-	constant::EMPTY_STR,
-	models,
-	models::nft_collection::NFTCollection,
-	utils::{get_filter_option, get_total_page},
-};
+use shared::{constant::EMPTY_STR, models, models::nft_collection::NFTCollection};
 
 //Find Collection Detail By ID
 pub async fn find_collection_by_id(
@@ -30,12 +31,34 @@ pub async fn find_collections_by_query(
 	db: Database,
 ) -> Result<Option<Page<NFTCollectionDTO>>, mongodb::error::Error> {
 	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NAME);
-	let query_find = doc! {
+	/* let query_find = doc! {
 		"$or":[
 			doc! {"collection_id":params.query.collection_id},
 			doc! {"name":params.query.name}
 		]
+	}; */
+	let query_find = {
+		let mut or_conditions = vec![];
+
+		if let Some(name) = params.query.name.clone() {
+			if !name.is_empty() {
+				or_conditions.push(doc! {"name": name});
+			}
+		}
+
+		if let Some(collection_id) = params.query.collection_id.clone() {
+			if !collection_id.is_empty() {
+				or_conditions.push(doc! {"collection_id": collection_id});
+			}
+		}
+
+		if !or_conditions.is_empty() {
+			doc! {"$or": or_conditions}
+		} else {
+			Document::new()
+		}
 	};
+
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut collections: Vec<NFTCollectionDTO> = Vec::new();

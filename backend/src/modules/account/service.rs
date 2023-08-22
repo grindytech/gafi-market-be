@@ -17,18 +17,6 @@ pub async fn find_account_by_adress(
 		Ok(None)
 	}
 }
-pub async fn find_account_by_name(
-	name: &String,
-	db: Database,
-) -> Result<Option<AccountDTO>, mongodb::error::Error> {
-	let col: Collection<Account> = db.collection(models::account::NAME);
-	let filter = doc! {"name": name};
-	if let Ok(Some(account_detail)) = col.find_one(filter, None).await {
-		Ok(Some(account_detail.into()))
-	} else {
-		Ok(None)
-	}
-}
 
 pub async fn get_account(
 	address: &String,
