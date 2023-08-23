@@ -9,7 +9,7 @@ pub enum TypeEventTx {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct HistoryTx {
+pub struct Transaction {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub tx_hash: String,
@@ -24,4 +24,4 @@ pub struct HistoryTx {
 	pub token_id: String,
 	pub raw: String,
 }
-pub const NAME: &str = "history_tx";
+pub const NAME: &str = "transaction";

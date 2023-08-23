@@ -1,12 +1,12 @@
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::history_tx::HistoryTx;
+use shared::transaction::Transaction;
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct HistoryTxDTO {
+pub struct TransactionDTO {
 	pub tx_hash: String,
 	pub status: String,
 	pub error_message: String,
@@ -19,9 +19,9 @@ pub struct HistoryTxDTO {
 	pub token_id: String,
 	pub raw: String,
 }
-impl From<HistoryTx> for HistoryTxDTO {
-	fn from(value: HistoryTx) -> Self {
-		HistoryTxDTO {
+impl From<Transaction> for TransactionDTO {
+	fn from(value: Transaction) -> Self {
+		TransactionDTO {
 			tx_hash: value.tx_hash,
 			status: value.status,
 			error_message: value.error_message,
