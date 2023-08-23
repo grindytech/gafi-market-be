@@ -19,9 +19,9 @@ pub struct HistoryTx {
 	pub event: String,
 	pub from: String,
 	pub to: String,
-	pub collection_id: bson::oid::ObjectId,
-	pub game_id: bson::oid::ObjectId,
-	pub token_id: bson::oid::ObjectId,
+	pub collection_id: String,
+	pub game_id: String,
+	pub token_id: String,
 	pub raw: String,
 }
 pub const NAME: &str = "history_tx";

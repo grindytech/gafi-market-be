@@ -1,4 +1,5 @@
-use crate::modules::nft::dto::NFTDTO;
+use crate::{common::DBQuery, modules::nft::dto::NFTDTO};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::bundle::Bundle;
 use utoipa::ToSchema;
@@ -63,4 +64,47 @@ pub struct QueryFindBundles {
 	pub max_price: Option<i32>,
 	pub status: Option<String>,
 	pub market_type: Option<String>,
+}
+impl DBQuery for QueryFindBundles {
+	fn to_doc(&self) -> Document {
+		let mut criteria: Vec<Document> = vec![];
+		if let Some(bundle_id) = &self.bundle_id {
+			criteria.push(doc! {
+				"bundle_id": bundle_id
+			});
+		}
+		if let Some(creator) = &self.creator {
+			criteria.push(doc! {
+				"creator": creator
+			});
+		}
+		if let Some(buyer) = &self.buyer {
+			criteria.push(doc! {
+				"buyer": buyer
+			});
+		}
+		if let Some(min_price) = &self.min_price {
+			criteria.push(doc! {
+				"min_price": min_price
+			});
+		};
+		if let Some(max_price) = &self.max_price {
+			criteria.push(doc! {
+				"max_price": max_price
+			});
+		}
+		if let Some(status) = &self.status {
+			criteria.push(doc! {
+				"status": status
+			});
+		}
+		if let Some(market_type) = &self.market_type {
+			criteria.push(doc! {
+				"market_type": market_type
+			});
+		};
+		doc! {
+			"$and":criteria
+		}
+	}
 }

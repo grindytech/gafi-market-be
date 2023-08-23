@@ -1,7 +1,10 @@
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use shared::models::nft::{Propertise, NFT};
+
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct PropertiseDTO {
@@ -90,4 +93,27 @@ pub struct QueryFindNFts {
 	pub name: Option<String>,
 	pub token_id: Option<String>,
 	pub collection_id: Option<String>,
+}
+impl DBQuery for QueryFindNFts {
+	fn to_doc(&self) -> Document {
+		let mut criteria: Vec<Document> = vec![];
+		if let Some(name) = &self.name {
+			criteria.push(doc! {
+				"name": name
+			});
+		}
+		if let Some(token_id) = &self.token_id {
+			criteria.push(doc! {
+				"token_id": token_id
+			});
+		}
+		if let Some(collection_id) = &self.collection_id {
+			criteria.push(doc! {
+				"collection_id": collection_id
+			});
+		}
+		doc! {
+			"$and":criteria
+		}
+	}
 }

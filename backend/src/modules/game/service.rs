@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use super::dto::{GameDTO, QueryFindGame};
 use crate::common::{
-	utils::{add_criteria, create_and_query, create_or_query, get_filter_option, get_total_page},
+	utils::{get_filter_option, get_total_page},
 	Page, QueryPage,
 };
 use actix_web::Result;
@@ -14,10 +12,7 @@ use shared::{
 };
 /* use futures::stream::StreamExt; */
 use log::info;
-use mongodb::{
-	bson::{doc, Bson},
-	Collection, Database,
-};
+use mongodb::{bson::doc, Collection, Database};
 //------------
 use crate::common::DBQuery;
 

@@ -68,8 +68,8 @@ pub async fn get_game(
         "desc": true,
 		 "query":{
 			"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700",
-			"game_id":"",
-			"category":"",
+			"game_id":null,
+			"category":null,
 			"is_verified":true,
 
 		 }

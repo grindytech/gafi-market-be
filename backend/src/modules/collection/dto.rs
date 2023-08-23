@@ -1,6 +1,9 @@
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
+
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -29,4 +32,28 @@ pub struct QueryFindCollections {
 	pub name: Option<String>,
 	pub collection_id: Option<String>,
 	pub game_id: Option<String>,
+}
+impl DBQuery for QueryFindCollections {
+	fn to_doc(&self) -> Document {
+		let mut criteria: Vec<Document> = vec![];
+
+		if let Some(collection_id) = &self.collection_id {
+			criteria.push(doc! {
+				"collection_id": collection_id
+			});
+		}
+		if let Some(name) = &self.name {
+			criteria.push(doc! {
+				"name": name
+			});
+		}
+		if let Some(game_id) = &self.game_id {
+			criteria.push(doc! {
+				"game_id": game_id
+			});
+		}
+		doc! {
+			"$and": criteria
+		}
+	}
 }

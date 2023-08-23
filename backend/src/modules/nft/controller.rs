@@ -117,7 +117,7 @@ pub async fn get_list_nft(
         "desc": true,
         "query":
 		{
-			"name":"","token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368",
+			"name":null,"token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368",
 			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
 		}
     })),

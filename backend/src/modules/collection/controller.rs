@@ -68,7 +68,7 @@ pub async fn get_collection(
         "desc": true,
         "query":
 		{
-			"name":"",
+			"name":null,
 			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
 		}
     })),

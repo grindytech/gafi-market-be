@@ -70,8 +70,9 @@ pub async fn get_bundles(
         "desc": true,
         "query":
 		{
-			"name":"",
-			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+			"name":null,
+			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc",
+			"bundle_id":null
 		}
     })),
     responses(

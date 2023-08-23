@@ -9,7 +9,7 @@ use mongodb::{
 use crate::{
 	common::{
 		utils::{get_filter_option, get_total_page},
-		Page, QueryPage,
+		DBQuery, Page, QueryPage,
 	},
 	shared::constant::EMPTY_STR,
 };
@@ -30,31 +30,6 @@ pub async fn find_nft_by_token(
 		Ok(None)
 	}
 }
-/* pub async fn find_nfs_by_name(
-	params: QueryPage<QueryFindNFts>,
-	db: Database,
-) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
-	let col: Collection<NFT> = db.collection(models::nft::NAME);
-	let filter = doc! {"name":params.query.name};
-
-	let mut cursor = col.find(filter, None).await?;
-	let mut list_nfts: Vec<NFTDTO> = Vec::new();
-	while let Some(nft) = cursor.try_next().await? {
-		list_nfts.push(nft.into())
-	}
-	let total = get_total_page(list_nfts.len(), params.size).await;
-	Ok(Some(Page::<NFTDTO> {
-		data: list_nfts,
-		message: EMPTY_STR.to_string(),
-		page: params.page,
-		size: params.size,
-		total,
-	}))
-} */
-
-/***
- * Get NFT by address of account
- */
 
 pub async fn find_nfts_by_address(
 	params: QueryPage<QueryFindNFts>,
@@ -100,48 +75,13 @@ pub async fn find_nfts_by_address(
 	}))
 }
 
-//TODO implement paging, order, find nfts by query, search by name
 pub async fn find_nfts_by_query(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
 ) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
 	let col: Collection<NFT> = db.collection(models::nft::NAME);
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
-
-	let query_find = {
-		let mut or_conditions = vec![];
-
-		if let Some(token) = params.query.token_id.clone() {
-			if !token.is_empty() {
-				or_conditions.push(doc! {"token_id": token});
-			}
-		}
-
-		if let Some(name) = params.query.name.clone() {
-			if !name.is_empty() {
-				or_conditions.push(doc! {"name": name});
-			}
-		}
-
-		if let Some(collection_id) = params.query.collection_id.clone() {
-			if !collection_id.is_empty() {
-				or_conditions.push(doc! {"collection_id": collection_id});
-			}
-		}
-
-		if !or_conditions.is_empty() {
-			doc! {"$or": or_conditions}
-		} else {
-			Document::new()
-		}
-	};
-	// create query optional => pass criteria
-	/* let mut criteria = HashMap::new();
-	criteria.insert("token_id".to_string(), params.query.token_id);
-	criteria.insert("name".to_string(), params.query.name);
-	criteria.insert("collection_id".to_string(), params.query.collection_id);
-
-	let query_find = create_or_query(criteria).await; */
+	let query_find = params.query.to_doc();
 	let mut cursor_nft = col.find(query_find, filter_option).await?;
 
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
