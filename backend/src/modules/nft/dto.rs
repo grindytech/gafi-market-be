@@ -44,6 +44,7 @@ pub struct NFTDTO {
 	pub favorite_count: i32,
 	pub create_at: i64,
 	pub propertise: Vec<PropertiseDTO>,
+	pub supply: Option<u32>,
 }
 impl Into<NFT> for NFTDTO {
 	fn into(self) -> NFT {
@@ -63,6 +64,7 @@ impl Into<NFT> for NFTDTO {
 			favorite_count: self.favorite_count,
 			propertise: self.propertise.iter().map(|value| value.clone().into()).collect(),
 			create_at: self.create_at,
+			supply: self.supply
 		}
 	}
 }
@@ -83,6 +85,7 @@ impl From<NFT> for NFTDTO {
 			favorite_count: value.favorite_count,
 			propertise: value.propertise.iter().map(|value| value.clone().into()).collect(),
 			create_at: value.create_at,
+			supply: value.supply
 		}
 	}
 }

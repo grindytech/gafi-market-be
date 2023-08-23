@@ -1,6 +1,8 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+use crate::BaseDocument;
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum TypeSale {
 	FixPrice(bool),
@@ -23,5 +25,9 @@ pub struct Sale {
 	pub update_at: i64,
 	pub create_at: i64,
 }
-//Sale and Offer
-pub const NAME: &str = "sale";
+impl BaseDocument for Sale {
+	fn name() -> String {
+		"sale".to_string()
+	}
+}
+

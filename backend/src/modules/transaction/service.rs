@@ -1,6 +1,6 @@
 use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
-use shared::{constant::EMPTY_STR, models, transaction::Transaction};
+use shared::{constant::EMPTY_STR, models, transaction::Transaction, BaseDocument};
 
 use crate::common::{
 	utils::{get_filter_option, get_total_page},
@@ -13,7 +13,7 @@ pub async fn find_tx_by_hash(
 	tx_hash: &String,
 	db: Database,
 ) -> Result<Option<TransactionDTO>, mongodb::error::Error> {
-	let col: Collection<Transaction> = db.collection(models::nft::NAME);
+	let col: Collection<Transaction> = db.collection(models::nft::NFT::name().as_str());
 	let filter = doc! {"tx_hash": tx_hash};
 	if let Ok(Some(tx_detail)) = col.find_one(filter, None).await {
 		Ok(Some(tx_detail.into()))
@@ -25,7 +25,7 @@ pub async fn find_tx_by_query(
 	params: QueryPage<QueryFindHistory>,
 	db: Database,
 ) -> Result<Option<Page<TransactionDTO>>, mongodb::error::Error> {
-	let col: Collection<Transaction> = db.collection(models::transaction::NAME);
+	let col: Collection<Transaction> = db.collection(models::transaction::Transaction::name().as_str());
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;

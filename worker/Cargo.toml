@@ -1,8 +1,24 @@
 [package]
+edition = {workspace = true}
 name = "worker"
 version = "0.1.0"
-edition = {workspace = true}
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+chrono.workspace = true
+# async-trait = {workspace = true}
+dotenv = {workspace = true}
+env_logger = {workspace = true}
+futures = "0.3.28"
+hex = "0.4.3"
+log = {workspace = true}
+mongodb = {workspace = true}
+serde = {workspace = true}
+serde_json.workspace = true
+shared = {path = "../shared"}
+subxt = {version = "0.31.0", features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat", "unstable-light-client"]}
+subxt-codegen = "0.31.0"
+subxt-metadata = "0.31.0"
+tokio = {version = "1.32.0", features = ["full"]}
+# actix-rt = {workspace = true}
+# actix-web = {workspace = true}

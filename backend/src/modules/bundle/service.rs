@@ -6,7 +6,7 @@ use mongodb::{
 	bson::{doc, oid::ObjectId, Bson},
 	error, Collection, Database,
 };
-use shared::{bundle::Bundle, constant::EMPTY_STR, models};
+use shared::{bundle::Bundle, constant::EMPTY_STR, models, BaseDocument};
 
 use crate::common::{
 	utils::{get_filter_option, get_total_page},
@@ -20,7 +20,7 @@ pub async fn find_bundle_by_id(
 	bundle_id: &String,
 	db: Database,
 ) -> Result<Option<BundleDTO>, error::Error> {
-	let col: Collection<Bundle> = db.collection(models::bundle::NAME);
+	let col: Collection<Bundle> = db.collection(models::bundle::Bundle::name().as_str());
 
 	let filter = doc! {"bundle_id":bundle_id};
 
@@ -36,7 +36,7 @@ pub async fn find_bundles_by_query(
 	params: QueryPage<QueryFindBundles>,
 	db: Database,
 ) -> Result<Option<Page<BundleDTO>>, mongodb::error::Error> {
-	let col: Collection<Bundle> = db.collection(models::bundle::NAME);
+	let col: Collection<Bundle> = db.collection(models::bundle::Bundle::name().as_str());
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;

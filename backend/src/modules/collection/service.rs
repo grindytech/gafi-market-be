@@ -7,6 +7,7 @@ use mongodb::{
 	Collection, Database,
 };
 use serde_json::Value;
+use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
 
 use crate::common::{
 	utils::{get_filter_option, get_total_page},
@@ -14,14 +15,14 @@ use crate::common::{
 };
 
 use super::dto::{NFTCollectionDTO, QueryFindCollections};
-use shared::{constant::EMPTY_STR, models, models::nft_collection::NFTCollection};
+use shared::constant::EMPTY_STR;
 
 //Find Collection Detail By ID
 pub async fn find_collection_by_id(
 	collection_id: &String,
 	db: Database,
 ) -> Result<Option<NFTCollectionDTO>, mongodb::error::Error> {
-	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NAME);
+	let col: Collection<NFTCollection> = db.collection(models::NFTCollection::name().as_str());
 	let filter = doc! {"collection_id":collection_id};
 	if let Ok(Some(collection_detail)) = col.find_one(filter, None).await {
 		Ok(Some(collection_detail.into()))
@@ -33,7 +34,7 @@ pub async fn find_collections_by_query(
 	params: QueryPage<QueryFindCollections>,
 	db: Database,
 ) -> Result<Option<Page<NFTCollectionDTO>>, mongodb::error::Error> {
-	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NAME);
+	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NFTCollection::name().as_str());
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;

@@ -1,6 +1,8 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+use crate::BaseDocument;
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Propertise {
 	pub key: String,
@@ -25,5 +27,10 @@ pub struct NFT {
 	pub favorite_count: i32,
 	pub propertise: Vec<Propertise>,
 	pub create_at: i64,
+	pub supply: Option<u32>
 }
-pub const NAME: &str = "nft";
+impl BaseDocument for NFT {
+	fn name() -> String {
+		"nft".to_string()
+	}
+}

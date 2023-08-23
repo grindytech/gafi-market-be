@@ -1,6 +1,8 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+use crate::BaseDocument;
+
 use super::account::SocialInfo;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Game {
@@ -8,16 +10,21 @@ pub struct Game {
 	pub id: Option<ObjectId>,
 	pub game_id: String,
 	pub owner: String, // Reffence to account address
-	pub is_verified: bool,
-	pub social: SocialInfo,
-	pub category: String,
-	pub name: String,
-	pub slug: String,
-	pub description: String,
+	pub is_verified: Option<bool>,
+	pub social: Option<SocialInfo>,
+	pub category: Option<String>,
+	pub name: Option<String>,
+	pub slug: Option<String>,
+	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub update_at: i64,
 	pub create_at: i64,
 }
 
-pub const NAME: &str = "game";
+impl BaseDocument for Game {
+	fn name() -> String {
+		"game".to_string()
+	}
+}
+

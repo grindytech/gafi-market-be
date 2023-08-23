@@ -9,6 +9,7 @@ use futures_util::TryStreamExt;
 use shared::{
 	constant::EMPTY_STR,
 	models::{self, game::Game},
+	BaseDocument,
 };
 /* use futures::stream::StreamExt; */
 use log::info;
@@ -21,7 +22,7 @@ pub async fn find_game_by_id(
 	game_id: &String,
 	db: Database,
 ) -> Result<Option<GameDTO>, mongodb::error::Error> {
-	let col: Collection<Game> = db.collection(models::game::NAME);
+	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 	let filter = doc! {"game_id":game_id};
 
 	if let Ok(Some(game_detail)) = col.find_one(filter, None).await {
@@ -36,7 +37,7 @@ pub async fn find_games_by_query(
 	params: QueryPage<QueryFindGame>,
 	db: Database,
 ) -> Result<Option<Page<GameDTO>>, mongodb::error::Error> {
-	let col: Collection<Game> = db.collection(models::game::NAME);
+	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 
 	let query_find = params.query.to_doc();
 
