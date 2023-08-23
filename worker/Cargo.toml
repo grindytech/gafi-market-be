@@ -5,6 +5,7 @@ version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+chrono.workspace = true
 # async-trait = {workspace = true}
 dotenv = {workspace = true}
 env_logger = {workspace = true}
@@ -13,6 +14,7 @@ hex = "0.4.3"
 log = {workspace = true}
 mongodb = {workspace = true}
 serde = {workspace = true}
+serde_json.workspace = true
 shared = {path = "../shared"}
 subxt = {version = "0.31.0", features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat", "unstable-light-client"]}
 subxt-codegen = "0.31.0"

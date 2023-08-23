@@ -24,7 +24,7 @@ impl Task {
 		Func: Fn(HandleParams) -> BoxFuture<Result<()>> + Send + Sync + 'static,
 	{
 		Self {
-			key: key.to_lowercase(),
+			key: key.to_string(),
 			runner: Box::new(func),
 		}
 	}

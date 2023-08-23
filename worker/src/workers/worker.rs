@@ -7,7 +7,7 @@ use subxt::{OnlineClient, PolkadotConfig};
 use tokio::time::Duration;
 
 pub struct WorkerState {
-	tasks: Vec<Box<Task>>,
+	tasks: Vec<Task>,
 	current_block: u32,
 	latest_block: u32,
 	db: Database,
@@ -62,16 +62,18 @@ impl WorkerState {
 		Ok(state)
 	}
 
-	pub fn register(&mut self, task: Task) {
-		self.tasks.push(Box::new(task));
+	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+		self.tasks.append(tasks);
 	}
 }
 
 pub struct Worker {
 	state: WorkerState,
+	pub name: String,
 }
 impl Worker {
 	pub async fn new(
+		name: String,
 		db: Database,
 		finalize_delay: Option<u32>,
 		start_block: Option<u32>,
@@ -79,15 +81,20 @@ impl Worker {
 		max_batch: Option<u32>,
 	) -> Result<Self> {
 		let state = WorkerState::new(db, finalize_delay, start_block, rpc, max_batch).await?;
-		Ok(Self { state })
+		Ok(Self { name, state })
 	}
 
-	pub fn register(&mut self, task: Task) {
-		self.state.register(task)
+	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+		self.state.add_tasks(tasks);
 	}
 
-	async fn save_processed_status(db: &Database, block: block::Block) -> Result<InsertOneResult> {
-		let collection: Collection<block::Block> = db.collection(block::Block::name().as_str());
+	async fn save_processed_status(
+		db: &Database,
+		block: block::Block,
+		name: String,
+	) -> Result<InsertOneResult> {
+		let collection: Collection<block::Block> =
+			db.collection(format!("{}_{}", name, block::Block::name()).as_str());
 		Ok(collection.insert_one(block, None).await?)
 	}
 
@@ -102,7 +109,7 @@ impl Worker {
 	async fn process_block(
 		api: &RpcClient,
 		db: &Database,
-		tasks: &Vec<Box<Task>>,
+		tasks: &Vec<Task>,
 		block_number: u32,
 	) -> Result<Block> {
 		let block_hash = api
@@ -115,11 +122,11 @@ impl Worker {
 		let events = api.events().at(block_hash).await?;
 		for ev in events.iter() {
 			let ev = ev?;
-			if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
-				log::debug!("{ev:?}");
-			} else {
-				log::warn!("<Cannot decode event>");
-			}
+			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
+			// 	log::debug!("{ev:?}");
+			// } else {
+			// 	log::warn!("<Cannot decode event>");
+			// }
 			for task in tasks {
 				if task.key == format!("{}:{}", ev.pallet_name(), ev.variant_name()) {
 					task.run(HandleParams {
@@ -159,11 +166,16 @@ impl Worker {
 		};
 
 		for block_number in state.current_block..end_block {
-			log::info!("Begin process block {}", state.current_block);
+			log::info!("[{}] Begin process block {}", self.name, state.current_block);
 			let block =
 				Self::process_block(&state.api, &state.db, &state.tasks, block_number).await?;
-			log::info!("Process block {} successfully {}", block.height, block.hash);
-			Self::save_processed_status(&state.db, block.clone()).await?;
+			log::info!(
+				"[{}] Process block {} successfully {}",
+				self.name,
+				block.height,
+				block.hash
+			);
+			Self::save_processed_status(&state.db, block.clone(), self.name.clone()).await?;
 			state.current_block += 1;
 
 			if !state.enabled {
@@ -191,7 +203,7 @@ impl Worker {
 						break
 					},
 				Err(err) => {
-					log::error!("Err: {}", err);
+					log::error!("[{}] Err: {}", self.name, err);
 				},
 			}
 			if delay_loop > 0 {
@@ -200,29 +212,4 @@ impl Worker {
 		}
 		Ok(())
 	}
-}
-
-async fn on_new_seed(params: HandleParams<'_>) -> Result<()> {
-	let new_seed = params.ev.as_event::<gafi::game_randomness::events::NewSeed>()?;
-	if let Some(e) = new_seed {
-		log::info!(" seed block: {:?}", e.block_number);
-		log::info!(" seed seed: {:?}", e.seed);
-	};
-	Ok(())
-}
-
-#[tokio::test]
-async fn test() -> Result<()> {
-	env_logger::init_from_env("info");
-	let db = shared::tests::utils::get_database().await;
-	let mut worker = Worker::new(db, None, Some(127200), None, None).await?;
-
-	let task = Task::new("GameRandomness:NewSeed", move |params| {
-		Box::pin(on_new_seed(params))
-	});
-	worker.register(task);
-
-	let _ = worker.start(1000).await;
-
-	Ok(())
 }

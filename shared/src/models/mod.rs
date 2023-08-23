@@ -20,3 +20,5 @@ pub mod pool;
 pub use pool::*;
 pub mod sale;
 pub use sale::*;
+pub mod loot_table;
+pub use loot_table::*;

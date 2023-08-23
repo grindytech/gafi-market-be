@@ -1,5 +1,6 @@
 use dotenv::dotenv;
 use env_logger::Env;
+use mongodb::Database;
 use shared::{db, types::Result, Config};
 use workers::Worker;
 
@@ -9,27 +10,65 @@ pub mod gafi {}
 
 mod tasks;
 mod workers;
+mod services;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-	dotenv().ok();
-
+async fn get_db() -> Database {
 	let configuration = Config::init();
 	let database = db::get_database(
 		configuration.mongodb_uri.clone(),
 		configuration.mongodb_db_name.clone(),
 	)
 	.await;
+	database
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+	dotenv().ok();
+	env_logger::init_from_env(Env::default().default_filter_or("debug"));
+	let database = get_db().await;
 	db::init_db(database.clone()).await;
-	env_logger::init_from_env(Env::default().default_filter_or("info"));
 
-	let mut worker = Worker::new(database, None, Some(127200), None, None).await?;
-	let tasks = tasks::create_tasks();
-	for task in tasks {
-		worker.register(task);
-	}
+	//worker process nft event
+	let run_worker_1 = async {
+		let database = get_db().await;
+		let mut nft_worker = Worker::new(
+			"nft".to_lowercase(),
+			database.clone(),
+			None,
+			Some(132000),
+			None,
+			None,
+		)
+		.await
+		.unwrap();
+		nft_worker.add_tasks(&mut tasks::nft::tasks());
+		let _ = nft_worker.start(1000).await;
+	};
 
-	worker.start(1000).await?;
+	//all other jobs
+	let run_worker_2 = async {
+		let database = get_db().await;
+		let mut other_worker = Worker::new(
+			"other".to_lowercase(),
+			database.clone(),
+			None,
+			Some(132000),
+			None,
+			None,
+		)
+		.await.unwrap();
+		let mut other_tasks = vec![];
+		other_tasks.append(&mut tasks::collection::tasks());
+		other_tasks.append(&mut tasks::pool::tasks());
+		other_tasks.append(&mut tasks::game::tasks());
+		other_worker.add_tasks(&mut other_tasks);
+		let _ = other_worker.start(1000).await;
+	};
+
+	let t1 = tokio::spawn(run_worker_1);
+	let t2: tokio::task::JoinHandle<_> = tokio::spawn(run_worker_2);
+	let (_, _) = (t1.await, t2.await);
 
 	Ok(())
 }

@@ -3882,6 +3882,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "dotenv",
+ "log",
  "mongodb",
  "serde",
  "utoipa",
@@ -5720,6 +5721,7 @@ dependencies = [
 name = "worker"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "dotenv",
  "env_logger",
  "futures",
@@ -5727,6 +5729,7 @@ dependencies = [
  "log",
  "mongodb",
  "serde",
+ "serde_json",
  "shared",
  "subxt",
  "subxt-codegen",

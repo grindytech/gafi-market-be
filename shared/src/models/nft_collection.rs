@@ -18,6 +18,8 @@ pub struct NFTCollection {
 	pub update_at: i64,
 	pub create_at: i64,
 	pub raw: String,
+	pub owner: String,
+	pub external_url: Option<String>
 }
 
 impl BaseDocument for NFTCollection {

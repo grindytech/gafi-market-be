@@ -11,3 +11,4 @@ mongodb = {workspace = true}
 serde = {workspace = true}
 utoipa = {workspace = true}
 async-trait = {workspace = true}
+log = {workspace = true}
