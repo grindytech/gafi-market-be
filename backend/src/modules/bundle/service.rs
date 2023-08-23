@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use actix_web::http;
 use futures_util::TryStreamExt;
 use mongodb::{
 	bson::{doc, oid::ObjectId, Bson},

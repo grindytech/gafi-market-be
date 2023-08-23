@@ -16,6 +16,12 @@ pub enum Status {
 	Expired,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct Items {
+	pub token_id: String,
+	pub game_id: String,
+	pub quantity: i32,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Bundle {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -23,7 +29,7 @@ pub struct Bundle {
 	pub creator: String,
 	pub name: String,
 	pub description: String,
-	pub items: Vec<nft::NFT>,
+	pub items: Vec<Items>,
 	pub market_type: String,
 	pub status: String,
 	pub price: i32,

@@ -1,13 +1,13 @@
 use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
-use shared::{constant::EMPTY_STR, models, transaction::Transaction, BaseDocument};
+use shared::{constant::EMPTY_STR, history_tx::HistoryTx, models};
 
 use crate::common::{
 	utils::{get_filter_option, get_total_page},
 	DBQuery, Page, QueryPage,
 };
 
-use super::dto::{QueryFindHistory, TransactionDTO};
+use super::dto::{HistoryTxDTO, QueryFindTX};
 
 pub async fn find_tx_by_hash(
 	tx_hash: &String,
@@ -22,21 +22,21 @@ pub async fn find_tx_by_hash(
 	}
 }
 pub async fn find_tx_by_query(
-	params: QueryPage<QueryFindHistory>,
+	params: QueryPage<QueryFindTX>,
 	db: Database,
-) -> Result<Option<Page<TransactionDTO>>, mongodb::error::Error> {
-	let col: Collection<Transaction> = db.collection(models::transaction::Transaction::name().as_str());
+) -> Result<Option<Page<HistoryTxDTO>>, mongodb::error::Error> {
+	let col: Collection<HistoryTx> = db.collection(models::history_tx::NAME);
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;
 
-	let mut list_transactions: Vec<TransactionDTO> = Vec::new();
+	let mut list_transactions: Vec<HistoryTxDTO> = Vec::new();
 	while let Some(tx) = cursor.try_next().await? {
 		list_transactions.push(tx.into())
 	}
 	let total = get_total_page(list_transactions.len(), params.size).await;
-	Ok(Some(Page::<TransactionDTO> {
+	Ok(Some(Page::<HistoryTxDTO> {
 		data: list_transactions,
 		message: EMPTY_STR.to_string(),
 		page: params.page,

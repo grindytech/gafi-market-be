@@ -1,7 +1,10 @@
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use shared::models::account::{Account, SocialInfo};
+
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 
@@ -68,6 +71,24 @@ impl From<SocialInfo> for SocialInfoDto {
 	}
 }
 pub struct QueryFindAccount {
-	pub address: String,
-	pub name: String,
+	pub address: Option<String>,
+	pub name: Option<String>,
+}
+impl DBQuery for QueryFindAccount {
+	fn to_doc(&self) -> Document {
+		let mut criteria: Vec<Document> = vec![];
+		if let Some(address) = &self.address {
+			criteria.push(doc! {
+				"address":address
+			});
+		}
+		if let Some(name) = &self.name {
+			criteria.push(doc! {
+				"name":name
+			});
+		};
+		doc! {
+			"$and":criteria
+		}
+	}
 }

@@ -90,14 +90,14 @@ pub async fn get_list_nft(
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))
 		},
 		Ok(None) => {
-			let rsp: ResponseBody<Option<_>> =
-				ResponseBody::<Option<()>>::new("Not found", None, false);
+			let rsp =
+				ResponseBody::<Option<NFTDTO>>::new("Not found", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
 				.content_type("application/json")
 				.json(rsp))
 		},
 		Err(e) => {
-			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
@@ -138,14 +138,14 @@ pub async fn search_list_nfts(
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))
 		},
 		Ok(None) => {
-			let rsp: ResponseBody<Option<_>> =
-				ResponseBody::<Option<()>>::new("Not found", None, false);
+			let rsp =
+				ResponseBody::<Option<NFTDTO>>::new("Not found", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
 				.content_type("application/json")
 				.json(rsp))
 		},
 		Err(e) => {
-			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}

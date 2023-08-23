@@ -1,15 +1,41 @@
 use crate::{common::DBQuery, modules::nft::dto::NFTDTO};
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::bundle::Bundle;
+use shared::bundle::{Bundle, Items};
 use utoipa::ToSchema;
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+pub struct ItemsDTO {
+	pub token_id: String,
+	pub game_id: String,
+	pub quantity: i32,
+}
+impl Into<Items> for ItemsDTO {
+	fn into(self) -> Items {
+		Items {
+			token_id: self.token_id,
+			game_id: self.game_id,
+			quantity: self.quantity,
+		}
+	}
+}
+impl From<Items> for ItemsDTO {
+	fn from(value: Items) -> Self {
+		ItemsDTO {
+			token_id: value.token_id,
+			game_id: value.game_id,
+			quantity: value.quantity,
+		}
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct BundleDTO {
 	pub bundle_id: String,
 	pub creator: String,
 	pub name: String,
 	pub description: String,
-	pub items: Vec<NFTDTO>,
+	pub items: Vec<ItemsDTO>,
 	pub market_type: String,
 	pub status: String,
 	pub price: i32,
@@ -18,6 +44,7 @@ pub struct BundleDTO {
 	pub update_at: i64,
 	pub create_at: i64,
 }
+
 impl Into<Bundle> for BundleDTO {
 	fn into(self) -> Bundle {
 		Bundle {

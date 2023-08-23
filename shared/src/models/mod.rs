@@ -8,6 +8,8 @@ pub mod bundle;
 pub use bundle::*;
 pub mod game;
 pub use game::*;
+pub mod history_tx;
+pub use history_tx::*;
 pub mod nft;
 pub use nft::*;
 pub mod nft_collection;
@@ -20,6 +22,4 @@ pub mod sale;
 pub use sale::*;
 pub mod loot_table;
 pub use loot_table::*;
-pub mod transaction;
-pub use transaction::*;
 
