@@ -1,11 +1,5 @@
-use std::collections::HashMap;
-
-use actix_web::http;
 use futures_util::TryStreamExt;
-use mongodb::{
-	bson::{doc, oid::ObjectId, Bson},
-	error, Collection, Database,
-};
+use mongodb::{bson::doc, error, Collection, Database};
 use shared::{bundle::Bundle, constant::EMPTY_STR, models};
 
 use crate::common::{

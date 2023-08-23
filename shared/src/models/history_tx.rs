@@ -1,4 +1,4 @@
-use mongodb::bson::{self, doc, oid::ObjectId};
+use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum TypeEventTx {
@@ -9,7 +9,7 @@ pub enum TypeEventTx {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Transaction {
+pub struct HistoryTx {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub tx_hash: String,
@@ -24,4 +24,4 @@ pub struct Transaction {
 	pub token_id: String,
 	pub raw: String,
 }
-pub const NAME: &str = "transaction";
+pub const NAME: &str = "history_tx";
