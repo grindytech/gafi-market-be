@@ -1,5 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
+
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct NFTCollection {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -16,6 +18,13 @@ pub struct NFTCollection {
 	pub update_at: i64,
 	pub create_at: i64,
 	pub raw: String,
+	pub owner: String,
+	pub external_url: Option<String>
 }
 
-pub const NAME: &str = "collection";
+impl BaseDocument for NFTCollection {
+	fn name() -> String {
+		"nft_collection".to_string()
+	}
+}
+

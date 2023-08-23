@@ -1,6 +1,8 @@
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct SocialInfo {
 	pub twitter: Option<String>,
@@ -27,5 +29,8 @@ pub struct Account {
 	pub update_at: i64,
 	pub create_at: i64,
 }
-
-pub const NAME: &str = "account";
+impl BaseDocument for Account {
+	fn name() -> String {
+		"account".to_string()
+	}
+}
