@@ -1,4 +1,7 @@
-use crate::modules::account::dto::SocialInfoDto;
+use std::collections::HashMap;
+
+use crate::{common::DBQuery, modules::account::dto::SocialInfoDto};
+use mongodb::bson::{doc, Bson, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::game::Game;
 use utoipa::ToSchema;
@@ -40,4 +43,33 @@ pub struct QueryFindGame {
 	pub owner: Option<String>,
 	pub category: Option<String>,
 	pub is_verified: Option<bool>,
+}
+
+impl DBQuery for QueryFindGame {
+	fn to_doc(&self) -> Document {
+		let mut criteria: Vec<Document> = vec![];
+		if let Some(game_id) = &self.game_id {
+			criteria.push(doc! {
+				"game_id": game_id
+			});
+		}
+		if let Some(owner) = &self.owner {
+			criteria.push(doc! {
+				"owner": owner
+			});
+		}
+		if let Some(category) = &self.category {
+			criteria.push(doc! {
+				"category": category
+			});
+		}
+		if let Some(is_verified) = &self.is_verified {
+			criteria.push(doc! {
+				"is_verified": is_verified
+			});
+		}
+		doc! {
+			"$and": criteria
+		}
+	}
 }

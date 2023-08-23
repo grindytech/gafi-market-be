@@ -19,6 +19,7 @@ use mongodb::{
 	Collection, Database,
 };
 //------------
+use crate::common::DBQuery;
 
 // Find Game Detail By Game ID
 pub async fn find_game_by_id(
@@ -42,24 +43,7 @@ pub async fn find_games_by_query(
 ) -> Result<Option<Page<GameDTO>>, mongodb::error::Error> {
 	let col: Collection<Game> = db.collection(models::game::NAME);
 
-	let mut criteria: HashMap<String, Option<Bson>> = HashMap::new();
-	add_criteria(&mut criteria, "game_id", params.query.game_id, |v| {
-		Bson::String(v.clone())
-	});
-	add_criteria(
-		&mut criteria,
-		"is_verified",
-		params.query.is_verified,
-		Bson::Boolean,
-	);
-	add_criteria(&mut criteria, "owner", params.query.owner, |v| {
-		Bson::String(v.clone())
-	});
-	add_criteria(&mut criteria, "category", params.query.category, |v| {
-		Bson::String(v.clone())
-	});
-
-	let query_find = create_or_query(criteria).await;
+	let query_find = params.query.to_doc();
 
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;
