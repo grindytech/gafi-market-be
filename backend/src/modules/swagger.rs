@@ -15,6 +15,7 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, co
 #[openapi(
     paths(
         crate::modules::account::controller::get_account,
+        crate::modules::account::controller::update_favorite,
         crate::modules::game::controller::get_games_by_address,
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
