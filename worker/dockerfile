@@ -1,0 +1,15 @@
+FROM rust:buster as builder
+
+WORKDIR /app
+ADD . /app
+RUN cargo build -r -p worker
+
+FROM debian:buster-slim
+RUN useradd -ms /bin/bash gafi
+USER gafi
+
+COPY --from=builder /app/target/release/worker /
+
+ENV RUST_BACKTRACE=1
+
+ENTRYPOINT ["/bin/bash", "-c", "/worker \"$@\"", "--"]

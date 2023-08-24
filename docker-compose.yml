@@ -1,0 +1,17 @@
+version: '2.1'
+
+services:
+  worker:
+    platform: linux/x86_64
+    image: dttr278/dev:gafi-market-worker-latest
+    env_file:
+      - .env
+    restart: always
+  backend:
+    platform: linux/x86_64
+    image: dttr278/dev:gafi-market-backend-latest
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    restart: always
