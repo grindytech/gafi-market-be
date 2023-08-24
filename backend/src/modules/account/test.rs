@@ -27,6 +27,7 @@ async fn test() {
 				twitter: None,
 				web: None,
 			},
+			favorites: None,
 		},
 		db.clone(),
 	)

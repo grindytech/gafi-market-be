@@ -1,12 +1,15 @@
-use crate::common::ErrorResponse;
+use crate::common::{ErrorResponse, QueryPage};
 use actix_web::{http, Result};
-use mongodb::{bson::doc, results::DeleteResult, Collection, Database};
+use mongodb::{
+	bson::doc, error::Error, options::FindOneAndUpdateOptions, results::DeleteResult, Collection,
+	Database,
+};
 use shared::{
 	models::{self, account::Account},
 	BaseDocument,
 };
 
-use super::dto::AccountDTO;
+use super::dto::{AccountDTO, QueryFindAccount};
 
 pub async fn find_account_by_adress(
 	address: &String,
@@ -44,6 +47,7 @@ pub async fn create_account(account: AccountDTO, db: Database) -> Result<String,
 		social: account.social.into(),
 		update_at: account.update_at,
 		create_at: account.create_at,
+		favorites: None,
 	};
 	let rs = col.insert_one(entity.clone(), None).await;
 	match rs {
@@ -61,4 +65,27 @@ pub async fn delete_account_by_address(
 	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
 	let filter = doc! {"address": address};
 	collection.delete_one(filter, None).await
+}
+
+pub async fn update_favorites_account(
+	params: QueryPage<QueryFindAccount>,
+	db: Database,
+) -> Result<Option<AccountDTO>, Error> {
+	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
+	let filter = doc! {"address":params.query.address};
+	/* 	let update = doc! {
+		"$set":{"favorites":bson::to_bson(&params.query.favorites).unwrap_or(Bson::Null)}
+	}; */
+	let update = doc! {
+		"$set":{"favorites":&params.query.favorites}
+	};
+	let options = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+	if let Ok(Some(result)) = collection.find_one_and_update(filter, update, options).await {
+		/* log::info!("Data {:?}", result.favorites); */
+		Ok(Some(result.into()))
+	} else {
+		Ok(None)
+	}
 }
