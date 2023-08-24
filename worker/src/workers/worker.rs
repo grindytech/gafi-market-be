@@ -210,7 +210,17 @@ impl Worker {
 						break
 					},
 				Err(err) => {
-					log::error!("[{}] Err: {}", self.name, err);
+					let new_client =
+						OnlineClient::<PolkadotConfig>::from_url(&self.state.rpc).await;
+					match new_client {
+						Ok(client) => {
+							self.state.api = client;
+						},
+						Err(err) => {
+							log::error!("[{}] Err: {:?}", self.name, err);
+						},
+					}
+					log::error!("[{}] Err: {:?}", self.name, err);
 				},
 			}
 			if delay_loop > 0 {
