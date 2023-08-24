@@ -6,6 +6,10 @@ use shared::{block, types::Result, BaseDocument, Block};
 use subxt::{events::Phase, OnlineClient, PolkadotConfig};
 use tokio::time::Duration;
 
+fn get_db_track_name(name: &str) -> String {
+	format!("{}_{}", name, block::Block::name())
+}
+
 pub struct WorkerState {
 	tasks: Vec<Task>,
 	current_block: u32,
@@ -24,15 +28,16 @@ impl WorkerState {
 		start_block: u32,
 		rpc: String,
 		max_batch: Option<u32>,
+		name: &str,
 	) -> Result<Self> {
 		let max_batch = max_batch.unwrap_or(1000);
 		let api = OnlineClient::<PolkadotConfig>::from_url(&rpc).await?;
 
 		let sort = doc! {"height": -1};
 		let option = FindOneOptions::builder().sort(sort).build();
-		let collection: Collection<block::Block> = db.collection(block::Block::name().as_str());
+		let collection: Collection<block::Block> = db.collection(get_db_track_name(name).as_str());
 		let last_block = collection.find_one(None, option).await?;
-
+		log::info!("db block {:?}", last_block);
 		let onchain_last_block = api.blocks().at_latest().await?;
 		let block_number = onchain_last_block.number();
 
@@ -72,7 +77,7 @@ impl Worker {
 		rpc: String,
 		max_batch: Option<u32>,
 	) -> Result<Self> {
-		let state = WorkerState::new(db, start_block, rpc, max_batch).await?;
+		let state = WorkerState::new(db, start_block, rpc, max_batch, &name).await?;
 		Ok(Self { name, state })
 	}
 
@@ -85,8 +90,7 @@ impl Worker {
 		block: block::Block,
 		name: String,
 	) -> Result<InsertOneResult> {
-		let collection: Collection<block::Block> =
-			db.collection(format!("{}_{}", name, block::Block::name()).as_str());
+		let collection: Collection<block::Block> = db.collection(&get_db_track_name(&name));
 		Ok(collection.insert_one(block, None).await?)
 	}
 
