@@ -1,6 +1,6 @@
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::history_tx::HistoryTx;
+use shared::history_tx::{self, HistoryTx};
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
@@ -15,14 +15,12 @@ pub struct HistoryTxDTO {
 
 	pub status: Option<String>,
 	pub value: u128,
-	pub amount: u32,
 
 	pub event: String,
 	pub from: String,
 	pub to: String,
-	pub collection_id: String,
-	pub token_id: String,
 	pub pool: Option<String>,
+	pub nfts: Vec<history_tx::Nft>,
 }
 impl From<HistoryTx> for HistoryTxDTO {
 	fn from(value: HistoryTx) -> Self {
@@ -33,13 +31,11 @@ impl From<HistoryTx> for HistoryTxDTO {
 			event: value.event,
 			from: value.from,
 			to: value.to,
-			collection_id: value.collection_id,
-			token_id: value.token_id,
-			amount: value.amount,
 			block_height: value.block_height,
 			event_index: value.event_index,
 			extrinsic_index: value.extrinsic_index,
 			pool: value.pool,
+			nfts: value.nfts
 		}
 	}
 }

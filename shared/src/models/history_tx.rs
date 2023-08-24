@@ -37,13 +37,11 @@ pub struct HistoryTx {
 	pub block_height: u32,
 
 	pub status: Option<String>,
-
 	pub value: u128,
 
 	pub event: String,
 	pub from: String,
 	pub to: String,
-
 	pub pool: Option<String>,
 	pub nfts: Vec<Nft>,
 }
