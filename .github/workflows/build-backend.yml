@@ -36,6 +36,8 @@ jobs:
 
        # Rust cache
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "build-backend"
 
       - name: Build
         run: |

@@ -38,6 +38,8 @@ jobs:
 
       # Rust cache
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "build-worker"
 
       - name: Build
         run: |
