@@ -23,8 +23,8 @@ async fn on_collection_created(params: HandleParams<'_>) -> Result<()> {
 				"$set": {
 			  "collection_id": collection.collection.to_string(),
 			  "owner": hex::encode(collection.who.0),
-		"created_at": DateTime::now(),
-			"updated_at": DateTime::now()
+				"created_at": DateTime::now(),
+				"updated_at": DateTime::now(),
 			}
 		};
 		collection_db.update_one(query, new_collection, option).await?;

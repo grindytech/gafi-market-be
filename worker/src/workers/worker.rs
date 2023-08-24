@@ -129,7 +129,7 @@ impl Worker {
 				Phase::Finalization => {},
 				Phase::Initialization => {},
 			}
-			log::debug!("phase {:?}", ev.phase());
+			// log::debug!("phase {:?}", ev.phase());
 			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
 			// 	log::debug!("{ev:?}");
 			// } else {
@@ -145,7 +145,7 @@ impl Worker {
 							height: block_number,
 							hash: block_hash_str.clone(),
 						},
-						extrinsic_index
+						extrinsic_index,
 					})
 					.await?; //TODO process in multi threads
 				}
@@ -168,13 +168,15 @@ impl Worker {
 		let mut state = &mut self.state;
 		state.running = true;
 
-		let end_block = if (state.latest_block - state.current_block) > state.max_batch {
+		let end_block = if (i64::from(state.latest_block) - i64::from(state.current_block)) >
+			i64::from(state.max_batch)
+		{
 			state.current_block + state.max_batch
 		} else {
 			state.latest_block
 		};
 
-		for block_number in state.current_block..end_block {
+		for block_number in state.current_block..end_block + 1 {
 			log::info!(
 				"[{}] Begin process block {}",
 				self.name,

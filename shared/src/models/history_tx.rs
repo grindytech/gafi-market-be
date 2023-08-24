@@ -11,6 +11,22 @@ pub enum TypeEventTx {
 use crate::BaseDocument;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct Nft {
+	pub collection_id: String,
+	pub token_id: String,
+	pub amount: u32,
+}
+impl Into<Document> for Nft {
+	fn into(self) -> Document {
+		doc! {
+			"collection_id": self.collection_id,
+			"token_id": self.token_id,
+			"amount": self.amount
+		}
+	}
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct HistoryTx {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -21,21 +37,26 @@ pub struct HistoryTx {
 	pub block_height: u32,
 
 	pub status: Option<String>,
-	// pub error_message: String,
+
 	pub value: u128,
-	pub amount: u32,
 
 	pub event: String,
 	pub from: String,
 	pub to: String,
-	pub collection_id: String,
-	// pub game_id: String,
-	pub token_id: String,
-	// pub raw: String,
+
 	pub pool: Option<String>,
+	pub nfts: Vec<Nft>,
 }
 impl Into<Document> for HistoryTx {
 	fn into(self) -> Document {
+		let nfts = self
+			.nfts
+			.into_iter()
+			.map(|nft| {
+				let doc: Document = nft.into();
+				doc
+			})
+			.collect::<Vec<Document>>();
 		doc! {
 			"tx_hash": self.tx_hash,
 
@@ -48,8 +69,8 @@ impl Into<Document> for HistoryTx {
 			"event": self.event,
 			"from": self.from,
 			"to": self.to,
-			"collection_id": self.collection_id,
-			"token_id": self.token_id
+			"pool": self.pool,
+			"nfts": Bson::from(nfts)
 		}
 	}
 }

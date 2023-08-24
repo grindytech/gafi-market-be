@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 			"nft".to_lowercase(),
 			database.clone(),
 			None,
-			Some(132000),
+			Some(136000),
 			None,
 			None,
 		)
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
 			"other".to_lowercase(),
 			database.clone(),
 			None,
-			Some(132000),
+			Some(136000),
 			None,
 			None,
 		)

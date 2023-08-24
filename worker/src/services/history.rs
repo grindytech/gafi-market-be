@@ -13,7 +13,8 @@ pub async fn upsert(history: HistoryTx, db: &Database) -> Result<()> {
 	  "event_index": history.event_index,
 	  "block_height": history.block_height,
 	};
-	let upsert: Document = history.into();
+	let history_doc: Document = history.into();
+	let upsert = doc! { "$set": history_doc };
 	let options = UpdateOptions::builder().upsert(true).build();
 	history_db.update_one(query, upsert, options).await?;
 	Ok(())
