@@ -7,32 +7,39 @@ use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct HistoryTxDTO {
-	pub tx_hash: String,
-	pub status: String,
-	pub error_message: String,
-	pub value: i32,
+	pub tx_hash: Option<String>,
+
+	pub extrinsic_index: u32,
+	pub event_index: u32,
+	pub block_height: u32,
+
+	pub status: Option<String>,
+	pub value: u128,
+	pub amount: u32,
+
 	pub event: String,
 	pub from: String,
 	pub to: String,
 	pub collection_id: String,
-	pub game_id: String,
 	pub token_id: String,
-	pub raw: String,
+	pub pool: Option<String>,
 }
 impl From<HistoryTx> for HistoryTxDTO {
 	fn from(value: HistoryTx) -> Self {
 		HistoryTxDTO {
 			tx_hash: value.tx_hash,
 			status: value.status,
-			error_message: value.error_message,
 			value: value.value,
 			event: value.event,
 			from: value.from,
 			to: value.to,
 			collection_id: value.collection_id,
-			game_id: value.game_id,
 			token_id: value.token_id,
-			raw: value.raw,
+			amount: value.amount,
+			block_height: value.block_height,
+			event_index: value.event_index,
+			extrinsic_index: value.extrinsic_index,
+			pool: value.pool,
 		}
 	}
 }

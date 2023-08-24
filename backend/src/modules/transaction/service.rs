@@ -1,6 +1,6 @@
 use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
-use shared::{constant::EMPTY_STR, history_tx::HistoryTx, models};
+use shared::{constant::EMPTY_STR, history_tx::HistoryTx, models, BaseDocument};
 
 use crate::common::{
 	utils::{get_filter_option, get_total_page},
@@ -12,8 +12,8 @@ use super::dto::{HistoryTxDTO, QueryFindTX};
 pub async fn find_tx_by_hash(
 	tx_hash: &String,
 	db: Database,
-) -> Result<Option<TransactionDTO>, mongodb::error::Error> {
-	let col: Collection<Transaction> = db.collection(models::nft::NFT::name().as_str());
+) -> Result<Option<HistoryTxDTO>, mongodb::error::Error> {
+	let col: Collection<HistoryTx> = db.collection(models::history_tx::HistoryTx::name().as_str());
 	let filter = doc! {"tx_hash": tx_hash};
 	if let Ok(Some(tx_detail)) = col.find_one(filter, None).await {
 		Ok(Some(tx_detail.into()))
@@ -25,7 +25,7 @@ pub async fn find_tx_by_query(
 	params: QueryPage<QueryFindTX>,
 	db: Database,
 ) -> Result<Option<Page<HistoryTxDTO>>, mongodb::error::Error> {
-	let col: Collection<HistoryTx> = db.collection(models::history_tx::NAME);
+	let col: Collection<HistoryTx> = db.collection(models::history_tx::HistoryTx::name().as_str());
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;

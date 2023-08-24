@@ -3,7 +3,7 @@ use crate::gafi;
 use super::*;
 use mongodb::{bson::doc, options::FindOneOptions, results::InsertOneResult, Collection, Database};
 use shared::{block, types::Result, BaseDocument, Block};
-use subxt::{OnlineClient, PolkadotConfig};
+use subxt::{events::Phase, OnlineClient, PolkadotConfig};
 use tokio::time::Duration;
 
 pub struct WorkerState {
@@ -122,6 +122,14 @@ impl Worker {
 		let events = api.events().at(block_hash).await?;
 		for ev in events.iter() {
 			let ev = ev?;
+
+			let mut extrinsic_index = None;
+			match ev.phase() {
+				Phase::ApplyExtrinsic(i) => extrinsic_index = Some(i),
+				Phase::Finalization => {},
+				Phase::Initialization => {},
+			}
+			log::debug!("phase {:?}", ev.phase());
 			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
 			// 	log::debug!("{ev:?}");
 			// } else {
@@ -137,6 +145,7 @@ impl Worker {
 							height: block_number,
 							hash: block_hash_str.clone(),
 						},
+						extrinsic_index
 					})
 					.await?; //TODO process in multi threads
 				}
@@ -166,7 +175,11 @@ impl Worker {
 		};
 
 		for block_number in state.current_block..end_block {
-			log::info!("[{}] Begin process block {}", self.name, state.current_block);
+			log::info!(
+				"[{}] Begin process block {}",
+				self.name,
+				state.current_block
+			);
 			let block =
 				Self::process_block(&state.api, &state.db, &state.tasks, block_number).await?;
 			log::info!(

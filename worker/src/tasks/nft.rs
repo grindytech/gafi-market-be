@@ -6,7 +6,7 @@ use mongodb::{
 };
 use serde::Deserialize;
 pub use shared::types::Result;
-use shared::{BaseDocument, NFTOwner, NFT};
+use shared::{BaseDocument, HistoryTx, NFTOwner, NFT};
 
 use crate::{
 	gafi, services,
@@ -95,20 +95,40 @@ async fn on_item_created(params: HandleParams<'_>) -> Result<()> {
 async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::Minted>()?;
 	if let Some(ev) = event_parse {
-		let mut need_refetch_amount = HashMap::<String, bool>::new();
+		let mut need_refetch_amount = HashMap::<String, u32>::new();
 
 		for item in ev.nfts {
-			need_refetch_amount.insert(
-				format!("{}:{}", item.collection, item.item).to_string(),
-				true,
-			);
+			let key = format!("{}:{}", item.collection, item.item).to_string();
+			let amount = need_refetch_amount.get(&key).unwrap_or(&0);
+			need_refetch_amount.insert(key, amount + 1);
 		}
 		//get balances & update
 		for key in need_refetch_amount.keys() {
 			let mut arr_str = key.split(":");
-
 			let collection_id = arr_str.next().unwrap();
 			let token_id = arr_str.next().unwrap();
+			let amount = need_refetch_amount.get(key).unwrap();
+
+			services::history::upsert(
+				HistoryTx {
+					collection_id: collection_id.to_string(),
+					event: "Game:Minted".to_string(),
+					event_index: params.ev.index(),
+					extrinsic_index: params.extrinsic_index.unwrap(),
+					block_height: params.block.height,
+					from: hex::encode(ev.who.0),
+					to: hex::encode(ev.target.0),
+					token_id: token_id.to_string(),
+					value: 0, // TODO get value from event
+					amount: *amount,
+					id: None,
+					status: None,
+					tx_hash: None,
+					pool: Some(ev.pool.to_string()),
+				},
+				params.db,
+			)
+			.await?;
 
 			services::nft::refresh_balance(
 				ev.target.clone(),
@@ -120,6 +140,51 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 			.await?;
 		}
 	};
+	Ok(())
+}
+
+async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
+	let event_parse = params.ev.as_event::<gafi::game::events::Transferred>()?;
+	if let Some(ev) = event_parse {
+		services::history::upsert(
+			HistoryTx {
+				collection_id: ev.collection.to_string(),
+				event: "Game:Transferred".to_string(),
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				block_height: params.block.height,
+				from: hex::encode(ev.from.0),
+				to: hex::encode(ev.dest.0),
+				token_id: ev.item.to_string(),
+				amount: ev.amount.into(),
+				value: 0,
+				id: None,
+				status: None,
+				tx_hash: None,
+				pool: None,
+			},
+			params.db,
+		)
+		.await?;
+
+		services::nft::refresh_balance(
+			ev.from.clone(),
+			ev.collection.to_string(),
+			ev.item.to_string(),
+			params.db,
+			params.api,
+		)
+		.await?;
+
+		services::nft::refresh_balance(
+			ev.dest.clone(),
+			ev.collection.to_string(),
+			ev.item.to_string(),
+			params.db,
+			params.api,
+		)
+		.await?;
+	}
 	Ok(())
 }
 
@@ -135,10 +200,8 @@ pub fn tasks() -> Vec<Task> {
 		Task::new("Nfts:ItemMetadataSet", move |params| {
 			Box::pin(on_metadata_set(params))
 		}),
+		Task::new("Game:Transferred", move |params| {
+			Box::pin(on_item_transfer(params))
+		}),
 	]
 }
-
-//TODO
-//Nfts:transfer
-//Nfts:burn
-//Nfts:issued
