@@ -1,16 +1,16 @@
 use dotenv::dotenv;
 use env_logger::Env;
 use mongodb::Database;
-use shared::{db, types::Result, Config};
+use shared::{config, db, types::Result, Config};
 use workers::Worker;
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "./metadata.scale")]
 pub mod gafi {}
 
+mod services;
 mod tasks;
 mod workers;
-mod services;
 
 async fn get_db() -> Database {
 	let configuration = Config::init();
@@ -31,13 +31,13 @@ async fn main() -> Result<()> {
 
 	//worker process nft event
 	let run_worker_1 = async {
+		let configuration = Config::init();
 		let database = get_db().await;
 		let mut nft_worker = Worker::new(
 			"nft".to_lowercase(),
 			database.clone(),
-			None,
-			Some(136000),
-			None,
+			configuration.start_block,
+			configuration.rpc,
 			None,
 		)
 		.await
@@ -48,16 +48,17 @@ async fn main() -> Result<()> {
 
 	//all other jobs
 	let run_worker_2 = async {
+		let configuration = Config::init();
 		let database = get_db().await;
 		let mut other_worker = Worker::new(
 			"other".to_lowercase(),
 			database.clone(),
-			None,
-			Some(136000),
-			None,
+			configuration.start_block,
+			configuration.rpc,
 			None,
 		)
-		.await.unwrap();
+		.await
+		.unwrap();
 		let mut other_tasks = vec![];
 		other_tasks.append(&mut tasks::collection::tasks());
 		other_tasks.append(&mut tasks::pool::tasks());

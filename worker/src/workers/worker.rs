@@ -12,7 +12,6 @@ pub struct WorkerState {
 	latest_block: u32,
 	db: Database,
 	api: RpcClient,
-	finalize_delay: u32,
 	rpc: String,
 	enabled: bool,
 	running: bool,
@@ -22,16 +21,11 @@ pub struct WorkerState {
 impl WorkerState {
 	pub async fn new(
 		db: Database,
-		finalize_delay: Option<u32>,
-		start_block: Option<u32>,
-		rpc: Option<String>,
+		start_block: u32,
+		rpc: String,
 		max_batch: Option<u32>,
 	) -> Result<Self> {
 		let max_batch = max_batch.unwrap_or(1000);
-		let finalize_delay = finalize_delay.unwrap_or(3);
-		let start_block = start_block.unwrap_or(0);
-		let rpc = rpc.unwrap_or("wss://rpc-testnet.gafi.network:443".to_string());
-
 		let api = OnlineClient::<PolkadotConfig>::from_url(&rpc).await?;
 
 		let sort = doc! {"height": -1};
@@ -48,7 +42,6 @@ impl WorkerState {
 			db,
 			tasks: vec![],
 			api,
-			finalize_delay,
 			rpc,
 			enabled: false,
 			running: false,
@@ -75,12 +68,11 @@ impl Worker {
 	pub async fn new(
 		name: String,
 		db: Database,
-		finalize_delay: Option<u32>,
-		start_block: Option<u32>,
-		rpc: Option<String>,
+		start_block: u32,
+		rpc: String,
 		max_batch: Option<u32>,
 	) -> Result<Self> {
-		let state = WorkerState::new(db, finalize_delay, start_block, rpc, max_batch).await?;
+		let state = WorkerState::new(db, start_block, rpc, max_batch).await?;
 		Ok(Self { name, state })
 	}
 

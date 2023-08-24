@@ -1,24 +1,24 @@
+use std::env::var;
 #[derive(Debug, Clone)]
-
 pub struct Config {
 	pub mongodb_uri: String,
 	pub mongodb_db_name: String,
-	// pub jwt_secret: String,
-	// pub jwt_max_age: i32,
+	pub rpc: String,
+	pub start_block: u32,
 }
 
 impl Config {
 	pub fn init() -> Config {
+		let rpc = var("RPC").unwrap_or("wss://rpc-testnet.gafi.network:443".to_string());
+		let start_block: u32 = var("START_BLOCK").unwrap_or("0".to_string()).parse().unwrap();
 		let mongodb_uri = std::env::var("MONGODB_URI").expect("MONGODB_URI must be set");
 		let mongodb_db_name =
 			std::env::var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
-		// let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-		// let jwt_max_age = std::env::var("JWT_MAX_AGE").expect("JWT_MAX_AGE must be set");
 		Config {
 			mongodb_uri,
 			mongodb_db_name,
-			// jwt_secret,
-			// jwt_max_age: jwt_max_age.parse::<i32>().unwrap(),
+			rpc,
+			start_block,
 		}
 	}
 }
