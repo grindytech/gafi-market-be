@@ -1,5 +1,5 @@
 use mongodb::{bson::doc, options::UpdateOptions, results::UpdateResult, Database};
-use shared::{types::Result, NFTOwner, BaseDocument};
+use shared::{types::Result, BaseDocument, NFTOwner};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};

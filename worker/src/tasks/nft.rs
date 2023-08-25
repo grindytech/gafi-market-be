@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use mongodb::{
-	bson::{doc, DateTime},
+	bson::{doc, DateTime, Bson},
 	options::UpdateOptions,
 };
 use serde::Deserialize;
 pub use shared::types::Result;
-use shared::{BaseDocument, HistoryTx, NFTOwner, NFT};
+use shared::{BaseDocument, HistoryTx, NFT};
 
 use crate::{
 	gafi, services,
@@ -32,7 +32,7 @@ async fn on_metadata_set(params: HandleParams<'_>) -> Result<()> {
 					let update = doc! {"$set": {
 						"img_url": data.image,
 						"name": data.title,
-						"updated_at": DateTime::now()
+						"updated_at": DateTime::now(),
 					}};
 					nft_db.update_one(query, update, None).await?;
 					log::info!(
@@ -60,7 +60,7 @@ async fn on_item_added(params: HandleParams<'_>) -> Result<()> {
 
 		let update = doc! {"$set": {
 			"supply": ev.amount,
-			"updated_at": DateTime::now()
+			"updated_at": DateTime::now(),
 		}};
 
 		nft_db.update_one(query, update, None).await?;
@@ -84,7 +84,7 @@ async fn on_item_created(params: HandleParams<'_>) -> Result<()> {
 			"created_by": hex::encode(ev.who.0),
 			"supply": ev.maybe_supply,
 			"created_at": DateTime::now(),
-			"updated_at": DateTime::now()
+			"updated_at": DateTime::now(),
 		}};
 		nft_db.update_one(query, upsert, options).await?;
 		log::info!("Nft item created {:?}", ev);
@@ -132,9 +132,8 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 				block_height: params.block.height,
 				from: hex::encode(ev.who.0),
 				to: hex::encode(ev.target.0),
-				value: 0, // TODO get value from event
+				value: "0".parse()?, // TODO get value from event
 				id: None,
-				status: None,
 				tx_hash: None,
 				pool: Some(ev.pool.to_string()),
 				nfts,
@@ -163,9 +162,8 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 				block_height: params.block.height,
 				from: hex::encode(ev.from.0),
 				to: hex::encode(ev.dest.0),
-				value: 0,
+				value: "0".parse()?,
 				id: None,
-				status: None,
 				tx_hash: None,
 				pool: None,
 				nfts: vec![nft],

@@ -1,4 +1,4 @@
-use mongodb::bson::{doc, oid::ObjectId, Bson, Document};
+use mongodb::bson::{doc, oid::ObjectId, Bson, Document, Decimal128};
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum TypeEventTx {
@@ -26,7 +26,7 @@ impl Into<Document> for Nft {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct HistoryTx {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -36,8 +36,7 @@ pub struct HistoryTx {
 	pub event_index: u32,
 	pub block_height: u32,
 
-	pub status: Option<String>,
-	pub value: u128,
+	pub value: Decimal128,
 
 	pub event: String,
 	pub from: String,
@@ -62,8 +61,7 @@ impl Into<Document> for HistoryTx {
 			"event_index": self.event_index,
 			"block_height": self.block_height,
 
-			"status": self.status,
-			"value": Bson::Decimal128(self.value.to_string().parse().ok().unwrap()),
+			"value": self.value,
 			"event": self.event,
 			"from": self.from,
 			"to": self.to,

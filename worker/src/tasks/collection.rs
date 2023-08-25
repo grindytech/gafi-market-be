@@ -58,11 +58,11 @@ async fn on_collection_metadata_set(params: HandleParams<'_>) -> Result<()> {
 					let option = UpdateOptions::builder().upsert(true).build();
 					let query = doc! {"collection_id": ev.collection.to_string()};
 					let update = doc! {"$set": {
-								"logo_url": data.image,
-								"name": data.title,
-								"updated_at": DateTime::now(),
-					"external_url": data.external_url
-							}};
+						"logo_url": data.image,
+						"name": data.title,
+						"updated_at": DateTime::now(),
+						"external_url": data.external_url,
+					}};
 					collection_db.update_one(query, update, option).await?;
 					log::info!(
 						"CollectionMetadataSet collection {}, data: {}",

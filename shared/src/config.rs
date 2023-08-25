@@ -5,6 +5,7 @@ pub struct Config {
 	pub mongodb_db_name: String,
 	pub rpc: String,
 	pub start_block: u32,
+	pub chain_decimal: u32,
 }
 
 impl Config {
@@ -14,11 +15,13 @@ impl Config {
 		let mongodb_uri = std::env::var("MONGODB_URI").expect("MONGODB_URI must be set");
 		let mongodb_db_name =
 			std::env::var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
+		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("18".to_string()).parse().unwrap();
 		Config {
 			mongodb_uri,
 			mongodb_db_name,
 			rpc,
 			start_block,
+			chain_decimal,
 		}
 	}
 }
