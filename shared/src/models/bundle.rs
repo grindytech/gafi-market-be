@@ -19,7 +19,7 @@ pub enum Status {
 pub struct Items {
 	pub token_id: String,
 	pub game_id: String,
-	pub quantity: i32,
+	pub amount: u32,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Bundle {
@@ -32,7 +32,7 @@ pub struct Bundle {
 	pub items: Vec<Items>,
 	pub market_type: String,
 	pub status: String,
-	pub price: i32,
+	pub price: u32,
 	pub begin_at: i64,
 	pub end_at: i64,
 	pub update_at: i64,
@@ -43,4 +43,3 @@ impl BaseDocument for Bundle {
 		"bundle".to_string()
 	}
 }
-

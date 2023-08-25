@@ -75,6 +75,5 @@ pub struct QueryPage<T> {
 	pub query: T,
 }
 
-
 mod types;
 pub use types::*;
