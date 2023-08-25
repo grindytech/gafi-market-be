@@ -1,7 +1,5 @@
 pub mod account;
 pub use account::*;
-pub mod auction;
-pub use auction::*;
 pub mod block;
 pub use block::*;
 pub mod bundle;
@@ -22,4 +20,5 @@ pub mod sale;
 pub use sale::*;
 pub mod loot_table;
 pub use loot_table::*;
-
+pub mod trade;
+pub use trade::*;

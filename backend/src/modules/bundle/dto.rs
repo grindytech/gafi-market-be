@@ -8,14 +8,14 @@ use utoipa::ToSchema;
 pub struct ItemsDTO {
 	pub token_id: String,
 	pub game_id: String,
-	pub quantity: i32,
+	pub amount: u32,
 }
 impl Into<Items> for ItemsDTO {
 	fn into(self) -> Items {
 		Items {
 			token_id: self.token_id,
 			game_id: self.game_id,
-			quantity: self.quantity,
+			amount: self.amount,
 		}
 	}
 }
@@ -24,7 +24,7 @@ impl From<Items> for ItemsDTO {
 		ItemsDTO {
 			token_id: value.token_id,
 			game_id: value.game_id,
-			quantity: value.quantity,
+			amount: value.amount,
 		}
 	}
 }
@@ -38,7 +38,7 @@ pub struct BundleDTO {
 	pub items: Vec<ItemsDTO>,
 	pub market_type: String,
 	pub status: String,
-	pub price: i32,
+	pub price: u32,
 	pub begin_at: i64,
 	pub end_at: i64,
 	pub update_at: i64,
