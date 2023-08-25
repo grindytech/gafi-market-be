@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BaseDocument, Items};
+use crate::{BaseDocument, Nft};
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum TradeType {
 	SetPrice,
@@ -16,7 +16,7 @@ pub struct Trade {
 	pub trade: TradeType,
 	pub owner: String,
 	pub maybe_price: Option<u32>,
-	pub maybe_required: Option<Items>,
+	pub maybe_required: Option<Nft>,
 	pub start_block: Option<u32>,
 	pub end_block: Option<u32>,
 }
