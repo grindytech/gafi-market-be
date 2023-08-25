@@ -11,7 +11,6 @@ pub fn route_config(cfg: &mut web::ServiceConfig) {
 			.service(modules::collection::controller::endpoints(scope(
 				"/collection",
 			)))
-			.service(modules::bundle::controller::endpoints(scope("/bundle")))
 			.service(modules::transaction::controller::endpoints(scope("/tx"))),
 	)
 	.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![(
