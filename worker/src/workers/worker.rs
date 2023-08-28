@@ -117,7 +117,7 @@ impl Worker {
 		for ev in events.iter() {
 			let ev = ev?;
 
-			let mut extrinsic_index: Option<i32> = None;
+			let extrinsic_index: Option<i32>;
 			match ev.phase() {
 				Phase::ApplyExtrinsic(i) => extrinsic_index = Some(i as i32),
 				Phase::Finalization => extrinsic_index = Some(-1),

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use mongodb::{
-	bson::{doc, DateTime, Decimal128},
+	bson::{doc, DateTime, Decimal128, Document},
 	options::UpdateOptions,
 };
 use serde::Deserialize;
@@ -9,9 +9,9 @@ pub use shared::types::Result;
 use shared::{
 	constant::{
 		EVENT_ITEM_ADDED, EVENT_ITEM_CREATED, EVENT_ITEM_METADATA_SET, EVENT_MINTED,
-		EVENT_TRANSFERRED,
+		EVENT_REQUEST_MINT, EVENT_TRANSFERRED,
 	},
-	BaseDocument, HistoryTx, NFT,
+	BaseDocument, HistoryTx, RequestMint, NFT,
 };
 
 use crate::{
@@ -219,6 +219,34 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
+async fn on_request_mint(params: HandleParams<'_>) -> Result<()> {
+	let event_parse = params.ev.as_event::<gafi::game::events::RequestMint>()?;
+	if let Some(ev) = event_parse {
+		let request_mint_db = params.db.collection::<RequestMint>(RequestMint::name().as_str());
+		let rq: Document = RequestMint {
+			block: params.block.height,
+			event_index: params.ev.index(),
+			execute_block: ev.block_number,
+			extrinsic_index: params.extrinsic_index.unwrap(),
+			pool: ev.pool.to_string(),
+			target: hex::encode(ev.target.0),
+			who: hex::encode(ev.who.0),
+		}
+		.into();
+		let query = doc! {
+			"block": params.block.height,
+			"event_index": params.ev.index(),
+			"extrinsic_index": params.extrinsic_index.unwrap(),
+		};
+		let update = doc! {
+			"$set": rq,
+		};
+		let options = UpdateOptions::builder().upsert(true).build();
+		request_mint_db.update_one(query, update, options).await?;
+	}
+	Ok(())
+}
+
 pub fn tasks() -> Vec<Task> {
 	vec![
 		Task::new(EVENT_MINTED, move |params| Box::pin(on_mint_nft(params))),
@@ -233,6 +261,9 @@ pub fn tasks() -> Vec<Task> {
 		}),
 		Task::new(EVENT_TRANSFERRED, move |params| {
 			Box::pin(on_item_transfer(params))
+		}),
+		Task::new(EVENT_REQUEST_MINT, move |params| {
+			Box::pin(on_request_mint(params))
 		}),
 	]
 }
