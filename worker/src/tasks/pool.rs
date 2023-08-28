@@ -6,7 +6,9 @@ use mongodb::{
 	bson::{doc, DateTime, Document},
 	options::UpdateOptions,
 };
-use shared::{types::Result, BaseDocument, LootTable, LootTableNft, Pool};
+use shared::{
+	constant::EVENT_MINING_POOL_CREATED, types::Result, BaseDocument, LootTable, LootTableNft, Pool,
+};
 
 async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::MiningPoolCreated>()?;
@@ -90,9 +92,10 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
-
+//add item
+// remove item
 pub fn tasks() -> Vec<Task> {
-	vec![Task::new("Game:MiningPoolCreated", move |params| {
+	vec![Task::new(EVENT_MINING_POOL_CREATED, move |params| {
 		Box::pin(on_pool_created(params))
 	})]
 }

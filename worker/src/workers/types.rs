@@ -1,6 +1,4 @@
-use std::pin::Pin;
-
-use futures::{future::BoxFuture, Future};
+use futures::future::BoxFuture;
 use mongodb::Database;
 use shared::{types::Result, Block};
 use subxt::{events::EventDetails, OnlineClient, PolkadotConfig};
@@ -10,7 +8,7 @@ pub struct HandleParams<'a> {
 	pub db: &'a Database,
 	pub api: &'a RpcClient,
 	pub block: Block,
-	pub extrinsic_index: Option<u32>, 
+	pub extrinsic_index: Option<u32>,
 	// tx
 }
 pub type OnchainEvent = EventDetails<PolkadotConfig>;

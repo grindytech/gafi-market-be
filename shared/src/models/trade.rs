@@ -39,16 +39,16 @@ pub struct Trade {
 
 	pub start_block: Option<u32>,
 	pub end_block: Option<u32>,
-	pub duration: Option<u32>,
+	pub duration: Option<u32>,//auction
 
-	pub unit_price: Option<Decimal128>,
-	pub maybe_price: Option<Decimal128>,
-	pub price: Option<Decimal128>,
+	pub unit_price: Option<Decimal128>,//set buy, set price
+	pub maybe_price: Option<Decimal128>,//auction, swap
+	pub price: Option<Decimal128>,//bundle
 
-	pub nft: Option<Nft>,
-	pub source: Option<Vec<Nft>>,
-	pub maybe_required: Option<Vec<Nft>>,
-	pub bundle: Option<Vec<Nft>>,
+	pub nft: Option<Nft>,//set buy, set price
+	pub source: Option<Vec<Nft>>,//swap, auction
+	pub maybe_required: Option<Vec<Nft>>,//swap
+	pub bundle: Option<Vec<Nft>>,//bundle
 	pub wish_list: Option<Vec<Nft>>,
 
 	pub sold: Option<u32>,//sold out amount in retail sale
@@ -57,7 +57,7 @@ pub struct Trade {
 
 impl Into<Document> for Trade {
 	fn into(self) -> Document {
-		let nfts: Option<Vec<Document>> = match self.maybe_required {
+		let maybe_required: Option<Vec<Document>> = match self.maybe_required {
 			Some(nfts) => nfts
 				.into_iter()
 				.map(|nft| {
@@ -111,16 +111,16 @@ impl Into<Document> for Trade {
 
 			"start_block": self.start_block,
 			"end_block": self.end_block,
-			"duration": self.duration,//auction
+			"duration": self.duration,
 
-			"unit_price": self.unit_price,//set buy, set price
-			"maybe_price": self.maybe_price,//auction, swap
-			"price": self.price,//bundle
+			"unit_price": self.unit_price,
+			"maybe_price": self.maybe_price,
+			"price": self.price,
 
-			"nft": nft,//set buy, set price
-			"maybe_required": nfts,//swap
-			"source": source,//swap, auction
-			"bundle": bundle,//bundle
+			"nft": nft,
+			"maybe_required": maybe_required,
+			"source": source,
+			"bundle": bundle,
 			"wish_list": wish_list,
 
 			"sold": self.sold,

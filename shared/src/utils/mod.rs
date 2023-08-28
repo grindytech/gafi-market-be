@@ -23,3 +23,11 @@ fn test() {
 	assert_eq!(string_decimal_to_number("123456789", 9), "0.123456789");
 	assert_eq!(string_decimal_to_number("123456789", 12), "0.000123456789");
 }
+
+pub fn vec_to_array(vec: Vec<u8>) -> [u8; 32] {
+	let mut arr_u8: [u8; 32] = [0; 32];
+	for i in 0..32 {
+		arr_u8[i] = *vec.get(i).unwrap();
+	}
+	arr_u8
+}

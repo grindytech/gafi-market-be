@@ -22,6 +22,27 @@ pub const EVENT_SET_BUNDLE: &str = "Game:BundleSet";
 pub const EVENT_SET_WISH_LIST: &str = "Game:WishlistSet";
 pub const EVENT_SET_AUCTION: &str = "Game:AuctionSet";
 
+pub const EVENT_ITEM_CREATED: &str = "Game:ItemCreated";
+pub const EVENT_MINTED: &str = "Game:Minted";
+pub const EVENT_TRANSFERRED: &str = "Game:Transferred";
+pub const EVENT_ITEM_ADDED: &str = "Game:ItemAdded";
+pub const EVENT_ITEM_METADATA_SET: &str = "Nfts:ItemMetadataSet";
+pub const EVENT_BUNDLE_BOUGHT: &str = "Game:BundleBought";
+pub const EVENT_WIST_LIST_FILLED: &str = "Game:WishlistFilled";
+
+pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
+
+pub const EVENT_SWAP_CLAIMED: &str = "Game:SwapClaimed";
+
+pub const EVENT_TRADE_CANCELLED: &str = "Game:TradeCanceled";
+
+pub const EVENT_MINING_POOL_CREATED: &str = "Game:MiningPoolCreated";
+
+
+
+
+
+
 
 
 
