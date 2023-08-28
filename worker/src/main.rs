@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use env_logger::Env;
 use mongodb::Database;
-use shared::{config, db, types::Result, Config};
+use shared::{db, types::Result, Config};
 use workers::Worker;
 
 // Generate an interface that we can use from the node's metadata.
@@ -42,7 +42,15 @@ async fn main() -> Result<()> {
 		)
 		.await
 		.unwrap();
+
 		nft_worker.add_tasks(&mut tasks::nft::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::retail::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::bundle::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::swap::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::wishlist::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::auction::tasks());
+		nft_worker.add_tasks(&mut tasks::trade::cancel_trade::tasks());
+
 		let _ = nft_worker.start(1000).await;
 	};
 
@@ -60,9 +68,11 @@ async fn main() -> Result<()> {
 		.await
 		.unwrap();
 		let mut other_tasks = vec![];
+
 		other_tasks.append(&mut tasks::collection::tasks());
 		other_tasks.append(&mut tasks::pool::tasks());
 		other_tasks.append(&mut tasks::game::tasks());
+		
 		other_worker.add_tasks(&mut other_tasks);
 		let _ = other_worker.start(1000).await;
 	};

@@ -1,12 +1,18 @@
 use std::collections::HashMap;
 
 use mongodb::{
-	bson::{doc, DateTime},
+	bson::{doc, DateTime, Decimal128},
 	options::UpdateOptions,
 };
 use serde::Deserialize;
 pub use shared::types::Result;
-use shared::{BaseDocument, HistoryTx, NFTOwner, NFT};
+use shared::{
+	constant::{
+		EVENT_ITEM_ADDED, EVENT_ITEM_CREATED, EVENT_ITEM_METADATA_SET, EVENT_MINTED,
+		EVENT_TRANSFERRED,
+	},
+	BaseDocument, HistoryTx, NFT,
+};
 
 use crate::{
 	gafi, services,
@@ -32,7 +38,7 @@ async fn on_metadata_set(params: HandleParams<'_>) -> Result<()> {
 					let update = doc! {"$set": {
 						"img_url": data.image,
 						"name": data.title,
-						"updated_at": DateTime::now()
+						"updated_at": DateTime::now(),
 					}};
 					nft_db.update_one(query, update, None).await?;
 					log::info!(
@@ -60,7 +66,7 @@ async fn on_item_added(params: HandleParams<'_>) -> Result<()> {
 
 		let update = doc! {"$set": {
 			"supply": ev.amount,
-			"updated_at": DateTime::now()
+			"updated_at": DateTime::now(),
 		}};
 
 		nft_db.update_one(query, update, None).await?;
@@ -84,7 +90,7 @@ async fn on_item_created(params: HandleParams<'_>) -> Result<()> {
 			"created_by": hex::encode(ev.who.0),
 			"supply": ev.maybe_supply,
 			"created_at": DateTime::now(),
-			"updated_at": DateTime::now()
+			"updated_at": DateTime::now(),
 		}};
 		nft_db.update_one(query, upsert, options).await?;
 		log::info!("Nft item created {:?}", ev);
@@ -110,8 +116,8 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 			let amount = need_refetch_amount.get(key).unwrap();
 			nfts.push(shared::history_tx::Nft {
 				amount: *amount,
-				collection_id: collection_id.to_string(),
-				token_id: token_id.to_string(),
+				collection: collection_id.parse()?,
+				item: token_id.parse()?,
 			});
 
 			services::nft::refresh_balance(
@@ -123,6 +129,16 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 			)
 			.await?;
 		}
+		let config = shared::config::Config::init();
+		let amount = ev.amount;
+		let price = ev.price;
+		let price_str = shared::utils::string_decimal_to_number(
+			&price.to_string(),
+			config.chain_decimal as i32,
+		);
+		let price_decimal: Decimal128 = price_str.parse()?;
+		let total_value = price_str.parse::<f64>()? * f64::from(amount);
+		let value_in_decimal: Decimal128 = total_value.to_string().parse()?;
 
 		services::history::upsert(
 			HistoryTx {
@@ -131,13 +147,17 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 				extrinsic_index: params.extrinsic_index.unwrap(),
 				block_height: params.block.height,
 				from: hex::encode(ev.who.0),
-				to: hex::encode(ev.target.0),
-				value: 0, // TODO get value from event
+				to: Some(hex::encode(ev.target.0)),
+				value: Some(value_in_decimal),
 				id: None,
-				status: None,
 				tx_hash: None,
 				pool: Some(ev.pool.to_string()),
-				nfts,
+				nfts: Some(nfts),
+				price: Some(price_decimal),
+				amount: Some(amount),
+				trade_id: None,
+				source: None,
+				trade_type: None,
 			},
 			params.db,
 		)
@@ -152,8 +172,8 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 	if let Some(ev) = event_parse {
 		let nft = shared::history_tx::Nft {
 			amount: ev.amount.into(),
-			collection_id: ev.collection.to_string(),
-			token_id: ev.item.to_string(),
+			collection: ev.collection,
+			item: ev.item,
 		};
 		services::history::upsert(
 			HistoryTx {
@@ -162,13 +182,17 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 				extrinsic_index: params.extrinsic_index.unwrap(),
 				block_height: params.block.height,
 				from: hex::encode(ev.from.0),
-				to: hex::encode(ev.dest.0),
-				value: 0,
+				to: Some(hex::encode(ev.dest.0)),
+				value: None,
 				id: None,
-				status: None,
 				tx_hash: None,
 				pool: None,
-				nfts: vec![nft],
+				nfts: Some(vec![nft]),
+				amount: Some(1),
+				price: None,
+				trade_id: None,
+				source: None,
+				trade_type: None,
 			},
 			params.db,
 		)
@@ -197,17 +221,17 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 
 pub fn tasks() -> Vec<Task> {
 	vec![
-		Task::new("Game:Minted", move |params| Box::pin(on_mint_nft(params))),
-		Task::new("Game:ItemCreated", move |params| {
+		Task::new(EVENT_MINTED, move |params| Box::pin(on_mint_nft(params))),
+		Task::new(EVENT_ITEM_CREATED, move |params| {
 			Box::pin(on_item_created(params))
 		}),
-		Task::new("Game:ItemAdded", move |params| {
+		Task::new(EVENT_ITEM_ADDED, move |params| {
 			Box::pin(on_item_added(params))
 		}),
-		Task::new("Nfts:ItemMetadataSet", move |params| {
+		Task::new(EVENT_ITEM_METADATA_SET, move |params| {
 			Box::pin(on_metadata_set(params))
 		}),
-		Task::new("Game:Transferred", move |params| {
+		Task::new(EVENT_TRANSFERRED, move |params| {
 			Box::pin(on_item_transfer(params))
 		}),
 	]

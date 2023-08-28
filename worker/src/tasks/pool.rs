@@ -1,15 +1,14 @@
 use crate::{
-	gafi::{
-		self,
-		runtime_types::{gafi_support::game::types::PoolType, pallet_game::types::PoolDetails},
-	},
+	gafi::{self, runtime_types::gafi_support::game::types::PoolType},
 	workers::{HandleParams, Task},
 };
 use mongodb::{
 	bson::{doc, DateTime, Document},
 	options::UpdateOptions,
 };
-use shared::{types::Result, BaseDocument, Pool};
+use shared::{
+	constant::EVENT_MINING_POOL_CREATED, types::Result, BaseDocument, LootTable, LootTableNft, Pool,
+};
 
 async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::MiningPoolCreated>()?;
@@ -38,37 +37,49 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			.iter()
 			.map(|item| {
 				let nft_loot = match &item.maybe_nft {
-					Some(nft) => Some(doc! {
-						"collection": nft.collection.to_string(),
-						"item": nft.item.to_string(),
+					Some(nft) => Some(LootTableNft {
+						collection: nft.collection.to_string(),
+						item: nft.item.to_string(),
 					}),
 					None => None,
 				};
-				doc! {
-					"nft": nft_loot,
-					"weight": item.weight,
+				LootTable {
+					nft: nft_loot,
+					weight: item.weight,
 				}
 			})
-			.collect::<Vec<Document>>();
+			.collect::<Vec<LootTable>>();
 
 		let mint_type = match pool_detail.mint_settings.mint_type {
 			gafi::runtime_types::gafi_support::game::types::MintType::Public => "Public",
 			gafi::runtime_types::gafi_support::game::types::MintType::HolderOf(_) => "HolderOf",
 		};
-		let upsert = doc! {"$set": {
-			"pool_id": ev.pool.to_string(),
-			"type_pool": pool_type,
-			"loot_table": loot_table.clone(),
-		  "owner": hex::encode(ev.who.0),
-			"admin": hex::encode(pool_detail.admin.0),
-			"mint_type":	mint_type,
-			"minting_fee": pool_detail.mint_settings.price.to_string(),
-			"begin_at": pool_detail.mint_settings.start_block,
-			"end_at":  pool_detail.mint_settings.end_block,
-			"owner_deposit": pool_detail.owner_deposit.to_string(),
-			"updated_at": DateTime::now(),
-			"create_at": DateTime::now(),
-		}};
+		let config = shared::config::Config::init();
+		let mining_fee = shared::utils::string_decimal_to_number(
+			&pool_detail.mint_settings.price.to_string(),
+			config.chain_decimal as i32,
+		);
+		// let owner_deposit
+		let pool: Document = Pool {
+			admin: hex::encode(pool_detail.admin.0),
+			begin_at: pool_detail.mint_settings.start_block.unwrap().into(),
+			create_at: DateTime::now().timestamp_millis(),
+			end_at: pool_detail.mint_settings.end_block.unwrap().into(),
+			id: None,
+			loot_table: loot_table.clone(),
+			mint_type: mint_type.to_string(),
+			minting_fee: mining_fee.parse()?,
+			owner: hex::encode(ev.who.0),
+			owner_deposit: pool_detail.owner_deposit.to_string(),
+			pool_id: ev.pool.to_string(),
+			type_pool: pool_type.to_string(),
+			update_at: DateTime::now().timestamp_millis(),
+		}
+		.into();
+
+		let upsert = doc! {
+			"$set": pool
+		};
 
 		pool_db.update_one(query, upsert, option).await?;
 		log::info!(
@@ -81,9 +92,10 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
-
+//add item
+// remove item
 pub fn tasks() -> Vec<Task> {
-	vec![Task::new("Game:MiningPoolCreated", move |params| {
+	vec![Task::new(EVENT_MINING_POOL_CREATED, move |params| {
 		Box::pin(on_pool_created(params))
 	})]
 }

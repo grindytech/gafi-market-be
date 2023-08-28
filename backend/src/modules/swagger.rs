@@ -9,12 +9,13 @@ use crate::{
 };
 use utoipa::OpenApi;
 
-use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, collection::dto::QueryFindCollections, game::dto::QueryFindGame};
+use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindCollections, game::dto::QueryFindGame};
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         crate::modules::account::controller::get_account,
+        crate::modules::account::controller::update_favorite,
         crate::modules::game::controller::get_games_by_address,
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
@@ -22,8 +23,6 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, co
         crate::modules::nft::controller::search_list_nfts,
         crate::modules::collection::controller::get_collection,
         crate::modules::collection::controller::search_list_collections,
-        crate::modules::bundle::controller::get_bundles,
-        crate::modules::bundle::controller::search_list_bundles,
         crate::modules::transaction::controller::get_history_tx,
         crate::modules::transaction::controller::search_history_tx
     ),
@@ -34,7 +33,6 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts}, bundle::dto::BundleDTO, co
         schemas(
             AccountDTO,
             GameDTO,
-            BundleDTO,
             SocialInfoDto,
             NFTDTO,
             NFTCollectionDTO,

@@ -2,7 +2,10 @@ use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use shared::models::account::{Account, SocialInfo};
+use shared::{
+	models::account::{Account, SocialInfo},
+	Favorites,
+};
 
 use crate::common::DBQuery;
 
@@ -19,6 +22,7 @@ pub struct AccountDTO {
 	pub update_at: i64,
 	pub create_at: i64,
 	pub social: SocialInfoDto,
+	pub favorites: Option<Vec<Favorites>>,
 }
 
 impl From<Account> for AccountDTO {
@@ -34,6 +38,7 @@ impl From<Account> for AccountDTO {
 			update_at: value.update_at,
 			create_at: value.create_at,
 			social: value.social.into(),
+			favorites: value.favorites,
 		}
 	}
 }
@@ -70,9 +75,12 @@ impl From<SocialInfo> for SocialInfoDto {
 		}
 	}
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindAccount {
 	pub address: Option<String>,
 	pub name: Option<String>,
+	pub favorites: Option<Vec<Favorites>>,
 }
 impl DBQuery for QueryFindAccount {
 	fn to_doc(&self) -> Document {

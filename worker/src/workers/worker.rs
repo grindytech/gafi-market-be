@@ -1,5 +1,3 @@
-use crate::gafi;
-
 use super::*;
 use mongodb::{bson::doc, options::FindOneOptions, results::InsertOneResult, Collection, Database};
 use shared::{block, types::Result, BaseDocument, Block};

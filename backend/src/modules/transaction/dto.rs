@@ -5,6 +5,8 @@ use utoipa::ToSchema;
 
 use crate::common::DBQuery;
 
+
+//TODO need update
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct HistoryTxDTO {
 	pub tx_hash: Option<String>,
@@ -13,21 +15,25 @@ pub struct HistoryTxDTO {
 	pub event_index: u32,
 	pub block_height: u32,
 
-	pub status: Option<String>,
-	pub value: u128,
+	// pub status: Option<String>,
+	pub value: Option<i64>,
 
 	pub event: String,
 	pub from: String,
-	pub to: String,
+	pub to: Option<String>,
 	pub pool: Option<String>,
-	pub nfts: Vec<history_tx::Nft>,
+	pub nfts: Option<Vec<history_tx::Nft>>,
 }
 impl From<HistoryTx> for HistoryTxDTO {
 	fn from(value: HistoryTx) -> Self {
+		let v = match value.value {
+			Some(value) => Some(value.to_string().parse::<i64>().unwrap()),
+			None => None,
+		};
 		HistoryTxDTO {
 			tx_hash: value.tx_hash,
-			status: value.status,
-			value: value.value,
+			// status: value.status,
+			value: v,
 			event: value.event,
 			from: value.from,
 			to: value.to,
@@ -35,7 +41,7 @@ impl From<HistoryTx> for HistoryTxDTO {
 			event_index: value.event_index,
 			extrinsic_index: value.extrinsic_index,
 			pool: value.pool,
-			nfts: value.nfts
+			nfts: value.nfts,
 		}
 	}
 }
