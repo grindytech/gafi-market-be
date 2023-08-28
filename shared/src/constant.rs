@@ -34,6 +34,10 @@ pub const EVENT_COLLECTION_ADDED: &str = "Game:CollectionAdded";
 pub const EVENT_COLLECTION_REMOVED: &str = "Game:CollectionRemoved";
 pub const EVENT_COLLECTION_CREATED: &str = "Game:CollectionCreated";
 pub const EVENT_COLLECTION_METADATA_SET: &str = "Nfts:CollectionMetadataSet";
+pub const EVENT_REQUEST_MINT: &str = "Game:RequestMint";
+
+
+
 
 pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
 
