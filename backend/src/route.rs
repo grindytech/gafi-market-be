@@ -1,4 +1,4 @@
-use crate::modules;
+use crate::modules::{self, account::service};
 use actix_web::web::{self, scope};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
@@ -11,7 +11,9 @@ pub fn route_config(cfg: &mut web::ServiceConfig) {
 			.service(modules::collection::controller::endpoints(scope(
 				"/collection",
 			)))
-			.service(modules::transaction::controller::endpoints(scope("/tx"))),
+			.service(modules::transaction::controller::endpoints(scope("/tx")))
+			.service(modules::trade::controller::endpoints(scope("/trade")))
+			.service(modules::auth::controller::endpoints(scope("/auth"))),
 	)
 	.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![(
 		Url::new("v1", "/api-docs/api.json"),

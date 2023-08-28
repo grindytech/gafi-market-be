@@ -79,7 +79,7 @@ pub async fn get_account(
 		})
 	),
 	responses(
-        (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
+        (status=StatusCode::OK,description="Update Profilee Success",body=AccountDTO),
         (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
 
    	 )

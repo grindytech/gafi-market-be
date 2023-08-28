@@ -13,7 +13,7 @@ pub enum TradeType {
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Trade {
 	pub trade_id: String,
-	pub trade: TradeType,
+	pub trade_type: TradeType,
 	pub owner: String,
 	pub maybe_price: Option<u32>,
 	pub maybe_required: Option<Nft>,

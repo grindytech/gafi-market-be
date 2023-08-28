@@ -67,10 +67,10 @@ pub async fn get_game(
         "order_by": "create_at",
         "desc": true,
 		 "query":{
-			"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700",
+			"owner":null,
 			"game_id":null,
 			"category":null,
-			"is_verified":true,
+			"is_verified":null,
 
 		 }
 		

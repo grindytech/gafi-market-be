@@ -40,7 +40,7 @@ pub async fn find_games_by_query(
 	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 
 	let query_find = params.query.to_doc();
-
+	log::info!("Query Fifnd {:?}", query_find);
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut list_games: Vec<GameDTO> = Vec::new();

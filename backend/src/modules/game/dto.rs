@@ -59,7 +59,7 @@ impl DBQuery for QueryFindGame {
 				"owner": owner
 			});
 		}
-		if let Some(category) = &self.category {
+		/* if let Some(category) = &self.category {
 			criteria.push(doc! {
 				"category": category
 			});
@@ -68,7 +68,7 @@ impl DBQuery for QueryFindGame {
 			criteria.push(doc! {
 				"is_verified": is_verified
 			});
-		}
+		} */
 		doc! {
 			"$and": criteria
 		}

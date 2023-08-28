@@ -64,8 +64,7 @@ impl<T> Page<T> {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
-/* #[aliases(QueryGame = QueryPage<QueryFindGame>)]
-#[aliases(QueryCollection=QueryPage<QueryFindCollections>)] */
+
 pub struct QueryPage<T> {
 	pub search: String,
 	pub page: u64,
@@ -73,6 +72,14 @@ pub struct QueryPage<T> {
 	pub order_by: String,
 	pub desc: bool,
 	pub query: T,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TokenPayload {
+	address: String,
+	sub: String,
+	iat: usize,
+	exp: usize,
 }
 
 mod types;

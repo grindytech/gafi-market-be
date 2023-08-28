@@ -9,7 +9,12 @@ use crate::{
 };
 use utoipa::OpenApi;
 
-use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindCollections, game::dto::QueryFindGame};
+use super::{
+	account::dto::QueryFindAccount,
+	collection::dto::QueryFindCollections,
+	game::dto::QueryFindGame,
+	nft::dto::{PropertiseDTO, QueryFindNFts},
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -24,7 +29,10 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindC
         crate::modules::collection::controller::get_collection,
         crate::modules::collection::controller::search_list_collections,
         crate::modules::transaction::controller::get_history_tx,
-        crate::modules::transaction::controller::search_history_tx
+        crate::modules::transaction::controller::search_history_tx,
+        crate::modules::trade::controller::search_list_trade,
+        crate::modules::auth::controller::get_random_nonce,
+         crate::modules::auth::controller::get_verify_token
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -42,7 +50,7 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindC
             QueryFindCollections,
             QueryFindGame,
             QueryFindNFts,
-            
+            QueryFindAccount,
             QueryPage<()>,
             NoResponse
         )
