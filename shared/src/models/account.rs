@@ -11,6 +11,18 @@ pub struct SocialInfo {
 	pub facebook: Option<String>,
 	pub discord: Option<String>,
 }
+
+impl Into<Document> for SocialInfo {
+	fn into(self) -> Document {
+		doc! {
+			"twitter":self.twitter,
+			"web": self.web,
+			"medium": self.medium,
+			"facebook": self.facebook,
+			"discord": self.discord,
+		}
+	}
+}
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Favorites {
 	pub token_id: String,

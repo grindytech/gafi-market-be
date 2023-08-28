@@ -29,6 +29,11 @@ pub const EVENT_ITEM_ADDED: &str = "Game:ItemAdded";
 pub const EVENT_ITEM_METADATA_SET: &str = "Nfts:ItemMetadataSet";
 pub const EVENT_BUNDLE_BOUGHT: &str = "Game:BundleBought";
 pub const EVENT_WIST_LIST_FILLED: &str = "Game:WishlistFilled";
+pub const EVENT_GAME_CREATED: &str = "Game:GameCreated";
+pub const EVENT_COLLECTION_ADDED: &str = "Game:CollectionAdded";
+pub const EVENT_COLLECTION_REMOVED: &str = "Game:CollectionRemoved";
+pub const EVENT_COLLECTION_CREATED: &str = "Game:CollectionCreated";
+pub const EVENT_COLLECTION_METADATA_SET: &str = "Nfts:CollectionMetadataSet";
 
 pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
 

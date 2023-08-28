@@ -10,7 +10,10 @@ use crate::{
 };
 use serde::Deserialize;
 
-use shared::{BaseDocument, NFTCollection};
+use shared::{
+	constant::{EVENT_COLLECTION_CREATED, EVENT_COLLECTION_METADATA_SET},
+	BaseDocument, NFTCollection,
+};
 
 async fn on_collection_created(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<CollectionCreated>()?;
@@ -81,10 +84,10 @@ async fn on_collection_metadata_set(params: HandleParams<'_>) -> Result<()> {
 
 pub fn tasks() -> Vec<Task> {
 	vec![
-		Task::new("Game:CollectionCreated", move |params| {
+		Task::new(EVENT_COLLECTION_CREATED, move |params| {
 			Box::pin(on_collection_created(params))
 		}),
-		Task::new("Nfts:CollectionMetadataSet", move |params| {
+		Task::new(EVENT_COLLECTION_METADATA_SET, move |params| {
 			Box::pin(on_collection_metadata_set(params))
 		}),
 	]

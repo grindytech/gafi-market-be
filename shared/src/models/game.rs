@@ -1,4 +1,4 @@
-use mongodb::bson::{doc, oid::ObjectId};
+use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
 use crate::BaseDocument;
@@ -18,8 +18,9 @@ pub struct Game {
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
-	pub update_at: i64,
-	pub create_at: i64,
+	pub update_at: Option<DateTime>,
+	pub create_at: Option<DateTime>,
+	pub collections: Option<Vec<String>>,
 }
 
 impl BaseDocument for Game {
@@ -28,3 +29,30 @@ impl BaseDocument for Game {
 	}
 }
 
+impl Into<Document> for Game {
+	fn into(self) -> Document {
+		let social = match self.social {
+			Some(s) => {
+				let doc: Document = s.into();
+				Some(doc)
+			},
+			None => None,
+		};
+		doc! {
+			"id":self.id,
+			"game_id":self.game_id,
+			"owner":self.owner,
+			"is_verified":self.is_verified,
+			"social":social,
+			"category":self.category,
+			"name": self.name,
+			"slug": self.slug,
+			"description": self.description,
+			"logo_url": self.logo_url,
+			"banner_url": self.banner_url,
+			"update_at": DateTime::now(),
+			"create_at": self.create_at,
+			"collections": self.collections,
+		}
+	}
+}
