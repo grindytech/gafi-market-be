@@ -1,11 +1,12 @@
 use crate::{common::DBQuery, modules::account::dto::SocialInfoDto};
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::game::Game;
 use utoipa::ToSchema;
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 
+//TODO need update
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct GameDTO {
 	pub game_id: String,
 	pub owner: String,
@@ -33,7 +34,7 @@ impl From<Game> for GameDTO {
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
-			create_at: value.create_at,
+			create_at: value.create_at.unwrap_or(DateTime::MIN).timestamp_millis(),
 		}
 	}
 }

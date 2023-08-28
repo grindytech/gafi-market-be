@@ -5,11 +5,15 @@ on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [master, dev]
-    paths: ["backend/*", "shared/*"]
+    paths:
+      - "backend/**"
+      - "shared/**"
 
   pull_request:
     branches: [master, dev]
-    paths: ["backend/*", "shared/*"]
+    paths:
+      - "backend/**"
+      - "shared/**"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,4 +46,3 @@ jobs:
       - name: Unit-Test
         run: |
           cargo test -r -p backend
-
