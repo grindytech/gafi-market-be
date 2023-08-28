@@ -17,7 +17,7 @@ pub struct HistoryTx {
 	pub id: Option<ObjectId>,
 	pub tx_hash: Option<String>,
 
-	pub extrinsic_index: u32,
+	pub extrinsic_index: i32,
 	pub event_index: u32,
 	pub block_height: u32,
 

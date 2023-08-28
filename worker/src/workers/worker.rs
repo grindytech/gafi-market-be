@@ -117,11 +117,11 @@ impl Worker {
 		for ev in events.iter() {
 			let ev = ev?;
 
-			let mut extrinsic_index = None;
+			let mut extrinsic_index: Option<i32> = None;
 			match ev.phase() {
-				Phase::ApplyExtrinsic(i) => extrinsic_index = Some(i),
-				Phase::Finalization => {},
-				Phase::Initialization => {},
+				Phase::ApplyExtrinsic(i) => extrinsic_index = Some(i as i32),
+				Phase::Finalization => extrinsic_index = Some(-1),
+				Phase::Initialization => extrinsic_index = Some(-2),
 			}
 			// log::debug!("phase {:?}", ev.phase());
 			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {

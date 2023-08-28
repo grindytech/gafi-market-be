@@ -8,7 +8,7 @@ pub struct HandleParams<'a> {
 	pub db: &'a Database,
 	pub api: &'a RpcClient,
 	pub block: Block,
-	pub extrinsic_index: Option<u32>,
+	pub extrinsic_index: Option<i32>,
 	// tx
 }
 pub type OnchainEvent = EventDetails<PolkadotConfig>;
