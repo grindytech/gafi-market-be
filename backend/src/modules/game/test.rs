@@ -1,11 +1,11 @@
-use actix_web::web::Data;
 use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
 
-use crate::app_state::AppState;
-
 use log::{info, warn};
-use shared::{models::{self, game::Game}, BaseDocument};
+use shared::{
+	models::{self, game::Game},
+	BaseDocument,
+};
 
 pub async fn find_games_of_account(
 	address: &String,

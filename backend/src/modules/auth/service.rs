@@ -1,9 +1,7 @@
 use mongodb::{bson::doc, Collection, Database};
 use shared::{models, Account, BaseDocument};
 
-use crate::common::utils::generate_random_six_digit_number;
-
-use super::dto::{QueryAuth, QueryNonce};
+use super::dto::QueryAuth;
 
 pub async fn update_nonce(
 	address: &String,
@@ -23,7 +21,7 @@ pub async fn update_nonce(
 	}
 }
 
-pub async fn verify_token(
+pub async fn get_jwt_token(
 	params: QueryAuth,
 	db: Database,
 ) -> Result<Option<Account>, mongodb::error::Error> {
@@ -37,8 +35,9 @@ pub async fn verify_token(
 			{"nonce": signature},
 		]
 	};
+
 	if let Ok(Some(account_detail)) = collection.find_one(filter, None).await {
-		Ok(Some(account_detail.into()))
+		Ok(Some(account_detail))
 	} else {
 		Ok(None)
 	}

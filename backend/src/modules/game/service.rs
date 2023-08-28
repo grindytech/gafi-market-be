@@ -11,10 +11,9 @@ use shared::{
 	models::{self, game::Game},
 	BaseDocument,
 };
-/* use futures::stream::StreamExt; */
-use log::info;
+
 use mongodb::{bson::doc, Collection, Database};
-//------------
+
 use crate::common::DBQuery;
 
 // Find Game Detail By Game ID

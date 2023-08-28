@@ -1,13 +1,10 @@
 use crate::{
-	app_state::{self, AppState},
+	app_state::AppState,
 	common::{
 		utils::{generate_jwt_token, generate_random_six_digit_number},
 		ResponseBody,
 	},
-	modules::auth::{
-		dto::{QueryAuth, QueryNonce},
-		service::update_nonce,
-	},
+	modules::auth::{dto::QueryAuth, service::update_nonce},
 };
 use actix_web::{
 	get,
@@ -16,9 +13,8 @@ use actix_web::{
 	web::{self, Data},
 	Error as AWError, HttpResponse, Result,
 };
-use mongodb::Database;
 
-use super::service::verify_token;
+use super::service::get_jwt_token;
 
 #[utoipa::path(
         tag = "AuthenticationEndpoints",
@@ -40,8 +36,11 @@ pub async fn get_random_nonce(
 	let address = path.into_inner();
 
 	let result = update_nonce(&address, nonce, app_state.db.clone()).await;
-	let data = QueryNonce { address, nonce };
-	let rsp = ResponseBody::<QueryNonce>::new("", data, true);
+	let data = QueryAuth {
+		address,
+		signature: nonce,
+	};
+	let rsp = ResponseBody::<QueryAuth>::new("", data, true);
 	Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 }
 
@@ -53,8 +52,8 @@ pub async fn get_random_nonce(
         content=QueryAuth,
         description="Verify Token",
         example=json!({
-            "address":"",
-            "signature":""
+            "address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600",
+            "signature":924545
         })
     ),
     responses(
@@ -67,12 +66,14 @@ pub async fn get_verify_token(
 	app_state: Data<AppState>,
 	req: web::Json<QueryAuth>,
 ) -> Result<HttpResponse, AWError> {
-	let result = verify_token(req.0.clone(), app_state.db.clone()).await;
-	let test = generate_jwt_token(req.0.clone().address, req.0.clone().signature);
-	log::info!("Test JWT {:?}", test);
+	let result = get_jwt_token(req.0.clone(), app_state.db.clone()).await;
+
 	match result {
 		Ok(Some(account)) => {
-			let rsp = account;
+			let access_token =
+				generate_jwt_token(req.0.clone().address, req.0.signature.to_string());
+
+			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true);
 
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 		},

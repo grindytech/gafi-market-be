@@ -1,6 +1,6 @@
 use super::TokenPayload;
-use chrono::{Duration, Utc};
-use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
+use chrono::Utc;
+use jsonwebtoken::{decode, encode, Algorithm, EncodingKey, Header, TokenData, Validation};
 use mongodb::bson::doc;
 use rand::Rng;
 use std::env::var;
