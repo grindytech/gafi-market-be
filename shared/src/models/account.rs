@@ -27,7 +27,7 @@ impl Into<Document> for SocialInfo {
 pub struct Favorites {
 	pub token_id: String,
 	pub collection_id: String,
-	pub amount: i32,
+	pub amount: u32,
 }
 impl Into<Bson> for Favorites {
 	fn into(self) -> Bson {
@@ -53,6 +53,7 @@ pub struct Account {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub favorites: Option<Vec<Favorites>>,
+	pub nonce: Option<String>,
 	pub update_at: i64,
 	pub create_at: i64,
 }

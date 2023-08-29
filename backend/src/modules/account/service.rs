@@ -48,6 +48,7 @@ pub async fn create_account(account: AccountDTO, db: Database) -> Result<String,
 		update_at: account.update_at,
 		create_at: account.create_at,
 		favorites: None,
+		nonce: None,
 	};
 	let rs = col.insert_one(entity.clone(), None).await;
 	match rs {

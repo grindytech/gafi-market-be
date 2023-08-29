@@ -24,7 +24,9 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindC
         crate::modules::collection::controller::get_collection,
         crate::modules::collection::controller::search_list_collections,
         crate::modules::transaction::controller::get_history_tx,
-        crate::modules::transaction::controller::search_history_tx
+        crate::modules::transaction::controller::search_history_tx,
+        crate::modules::auth::controller::get_random_nonce,
+        crate::modules::auth::controller::get_verify_token
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
