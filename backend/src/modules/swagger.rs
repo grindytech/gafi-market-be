@@ -13,7 +13,6 @@ use utoipa::OpenApi;
 use super::{
 	auth::dto::{QueryAuth, QueryNonce},
 	game::dto::QueryFindGame,
-	nft::dto::PropertiseDTO,
 };
 
 #[derive(OpenApi)]
@@ -43,7 +42,6 @@ use super::{
             SocialInfoDto,
             NFTDTO,
             NFTCollectionDTO,
-            PropertiseDTO,
             ResponseBody<()>,
             Page<()>,
             QueryNonce,

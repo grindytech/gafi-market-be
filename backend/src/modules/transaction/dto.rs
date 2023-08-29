@@ -1,13 +1,12 @@
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, Decimal128, Document};
 use serde::{Deserialize, Serialize};
 use shared::history_tx::{self, HistoryTx};
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
 
-
 //TODO need update
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, ToSchema)]
 pub struct HistoryTxDTO {
 	pub tx_hash: Option<String>,
 
@@ -23,6 +22,12 @@ pub struct HistoryTxDTO {
 	pub to: Option<String>,
 	pub pool: Option<String>,
 	pub nfts: Option<Vec<history_tx::Nft>>,
+
+	pub amount: Option<u32>,
+	pub price: Option<Decimal128>,
+
+	pub trade_id: Option<String>,
+	pub trade_type: Option<String>,
 }
 impl From<HistoryTx> for HistoryTxDTO {
 	fn from(value: HistoryTx) -> Self {
@@ -42,6 +47,10 @@ impl From<HistoryTx> for HistoryTxDTO {
 			extrinsic_index: value.extrinsic_index,
 			pool: value.pool,
 			nfts: value.nfts,
+			amount: value.amount,
+			price: value.price,
+			trade_id: value.trade_id,
+			trade_type: value.trade_type,
 		}
 	}
 }
