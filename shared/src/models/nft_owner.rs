@@ -12,11 +12,10 @@ pub struct NFTOwner {
 	pub address: String,
 	pub amount: i32,
 	pub lock: i32,
-	pub create_at: i64,
+	pub created_at: i64,
 }
 impl BaseDocument for NFTOwner {
 	fn name() -> String {
 		"nft_owner".to_string()
 	}
 }
-

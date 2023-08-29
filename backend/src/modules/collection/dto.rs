@@ -19,7 +19,7 @@ pub struct NFTCollectionDTO {
 	pub category: Option<String>,
 
 	pub external_url: Option<String>,
-	pub create_at: DateTime,
+	pub created_at: DateTime,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
@@ -33,7 +33,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			category: value.category,
 			external_url: value.external_url,
 			owner: value.owner,
-			create_at: value.create_at,
+			created_at: value.created_at,
 		}
 	}
 }

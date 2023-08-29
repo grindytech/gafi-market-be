@@ -4,7 +4,7 @@ use mongodb::{
 };
 pub use shared::types::Result;
 use shared::{
-	constant::{EVENT_COLLECTION_REMOVED, EVENT_GAME_CREATED, EVENT_COLLECTION_ADDED},
+	constant::{EVENT_COLLECTION_ADDED, EVENT_COLLECTION_REMOVED, EVENT_GAME_CREATED},
 	BaseDocument, Game, NFTCollection,
 };
 
@@ -143,7 +143,7 @@ async fn on_game_created(params: HandleParams<'_>) -> Result<()> {
 			banner_url: None,
 			category: None,
 			collections: None,
-			create_at: Some(DateTime::now()),
+			created_at: Some(DateTime::now()),
 			description: None,
 			game_id: game.game.to_string(),
 			id: None,
@@ -153,7 +153,7 @@ async fn on_game_created(params: HandleParams<'_>) -> Result<()> {
 			owner: hex::encode(game.who.0),
 			slug: None,
 			social: None,
-			update_at: None,
+			updated_at: None,
 		}
 		.into();
 		let new_game = doc! {

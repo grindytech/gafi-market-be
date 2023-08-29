@@ -18,8 +18,8 @@ async fn test() {
 			bio: "test".to_string(),
 			logo_url: None,
 			banner_url: None,
-			update_at: Utc::now().timestamp_millis(),
-			create_at: Utc::now().timestamp_millis(),
+			updated_at: Utc::now().timestamp_millis(),
+			created_at: Utc::now().timestamp_millis(),
 			social: SocialInfoDto {
 				discord: None,
 				facebook: None,

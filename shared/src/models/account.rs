@@ -54,8 +54,8 @@ pub struct Account {
 	pub banner_url: Option<String>,
 	pub favorites: Option<Vec<Favorites>>,
 	pub nonce: Option<String>,
-	pub update_at: i64,
-	pub create_at: i64,
+	pub updated_at: i64,
+	pub created_at: i64,
 }
 impl BaseDocument for Account {
 	fn name() -> String {

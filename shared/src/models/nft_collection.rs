@@ -16,8 +16,8 @@ pub struct NFTCollection {
 	pub banner_url: Option<String>,
 	/* 	pub minting_fee: String, */
 	pub is_verified: Option<bool>,
-	pub update_at: Option<DateTime>,
-	pub create_at: DateTime,
+	pub updated_at: Option<DateTime>,
+	pub created_at: DateTime,
 	// pub raw: String,
 	pub owner: String,
 	pub external_url: Option<String>,
@@ -42,8 +42,8 @@ impl Into<Document> for NFTCollection {
 			"banner_url": self.banner_url,
 		/* 	"minting_fee": self.minting_fee, */
 			"is_verified": self.is_verified,
-			"update_at": DateTime::now(),
-			"create_at": self.create_at,
+			"updated_at": DateTime::now(),
+			"created_at": self.created_at,
 			"owner":self.owner,
 			"external_url": self.external_url,
 			"games": self.games,

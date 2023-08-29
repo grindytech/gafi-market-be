@@ -6,7 +6,7 @@ use actix_web::{
 	Error as AWError, HttpResponse, Result,
 };
 
-use super::dto::{GameDTO, GameParams};
+use super::dto::GameDTO;
 
 use crate::{
 	app_state::AppState,
@@ -54,16 +54,32 @@ pub async fn get_game(
 }
 
 #[utoipa::path(
+	post,
     tag = "GameEndpoints",
     context_path="/game",
-    params(GameParams),
+    request_body(
+		content=QueryGame,description="Find Collection by"
+		,example=json!({
+        "search":"",
+        "page": 1,
+        "size": 10,
+        "order_by": "create_at",
+        "desc": true,
+        "query":
+		{
+			"game_id":null,
+			"owner":null,
+			"category":null,
+			"is_verfied":null,
+		}
+    })),
     responses(
         (status=StatusCode::OK,description="Find List Game Success",body=Vec<GameDTO>),
         (status=StatusCode::NOT_FOUND,description="Can not found List game"))
 )]
-#[get("/search")]
-/* req: web::Json<QueryPage<QueryFindGame>>, */
-pub async fn get_games_by_query(
+#[post("/search")]
+
+pub async fn search_games_by_query(
 	app_state: Data<AppState>,
 	path: web::Json<QueryPage<QueryFindGame>>,
 ) -> Result<HttpResponse, AWError> {
@@ -88,5 +104,5 @@ pub async fn get_games_by_query(
 
 /* pub async fn get_games(app_state: Data<AppState>) -> Result<HttpResponse, AWError> {} */
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_games_by_query).service(get_game)
+	scope.service(search_games_by_query).service(get_game)
 }

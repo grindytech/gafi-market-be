@@ -87,11 +87,11 @@ impl DBQuery for QueryFindGame {
 	}
 }
 
-#[derive(Deserialize, IntoParams)]
+/* #[derive(Deserialize, IntoParams)]
 pub struct GameParams {
 	pub search: String,
 	pub page: u64,
 	pub size: u64,
 	pub order_by: String,
 	pub desc: bool,
-}
+} */

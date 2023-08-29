@@ -26,8 +26,8 @@ pub struct NFT {
 	pub visitor_count: i32,
 	pub favorite_count: i32,
 	pub propertise: Vec<Propertise>,
-	pub create_at: i64,
-	pub supply: Option<u32>
+	pub created_at: i64,
+	pub supply: Option<u32>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

@@ -7,10 +7,12 @@ use crate::{
 		nft::dto::NFTDTO,
 	},
 };
+
 use utoipa::OpenApi;
 
 use super::{
 	auth::dto::{QueryAuth, QueryNonce},
+	game::dto::QueryFindGame,
 	nft::dto::PropertiseDTO,
 };
 
@@ -19,7 +21,7 @@ use super::{
     paths(
         crate::modules::account::controller::get_account,
         crate::modules::account::controller::update_favorite,
-        crate::modules::game::controller::get_games_by_query,
+        crate::modules::game::controller::search_games_by_query,
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
         crate::modules::nft::controller::get_list_nft,
@@ -46,6 +48,8 @@ use super::{
             Page<()>,
             QueryNonce,
             QueryAuth,
+            QueryFindGame,
+        
             QueryPage<()>,
             NoResponse
         )
