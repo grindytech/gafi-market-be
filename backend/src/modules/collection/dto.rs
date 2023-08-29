@@ -1,19 +1,25 @@
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
 
-
-//TODO need update
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
 	pub collection_id: String,
+	pub owner: String,
+
 	pub name: String,
 	pub slug: Option<String>,
+
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+	pub is_verified: Option<bool>,
+	pub category: Option<String>,
+
+	pub external_url: Option<String>,
+	pub create_at: DateTime,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
@@ -23,6 +29,11 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			slug: value.slug,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
+			is_verified: value.is_verified,
+			category: value.category,
+			external_url: value.external_url,
+			owner: value.owner,
+			create_at: value.create_at,
 		}
 	}
 }
@@ -52,8 +63,13 @@ impl DBQuery for QueryFindCollections {
 				"game_id": game_id
 			});
 		}
-		doc! {
-			"$and": criteria
+
+		if criteria.len() == 0 {
+			doc! {}
+		} else {
+			doc! {
+				"$and": criteria
+			}
 		}
 	}
 }

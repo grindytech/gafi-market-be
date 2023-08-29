@@ -4,7 +4,10 @@ use crate::{
 		utils::{generate_jwt_token, generate_random_six_digit_number},
 		ResponseBody,
 	},
-	modules::auth::{dto::QueryAuth, service::update_nonce},
+	modules::auth::{
+		dto::{QueryAuth, QueryNonce},
+		service::update_nonce,
+	},
 };
 use actix_web::{
 	get,
@@ -23,8 +26,8 @@ use super::service::get_jwt_token;
 			"address"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
 		)),
         responses(
-            (status = OK, description = "Nonce Return Data", body = ResponseBody<QueryNonce>),
-              (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Nonce Return Data")
+            (status = OK, description = "Nonce Return Data", body =  ResponseBody<QueryAuth>),
+            (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Error",body=NoData)
         ),
 )]
 #[get("/nonce/{address}")]
@@ -36,11 +39,8 @@ pub async fn get_random_nonce(
 	let address = path.into_inner();
 
 	let result = update_nonce(&address, nonce, app_state.db.clone()).await;
-	let data = QueryAuth {
-		address,
-		signature: nonce,
-	};
-	let rsp = ResponseBody::<QueryAuth>::new("", data, true);
+	let data = QueryNonce { address, nonce };
+	let rsp = ResponseBody::<QueryNonce>::new("", data, true);
 	Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 }
 

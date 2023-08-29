@@ -2,39 +2,46 @@ use crate::{common::DBQuery, modules::account::dto::SocialInfoDto};
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::game::Game;
-use utoipa::ToSchema;
-
+use utoipa::{IntoParams, ToSchema};
 
 //TODO need update
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct GameDTO {
 	pub game_id: String,
 	pub owner: String,
-	pub is_verified: bool,
+
+	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfoDto>,
 	pub category: Option<String>,
 	pub name: Option<String>,
+	pub slug: Option<String>,
+
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
-	pub create_at: i64,
+
+	pub created_at: Option<DateTime>,
 }
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
 		GameDTO {
 			game_id: value.game_id,
 			owner: value.owner,
-			is_verified: value.is_verified.unwrap_or(false),
+			/* is_verified: value.is_verified.unwrap_or(false), */
+			is_verified: value.is_verified,
 			social: match value.social {
 				Some(s) => Some(s.into()),
 				None => None,
 			},
 			category: value.category,
 			name: value.name,
+			slug: value.slug,
+
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
-			create_at: value.create_at.unwrap_or(DateTime::MIN).timestamp_millis(),
+			created_at: value.created_at,
+			/* 	create_at: value.create_at, */
 		}
 	}
 }
@@ -70,8 +77,21 @@ impl DBQuery for QueryFindGame {
 				"is_verified": is_verified
 			});
 		}
-		doc! {
-			"$and": criteria
+		if criteria.len() == 0 {
+			doc! {}
+		} else {
+			doc! {
+				"$and": criteria
+			}
 		}
 	}
+}
+
+#[derive(Deserialize, IntoParams)]
+pub struct GameParams {
+	pub search: String,
+	pub page: u64,
+	pub size: u64,
+	pub order_by: String,
+	pub desc: bool,
 }

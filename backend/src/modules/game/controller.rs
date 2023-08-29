@@ -6,26 +6,23 @@ use actix_web::{
 	Error as AWError, HttpResponse, Result,
 };
 
-use shared::constant::EMPTY_STR;
+use super::dto::{GameDTO, GameParams};
 
-use super::dto::GameDTO;
 use crate::{
 	app_state::AppState,
-	common::{ QueryPage, ResponseBody},
+	common::{QueryPage, ResponseBody},
 	modules::game::{
 		dto::QueryFindGame,
 		service::{find_game_by_id, find_games_by_query},
 	},
 };
-
-
-
+use shared::constant::EMPTY_STR;
 
 #[utoipa::path(
     tag = "GameEndpoints",
     context_path = "/game",
     params((
-		"game_id"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ"
+		"game_id"=String,Path,description="ID of Game",example="7"
 	)),
     responses(
         (status=200,description="Find Game Success",body=GameDTO),
@@ -57,34 +54,20 @@ pub async fn get_game(
 }
 
 #[utoipa::path(
-    post,
     tag = "GameEndpoints",
     context_path="/game",
-    request_body(content =QueryGame,description="Find List Games Follow Query",content_type="application/json", example=json!({
-		"search":"",
-        "page": 1,
-        "size": 10,
-        "order_by": "create_at",
-        "desc": true,
-		 "query":{
-			"owner":"0sxbdfc529688922fb5036d9439a7cd61d61114f700",
-			"game_id":null,
-			"category":null,
-			"is_verified":true,
-
-		 }
-		
-	})) , 
+    params(GameParams),
     responses(
         (status=StatusCode::OK,description="Find List Game Success",body=Vec<GameDTO>),
         (status=StatusCode::NOT_FOUND,description="Can not found List game"))
 )]
-#[post("/list")]
-pub async fn get_games_by_address(
+#[get("/search")]
+/* req: web::Json<QueryPage<QueryFindGame>>, */
+pub async fn get_games_by_query(
 	app_state: Data<AppState>,
-	req: web::Json<QueryPage<QueryFindGame>>,
+	path: web::Json<QueryPage<QueryFindGame>>,
 ) -> Result<HttpResponse, AWError> {
-	let list_games = find_games_by_query(req.0, app_state.db.clone()).await;
+	let list_games = find_games_by_query(path.0, app_state.db.clone()).await;
 
 	match list_games {
 		Ok(Some(games)) => {
@@ -105,5 +88,5 @@ pub async fn get_games_by_address(
 
 /* pub async fn get_games(app_state: Data<AppState>) -> Result<HttpResponse, AWError> {} */
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_games_by_address).service(get_game)
+	scope.service(get_games_by_query).service(get_game)
 }

@@ -10,16 +10,19 @@ pub struct Game {
 	pub id: Option<ObjectId>,
 	pub game_id: String,
 	pub owner: String, // Reffence to account address
+
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
 	pub name: Option<String>,
 	pub slug: Option<String>,
+
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
-	pub update_at: Option<DateTime>,
-	pub create_at: Option<DateTime>,
+
+	pub updated_at: Option<DateTime>,
+	pub created_at: Option<DateTime>,
 	pub collections: Option<Vec<String>>,
 }
 
@@ -50,8 +53,8 @@ impl Into<Document> for Game {
 			"description": self.description,
 			"logo_url": self.logo_url,
 			"banner_url": self.banner_url,
-			"update_at": DateTime::now(),
-			"create_at": self.create_at,
+			"updated_at": DateTime::now(),
+			"created_at": self.created_at,
 			"collections": self.collections,
 		}
 	}

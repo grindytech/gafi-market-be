@@ -11,10 +11,9 @@ use shared::{
 	models::{self, game::Game},
 	BaseDocument,
 };
-/* use futures::stream::StreamExt; */
-use log::info;
+
 use mongodb::{bson::doc, Collection, Database};
-//------------
+
 use crate::common::DBQuery;
 
 // Find Game Detail By Game ID
@@ -40,8 +39,8 @@ pub async fn find_games_by_query(
 	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 
 	let query_find = params.query.to_doc();
-
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
+
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut list_games: Vec<GameDTO> = Vec::new();
 	while let Some(game) = cursor.try_next().await? {

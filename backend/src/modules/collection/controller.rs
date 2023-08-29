@@ -18,7 +18,7 @@ use super::dto::QueryFindCollections;
     context_path="/collection",
 	
     params((
-		"collection_id"=String,Path,description="Collection ID",example="Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+		"collection_id"=String,Path,description="Collection ID",example="12"
 	)),
     responses(
         (status= 200 , description="Find Collection Success",body= NFTCollectionDTO),
@@ -69,7 +69,8 @@ pub async fn get_collection(
         "query":
 		{
 			"name":null,
-			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+			"collection_id":null,
+			"game_id":null,
 		}
     })),
     responses(
