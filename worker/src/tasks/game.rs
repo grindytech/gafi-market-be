@@ -4,7 +4,7 @@ use mongodb::{
 };
 pub use shared::types::Result;
 use shared::{
-	constant::{EVENT_COLLECTION_REMOVED, EVENT_GAME_CREATED, EVENT_COLLECTION_ADDED},
+	constant::{EVENT_COLLECTION_ADDED, EVENT_COLLECTION_REMOVED, EVENT_GAME_CREATED},
 	BaseDocument, Game, NFTCollection,
 };
 
@@ -52,7 +52,7 @@ async fn on_collection_added(params: HandleParams<'_>) -> Result<()> {
 					"game_id": ev.game.to_string(),
 				},
 				doc! {
-					"collections": collections,
+					"$set":{"collections": collections,}
 				},
 				None,
 			)
@@ -63,7 +63,7 @@ async fn on_collection_added(params: HandleParams<'_>) -> Result<()> {
 					"collection_id": ev.collection.to_string(),
 				},
 				doc! {
-					"games": games,
+					"$set": {"games": games,}
 				},
 				None,
 			)
@@ -111,7 +111,7 @@ async fn on_collection_removed(params: HandleParams<'_>) -> Result<()> {
 					"game_id": ev.game.to_string(),
 				},
 				doc! {
-					"collections": collections,
+					"$set":{"collections": collections,}
 				},
 				None,
 			)
@@ -122,7 +122,7 @@ async fn on_collection_removed(params: HandleParams<'_>) -> Result<()> {
 					"collection_id": ev.collection.to_string(),
 				},
 				doc! {
-					"games": games,
+					"$set":{"games": games,}
 				},
 				None,
 			)
