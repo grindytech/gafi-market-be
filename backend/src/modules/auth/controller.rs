@@ -40,7 +40,7 @@ pub async fn get_random_nonce(
 
 	let result = update_nonce(&address, nonce, app_state.db.clone()).await;
 	let data = QueryNonce { address, nonce };
-	let rsp = ResponseBody::<QueryNonce>::new("", data, true);
+	let rsp = ResponseBody::<QueryNonce>::new("Sign to Authentication", data, true);
 	Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 }
 

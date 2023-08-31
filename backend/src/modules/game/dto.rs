@@ -2,9 +2,8 @@ use crate::{common::DBQuery, modules::account::dto::SocialInfoDto};
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::game::Game;
-use utoipa::{IntoParams, ToSchema};
+use utoipa::ToSchema;
 
-//TODO need update
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct GameDTO {
 	pub game_id: String,

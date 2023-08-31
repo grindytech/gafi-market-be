@@ -8,11 +8,13 @@ use crate::{
 	},
 };
 
+
 use utoipa::OpenApi;
 
 use super::{
 	auth::dto::{QueryAuth, QueryNonce},
 	game::dto::QueryFindGame,
+	pool::dto::PoolDTO,
 	transaction::dto::QueryFindTX,
 };
 
@@ -41,6 +43,7 @@ use super::{
         schemas(
             AccountDTO,
             GameDTO,
+            PoolDTO,
             SocialInfoDto,
             NFTDTO,
             NFTCollectionDTO,
@@ -51,7 +54,8 @@ use super::{
             QueryFindGame,
             QueryFindTX,
             QueryPage<()>,
-            NoResponse
+            NoResponse,
+        
         )
     ),
     servers(

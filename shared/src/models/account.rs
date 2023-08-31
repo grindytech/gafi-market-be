@@ -53,7 +53,7 @@ pub struct Account {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub favorites: Option<Vec<Favorites>>,
-	pub nonce: Option<String>,
+	pub nonce: Option<u32>,
 	pub updated_at: i64,
 	pub created_at: i64,
 }
