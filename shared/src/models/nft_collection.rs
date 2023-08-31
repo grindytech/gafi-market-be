@@ -7,14 +7,13 @@ pub struct NFTCollection {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub collection_id: String,
-
 	pub name: Option<String>,
 	pub slug: Option<String>,
 
 	pub category: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
-	/* 	pub minting_fee: String, */
+	// pub minting_fee: String,
 	pub is_verified: Option<bool>,
 	pub updated_at: Option<DateTime>,
 	pub created_at: DateTime,
@@ -40,7 +39,7 @@ impl Into<Document> for NFTCollection {
 			"category": self.category,
 			"logo_url": self.logo_url,
 			"banner_url": self.banner_url,
-		/* 	"minting_fee": self.minting_fee, */
+			// "minting_fee": self.minting_fee,
 			"is_verified": self.is_verified,
 			"updated_at": DateTime::now(),
 			"created_at": self.created_at,

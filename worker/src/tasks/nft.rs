@@ -60,19 +60,8 @@ async fn on_metadata_set(params: HandleParams<'_>) -> Result<()> {
 async fn on_item_added(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::ItemAdded>()?;
 	if let Some(ev) = event_parse {
-		let nft_db = params.db.collection::<NFT>(NFT::name().as_str());
-		let query =
-			doc! {"token_id": ev.item.to_string(),"collection_id": ev.collection.to_string()};
-
-		let update = doc! {"$set": {
-			"supply": ev.amount,
-			"updated_at": DateTime::now(),
-		}};
-
-		nft_db.update_one(query, update, None).await?;
-		log::info!("Nft item added {:?}", ev);
+		services::nft::refresh_supply(ev.collection, ev.item, params.db, params.api).await?;
 	}
-
 	Ok(())
 }
 //ItemCreated
@@ -111,9 +100,9 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 		//get balances & update
 		for key in need_refetch_amount.keys() {
 			let mut arr_str = key.split(":");
-			let collection_id = arr_str.next().unwrap();
-			let token_id = arr_str.next().unwrap();
-			let amount = need_refetch_amount.get(key).unwrap();
+			let collection_id = arr_str.next().expect("get collection_id fail");
+			let token_id = arr_str.next().expect("get token_id fail");
+			let amount = need_refetch_amount.get(key).expect("fail to get need_refetch_amount");
 			nfts.push(shared::history_tx::Nft {
 				amount: *amount,
 				collection: collection_id.parse()?,

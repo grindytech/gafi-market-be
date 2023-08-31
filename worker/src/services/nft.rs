@@ -1,8 +1,33 @@
 use mongodb::{bson::doc, options::UpdateOptions, results::UpdateResult, Database};
-use shared::{types::Result, BaseDocument, NFTOwner};
+use shared::{types::Result, BaseDocument, NFTOwner, NFT};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};
+
+pub async fn refresh_supply(
+	collection_id: u32,
+	token_id: u32,
+	db: &Database,
+	api: &RpcClient,
+) -> Result<UpdateResult> {
+	let query_address = gafi::storage().game().supply_of(collection_id, token_id);
+	let supply = api
+		.storage()
+		.at_latest()
+		.await?
+		.fetch(&query_address)
+		.await?
+		.expect(format!("Fail to get supply of {}, {}", collection_id, token_id,).as_str());
+	let nft_db = db.collection::<NFT>(NFT::name().as_str());
+	let query = doc! {
+		"collection_id": collection_id.to_string(),
+		"token_id": token_id.to_string(),
+	};
+	let update = doc! {"$set":{"supply": supply}};
+	let rs = nft_db.update_one(query, update.clone(), None).await?;
+	log::info!("Nft supply updated {:?}", update);
+	Ok(rs)
+}
 
 pub async fn refresh_balance(
 	target: AccountId32,
