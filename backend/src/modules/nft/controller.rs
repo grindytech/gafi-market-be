@@ -134,7 +134,7 @@ pub async fn search_list_nfts(
 	req: web::Json<QueryPage<QueryFindNFts>>,
 ) -> Result<HttpResponse, AWError> {
 	let list_nfts = find_nfts_by_query(req.0, app_state.db.clone()).await;
-	log::info!("What error {:?}",list_nfts);
+	
 	match list_nfts {
 		Ok(Some(nfts)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))

@@ -10,7 +10,7 @@ pub struct NFTCollectionDTO {
 	pub collection_id: String,
 	pub owner: String,
 
-	pub name: String,
+	pub name: Option<String>,
 	pub slug: Option<String>,
 
 	pub logo_url: Option<String>,

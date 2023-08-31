@@ -18,7 +18,8 @@ use actix_web::{
 			"address"=String,Path,description="Address of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
 		)),
         responses(
-            (status = OK, description = "Account Response", body = AccountObject)
+            (status = StatusCode::OK, description = "Find Account Detail Success", body = AccountObject),
+			(status = StatusCode::NOT_FOUND, description = "Can Not Found This Account", body = NoData)
         ),
     )]
 #[get("/{address}")]
@@ -52,7 +53,7 @@ pub async fn get_account(
 	tag="AccountEndpoints",
 	context_path="/account",
 	request_body(
-		content=QueryFindAccount,description="Update New Favorite",
+		content=QueryFindAccount,description="Update New Favorite of a account",
 		example=json!({
 			"search":"",
 			"page": 1,

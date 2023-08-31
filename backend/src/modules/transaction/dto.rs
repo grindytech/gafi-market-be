@@ -103,8 +103,12 @@ impl DBQuery for QueryFindTX {
 				"token_id": token_id
 			});
 		}
-		doc! {
-			"$and":criteria
+		if criteria.len() == 0 {
+			doc! {}
+		} else {
+			doc! {
+				"$and": criteria
+			}
 		}
 	}
 }

@@ -8,9 +8,9 @@ use utoipa::{
 
 use crate::modules::{
 	account::dto::AccountDTO,
-	collection::dto::QueryFindCollections,
+	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::QueryFindGame,
-	nft::dto::{QueryFindNFts, NFTDTO},
+	nft::dto::{QueryFindNFts, NFTDTO}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
 };
 
 #[derive(Debug, Serialize)]
@@ -41,7 +41,12 @@ impl<T> ResponseBody<T> {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
-#[aliases(NFTPage = Page<NFTDTO>)]
+#[aliases(
+	NFTPage = Page<NFTDTO>,
+	TxPage = Page<HistoryTxDTO>,
+	CollectionPage = Page<NFTCollectionDTO>,
+	PoolPage = Page<PoolDTO>,
+)]
 pub struct Page<T> {
 	pub message: String,
 	pub data: Vec<T>,
@@ -66,7 +71,9 @@ impl<T> Page<T> {
 #[aliases(
 	QueryNFT = QueryPage<QueryFindNFts>, 
 	QueryCollection = QueryPage<QueryFindCollections> ,
-	QueryGame=QueryPage<QueryFindGame>
+	QueryGame=QueryPage<QueryFindGame>,
+	QueryTransaction=QueryPage<QueryFindTX>,
+	QueryPool=QueryPage<QueryFindPool>
 )]
 
 pub struct QueryPage<T> {

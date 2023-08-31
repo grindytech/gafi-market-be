@@ -21,8 +21,8 @@ use super::dto::QueryFindCollections;
 		"collection_id"=String,Path,description="Collection ID",example="12"
 	)),
     responses(
-        (status= 200 , description="Find Collection Success",body= NFTCollectionDTO),
-        (status=NOT_FOUND,description="Collection was not found")
+        (status= StatusCode::OK , description="Find Collection Detail Success",body= NFTCollectionDTO),
+        (status=StatusCode::NOT_FOUND,description="Collection was not found")
     )
 )]
 #[get("/{collection_id}")]
@@ -74,8 +74,8 @@ pub async fn get_collection(
 		}
     })),
     responses(
-        (status= 200 , description="Search List Collections Success",body= NFTCollectionDTO),
-        (status=NOT_FOUND,description="Collections was not found")
+        (status= StatusCode::OK , description="Search List Collections Success",body= CollectionPage),
+        (status=StatusCode::NOT_FOUND,description="Collections was not found")
     )
 )]
 #[post("/search")]

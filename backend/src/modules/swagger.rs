@@ -13,6 +13,7 @@ use utoipa::OpenApi;
 use super::{
 	auth::dto::{QueryAuth, QueryNonce},
 	game::dto::QueryFindGame,
+	transaction::dto::QueryFindTX,
 };
 
 #[derive(OpenApi)]
@@ -30,7 +31,8 @@ use super::{
         crate::modules::transaction::controller::get_history_tx,
         crate::modules::transaction::controller::search_history_tx,
         crate::modules::auth::controller::get_random_nonce,
-        crate::modules::auth::controller::get_verify_token
+        crate::modules::auth::controller::get_verify_token,
+        crate::modules::pool::controller::search_list_pools,
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -47,7 +49,7 @@ use super::{
             QueryNonce,
             QueryAuth,
             QueryFindGame,
-        
+            QueryFindTX,
             QueryPage<()>,
             NoResponse
         )

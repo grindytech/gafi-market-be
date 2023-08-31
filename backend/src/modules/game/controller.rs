@@ -25,8 +25,8 @@ use shared::constant::EMPTY_STR;
 		"game_id"=String,Path,description="ID of Game",example="7"
 	)),
     responses(
-        (status=200,description="Find Game Success",body=GameDTO),
-        (status=NOT_FOUND,description="Can not found this game"))
+        (status=200,description="Find Game Detail Success",body=GameDTO),
+        (status=NOT_FOUND,description="Can Not Found This Game"))
 )]
 #[get("/{game_id}")]
 pub async fn get_game(
@@ -74,7 +74,7 @@ pub async fn get_game(
 		}
     })),
     responses(
-        (status=StatusCode::OK,description="Find List Game Success",body=Vec<GameDTO>),
+        (status=StatusCode::OK,description="Find List Game Success",body=GamePage),
         (status=StatusCode::NOT_FOUND,description="Can not found List game"))
 )]
 #[post("/search")]

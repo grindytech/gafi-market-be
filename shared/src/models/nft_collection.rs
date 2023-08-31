@@ -8,7 +8,7 @@ pub struct NFTCollection {
 	pub id: Option<ObjectId>,
 	pub collection_id: String,
 
-	pub name: String,
+	pub name: Option<String>,
 	pub slug: Option<String>,
 
 	pub category: Option<String>,
