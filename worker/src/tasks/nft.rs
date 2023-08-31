@@ -60,19 +60,8 @@ async fn on_metadata_set(params: HandleParams<'_>) -> Result<()> {
 async fn on_item_added(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::ItemAdded>()?;
 	if let Some(ev) = event_parse {
-		let nft_db = params.db.collection::<NFT>(NFT::name().as_str());
-		let query =
-			doc! {"token_id": ev.item.to_string(),"collection_id": ev.collection.to_string()};
-
-		let update = doc! {"$set": {
-			"supply": ev.amount,
-			"updated_at": DateTime::now(),
-		}};
-
-		nft_db.update_one(query, update, None).await?;
-		log::info!("Nft item added {:?}", ev);
+		services::nft::refresh_supply(ev.collection, ev.item, params.db, params.api).await?;
 	}
-
 	Ok(())
 }
 //ItemCreated

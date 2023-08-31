@@ -4,8 +4,8 @@ use mongodb::{
 };
 use shared::{
 	constant::{
-		EVENT_BOUGHT_ITEM, EVENT_SET_BUY, EVENT_SET_PRICE, TRADE_SET_BUY,
-		TRADE_SET_PRICE, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
+		EVENT_BOUGHT_ITEM, EVENT_SET_BUY, EVENT_SET_PRICE, TRADE_SET_BUY, TRADE_SET_PRICE,
+		TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
 	},
 	history_tx, models, BaseDocument, Trade,
 };
@@ -74,12 +74,12 @@ async fn on_item_bought(params: HandleParams<'_>) -> Result<()> {
 						"trade_id": trade.trade_id,
 					},
 					doc! {
-							  "$set":{
-								  // "amount": trade_item.amount,
-								  "status": TRADE_STATUS_SOLD,
-					"sold": sold,
-							  }
-						  },
+					"$set":{
+						// "amount": trade_item.amount,
+						"status": TRADE_STATUS_SOLD,
+						"sold": sold,
+					}
+					},
 					None,
 				)
 				.await?;
