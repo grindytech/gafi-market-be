@@ -100,9 +100,9 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 		//get balances & update
 		for key in need_refetch_amount.keys() {
 			let mut arr_str = key.split(":");
-			let collection_id = arr_str.next().unwrap();
-			let token_id = arr_str.next().unwrap();
-			let amount = need_refetch_amount.get(key).unwrap();
+			let collection_id = arr_str.next().expect("get collection_id fail");
+			let token_id = arr_str.next().expect("get token_id fail");
+			let amount = need_refetch_amount.get(key).expect("fail to get need_refetch_amount");
 			nfts.push(shared::history_tx::Nft {
 				amount: *amount,
 				collection: collection_id.parse()?,

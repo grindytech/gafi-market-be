@@ -26,7 +26,7 @@ async fn on_collection_added(params: HandleParams<'_>) -> Result<()> {
 				None,
 			)
 			.await?
-			.unwrap();
+			.expect("Game not found");
 		let collection = collection_db
 			.find_one(
 				doc! {
@@ -35,7 +35,7 @@ async fn on_collection_added(params: HandleParams<'_>) -> Result<()> {
 				None,
 			)
 			.await?
-			.unwrap();
+			.expect("NFTCollection not found");
 		let mut collections: Vec<String> = match game.collections {
 			Some(c) => c,
 			None => vec![],
@@ -85,7 +85,7 @@ async fn on_collection_removed(params: HandleParams<'_>) -> Result<()> {
 				None,
 			)
 			.await?
-			.unwrap();
+			.expect("Game not found");
 		let collection = collection_db
 			.find_one(
 				doc! {
@@ -94,7 +94,7 @@ async fn on_collection_removed(params: HandleParams<'_>) -> Result<()> {
 				None,
 			)
 			.await?
-			.unwrap();
+			.expect("NFTCollection not found");
 		let mut collections: Vec<String> = match game.collections {
 			Some(c) => c.into_iter().filter(|c| *c != ev.collection.to_string()).collect(),
 			None => vec![],

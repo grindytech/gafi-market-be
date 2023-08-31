@@ -30,11 +30,11 @@ pub async fn get_trade_config(
 		.storage()
 		.at_latest()
 		.await
-		.unwrap()
+		.expect("Fail to get blockchain storage")
 		.fetch(&query_address)
 		.await
-		.unwrap()
-		.unwrap();
+		.expect("Fail to get trade_config")
+		.expect("Fail to get trade_config");
 	Ok(trade_config)
 }
 
@@ -59,6 +59,13 @@ pub async fn bundle_of(
 	api: &RpcClient,
 ) -> shared::types::Result<Vec<Package<u32, u32>>> {
 	let query_address = gafi::storage().game().bundle_of(trade_id);
-	let trade_config = api.storage().at_latest().await?.fetch(&query_address).await?.unwrap().0;
+	let trade_config = api
+		.storage()
+		.at_latest()
+		.await?
+		.fetch(&query_address)
+		.await?
+		.expect("Fail to get trade config")
+		.0;
 	Ok(trade_config)
 }

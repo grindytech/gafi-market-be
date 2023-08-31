@@ -67,10 +67,10 @@ async fn on_auction_claimed(params: HandleParams<'_>) -> Result<()> {
 			),
 		};
 		services::history::upsert(history, params.db).await?;
-		for nft in trade.source.unwrap() {
+		for nft in trade.source.expect("on_auction_claimed trade.source fail") {
 			if who.is_some() {
 				services::nft::refresh_balance(
-					who.clone().unwrap(),
+					who.clone().expect("on_auction_claimed trade.source who"),
 					nft.collection.to_string(),
 					nft.item.to_string(),
 					params.db,
