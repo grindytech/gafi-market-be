@@ -1,7 +1,15 @@
-use mongodb::{bson::doc, Collection, Database};
-use shared::{models, Account, BaseDocument};
+use chrono::Utc;
+use mongodb::{
+	bson::doc,
+	options::{FindOneAndUpdateOptions, ReturnDocument},
+	Collection, Database,
+};
+use shared::{models, Account, BaseDocument, SocialInfo};
 
-use crate::common::utils::generate_random_six_digit_number;
+use crate::{
+	common::utils::generate_uuid,
+	modules::account::{dto::AccountDTO, service::create_account},
+};
 
 use super::dto::QueryAuth;
 /**
@@ -10,31 +18,64 @@ use super::dto::QueryAuth;
  */
 pub async fn update_nonce(
 	address: &String,
-	nonce: u32,
+	nonce: String,
 	db: Database,
-) -> Result<Option<Account>, mongodb::error::Error> {
-	let col: Collection<Account> = db.collection(models::account::Account::name().as_str());
+) -> Result<String, mongodb::error::Error> {
+	let col: Collection<AccountDTO> = db.collection(models::account::Account::name().as_str());
 
+	/* 	let find_options = FindOneAndUpdateOptions::builder()
+	.return_document(ReturnDocument::After)
+	.upsert(true)
+	.build(); */
 	let filter = doc! {"address":address};
 	let update = doc! {
-		"$set":{"nonce":nonce}
+		"$set":{"nonce":nonce.clone()}
 	};
+
 	if let Ok(Some(account)) = col.find_one_and_update(filter, update, None).await {
-		Ok(Some(account))
+		Ok(account.address)
 	} else {
-		Ok(None)
+		let new_account = create_account(
+			AccountDTO {
+				address: address.clone(),
+				balance: None,
+				is_verified: None,
+				name: address.to_string(),
+				bio: None,
+				logo_url: None,
+				banner_url: None,
+				updated_at: Utc::now().timestamp_millis(),
+				created_at: Utc::now().timestamp_millis(),
+				social: SocialInfo {
+					discord: None,
+					facebook: None,
+					medium: None,
+					twitter: None,
+					web: None,
+				},
+				favorites: None,
+				nonce: Some(nonce),
+			},
+			db.clone(),
+		)
+		.await;
+		/* let insert_result = col.insert_one(new_account, None). */
+		match new_account {
+			Ok(account) => Ok(account),
+			Err(e) => Err(e),
+		}
 	}
 }
 
-pub async fn get_jwt_token(
+pub async fn get_access_token(
 	params: QueryAuth,
 	db: Database,
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let address = params.address;
-	let signature = params.signature; // nonce
+	let signature = params.signature;
 
 	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
-	let nonce = generate_random_six_digit_number();
+	let nonce = generate_uuid();
 	let filter = doc! {
 		"$and": [
 			{"address": address},

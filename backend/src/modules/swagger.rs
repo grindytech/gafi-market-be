@@ -1,7 +1,7 @@
 use crate::{
 	common::{NoResponse, Page, QueryPage, ResponseBody},
 	modules::{
-		account::dto::{AccountDTO, SocialInfoDto},
+		account::dto::AccountDTO,
 		collection::dto::NFTCollectionDTO,
 		game::dto::GameDTO,
 		nft::dto::NFTDTO,
@@ -9,6 +9,7 @@ use crate::{
 };
 
 
+use shared::SocialInfo;
 use utoipa::OpenApi;
 
 use super::{
@@ -44,7 +45,7 @@ use super::{
             AccountDTO,
             GameDTO,
             PoolDTO,
-            SocialInfoDto,
+            SocialInfo,
             NFTDTO,
             NFTCollectionDTO,
             ResponseBody<()>,

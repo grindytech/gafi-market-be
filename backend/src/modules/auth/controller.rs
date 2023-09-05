@@ -1,13 +1,10 @@
 use crate::{
 	app_state::AppState,
 	common::{
-		utils::{generate_jwt_token, generate_random_six_digit_number},
+		utils::{generate_jwt_token, generate_message_sign_in, generate_uuid},
 		ResponseBody,
 	},
-	modules::auth::{
-		dto::{QueryAuth, QueryNonce},
-		service::update_nonce,
-	},
+	modules::auth::{dto::QueryAuth, dto::QueryNonce, service::update_nonce},
 };
 use actix_web::{
 	get,
@@ -17,16 +14,16 @@ use actix_web::{
 	Error as AWError, HttpResponse, Result,
 };
 
-use super::service::get_jwt_token;
+use super::service::get_access_token;
 
 #[utoipa::path(
         tag = "AuthenticationEndpoints",
         context_path = "/auth",
         params((
-			"address"=String,Path,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
+			"address"=String,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
 		)),
         responses(
-            (status = OK, description = "Nonce Return Data", body =  ResponseBody<QueryAuth>),
+            (status = OK, description = "Authentication Message", body =  ResponseBody<QueryNonce>),
             (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Error",body=NoData)
         ),
 )]
@@ -35,12 +32,19 @@ pub async fn get_random_nonce(
 	app_state: Data<AppState>,
 	path: web::Path<String>,
 ) -> Result<HttpResponse, AWError> {
-	let nonce = generate_random_six_digit_number();
+	let nonce = generate_uuid();
 	let address = path.into_inner();
+	/* log::info!("address {:?}", address); */
+	let result = update_nonce(&address, nonce.clone(), app_state.db.clone()).await;
 
-	let result = update_nonce(&address, nonce, app_state.db.clone()).await;
-	let data = QueryNonce { address, nonce };
-	let rsp = ResponseBody::<QueryNonce>::new("Sign to Authentication", data, true);
+	let data = generate_message_sign_in(&address, &nonce);
+	let rsp = ResponseBody::<QueryNonce>::new(
+		"Signature Request",
+		QueryNonce {
+			login_message: data,
+		},
+		true,
+	);
 	Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 }
 
@@ -66,12 +70,11 @@ pub async fn get_verify_token(
 	app_state: Data<AppState>,
 	req: web::Json<QueryAuth>,
 ) -> Result<HttpResponse, AWError> {
-	let result = get_jwt_token(req.0.clone(), app_state.db.clone()).await;
+	let result = get_access_token(req.0.clone(), app_state.db.clone()).await;
 
 	match result {
 		Ok(Some(account)) => {
-			let access_token =
-				generate_jwt_token(req.0.clone().address, req.0.signature.to_string());
+			let access_token = generate_jwt_token(req.0.clone().address, app_state);
 
 			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true);
 

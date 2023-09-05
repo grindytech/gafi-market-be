@@ -1,9 +1,11 @@
+use crate::app_state::AppState;
+
+use super::TokenPayload;
+use actix_web::web::Data;
 use chrono::Utc;
 use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use mongodb::bson::doc;
-use rand::Rng;
-
-use super::TokenPayload;
+use uuid::Uuid;
 
 pub async fn get_total_page(number_items: usize, size: u64) -> u64 {
 	(number_items as f64 / size as f64).ceil() as u64
@@ -20,14 +22,34 @@ pub async fn get_filter_option(
 	Some(find_options)
 }
 
-pub fn generate_random_six_digit_number() -> u32 {
-	let mut rng = rand::thread_rng();
-	rng.gen_range(100_000..999_999)
+pub fn generate_uuid() -> String {
+	let uuid = Uuid::new_v4();
+	uuid.to_string()
+}
+pub fn generate_message_sign_in(wallet_address: &str, nonce: &str) -> String {
+	let template = format!(
+        "Welcome to Gafi Market!\n\
+         \n\
+         Click to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\
+         \n\
+         This request will not trigger a blockchain transaction or cost any gas fees.\n\
+         \n\
+         Your authentication status will reset after 24 hours.\n\
+         \n\
+         Wallet address:\n\
+         {}\n\
+         \n\
+         Nonce:\n\
+         {}",
+        wallet_address, nonce
+    );
+
+	template
 }
 
 pub fn generate_jwt_token(
 	address: String,
-	sub: String,
+	app: Data<AppState>,
 ) -> Result<String, jsonwebtoken::errors::Error> {
 	// Define the current timestamp
 	let current_timestamp = Utc::now().timestamp() as usize;
@@ -35,15 +57,14 @@ pub fn generate_jwt_token(
 	// Define the payload data
 	let payload = TokenPayload {
 		address,
-		sub,
 		iat: current_timestamp,
 		exp: current_timestamp + 3600, // Token expires in 1 hour
 	};
-	let secret_key = std::env::var("JWT_TOKEN_SECRET").expect("JWT_TOKEN_SECRET must be set");
+
 	let token = encode(
 		&Header::new(Algorithm::HS256),
 		&payload,
-		&EncodingKey::from_secret(secret_key.as_ref()),
+		&EncodingKey::from_secret(app.config.secret_key.as_ref()),
 	)?;
 
 	Ok(token)

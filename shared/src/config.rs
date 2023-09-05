@@ -6,6 +6,7 @@ pub struct Config {
 	pub rpc: String,
 	pub start_block: u32,
 	pub chain_decimal: u32,
+	pub secret_key: String,
 }
 
 impl Config {
@@ -16,12 +17,14 @@ impl Config {
 		let mongodb_db_name =
 			std::env::var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
 		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("18".to_string()).parse().unwrap();
+		let secret_key = std::env::var("JWT_TOKEN_SECRET").expect("JWT_TOKEN_SECRET must be set");
 		Config {
 			mongodb_uri,
 			mongodb_db_name,
 			rpc,
 			start_block,
 			chain_decimal,
+			secret_key,
 		}
 	}
 }

@@ -13,15 +13,20 @@ use crate::common::DBQuery;
 
 pub struct AccountDTO {
 	pub address: String,
-	pub balance: String,
-	pub is_verified: bool,
+	pub balance: Option<String>,
+
+	pub is_verified: Option<bool>,
 	pub name: String,
-	pub bio: String,
+	pub bio: Option<String>,
+
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+
 	pub updated_at: i64,
 	pub created_at: i64,
-	pub social: SocialInfoDto,
+
+	pub nonce: Option<String>,
+	pub social: SocialInfo,
 	pub favorites: Option<Vec<Favorites>>,
 }
 
@@ -39,39 +44,7 @@ impl From<Account> for AccountDTO {
 			created_at: value.created_at,
 			social: value.social.into(),
 			favorites: value.favorites,
-		}
-	}
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct SocialInfoDto {
-	pub twitter: Option<String>,
-	pub web: Option<String>,
-	pub medium: Option<String>,
-	pub facebook: Option<String>,
-	pub discord: Option<String>,
-}
-
-impl Into<SocialInfo> for SocialInfoDto {
-	fn into(self) -> SocialInfo {
-		SocialInfo {
-			discord: self.discord,
-			facebook: self.facebook,
-			medium: self.medium,
-			twitter: self.twitter,
-			web: self.web,
-		}
-	}
-}
-
-impl From<SocialInfo> for SocialInfoDto {
-	fn from(value: SocialInfo) -> Self {
-		SocialInfoDto {
-			twitter: value.twitter,
-			web: value.web,
-			medium: value.medium,
-			facebook: value.facebook,
-			discord: value.discord,
+			nonce: value.nonce,
 		}
 	}
 }

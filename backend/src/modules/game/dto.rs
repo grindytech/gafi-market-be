@@ -1,7 +1,7 @@
-use crate::{common::DBQuery, modules::account::dto::SocialInfoDto};
+use crate::common::DBQuery;
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
-use shared::models::game::Game;
+use shared::{models::game::Game, SocialInfo};
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
@@ -10,7 +10,7 @@ pub struct GameDTO {
 	pub owner: String,
 
 	pub is_verified: Option<bool>,
-	pub social: Option<SocialInfoDto>,
+	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
 	pub name: Option<String>,
 	pub slug: Option<String>,

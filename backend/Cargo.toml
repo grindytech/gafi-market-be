@@ -24,4 +24,4 @@ serde_json = {workspace = true}
 shared = {path = "../shared"}
 utoipa = {workspace = true}
 utoipa-swagger-ui = {workspace = true}
-rand= {workspace=true}
+uuid={workspace=true}

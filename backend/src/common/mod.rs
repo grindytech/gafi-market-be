@@ -89,7 +89,7 @@ pub struct QueryPage<T> {
 #[derive(Debug, Serialize, Deserialize)]
 struct TokenPayload {
 	address: String,
-	sub: String,
+	/* sub: String, */
 	iat: usize,
 	exp: usize,
 }

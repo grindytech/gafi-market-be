@@ -5,6 +5,7 @@ use actix_web::{
 	Error as AWError, HttpResponse, post,
 };
 use shared::constant::EMPTY_STR;
+use utoipa::openapi::Info;
 
 use crate::{
 	app_state::AppState,
@@ -64,7 +65,7 @@ pub async fn get_collection(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "create_at",
+        "order_by": "created_at",
         "desc": true,
         "query":
 		{
@@ -81,6 +82,7 @@ pub async fn get_collection(
 #[post("/search")]
 pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<QueryPage<QueryFindCollections>>)->Result<HttpResponse,AWError>{
 	let list_collections=find_collections_by_query(req.0, app_state.db.clone()).await;
+	log::info!("Error {:?}",list_collections);
 	match list_collections {
 		Ok(Some(collections)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(collections))

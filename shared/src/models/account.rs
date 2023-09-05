@@ -45,15 +45,19 @@ pub struct Account {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub address: String,
-	pub balance: String,
-	pub is_verified: bool,
+	pub balance: Option<String>,
+	pub is_verified: Option<bool>,
+
 	pub name: String,
-	pub bio: String,
+	pub bio: Option<String>,
 	pub social: SocialInfo,
+
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+
 	pub favorites: Option<Vec<Favorites>>,
-	pub nonce: Option<u32>,
+
+	pub nonce: Option<String>,
 	pub updated_at: i64,
 	pub created_at: i64,
 }
