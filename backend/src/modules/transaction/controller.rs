@@ -22,11 +22,11 @@ use super::{
     tag = "TransactionEndpoints",
     context_path = "/tx",
     params((
-		"tx_hash"=String,Path,description="ID of Game",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ"
+		"tx_hash"=String,Path,description="ID of Transaction",example="Q29sbGVjdGlvblR5cGU6MjU5MzgzMjQ"
 	)),
     responses(
-        (status=200,description="Find Game Success",body=GameDTO),
-        (status=NOT_FOUND,description="Can not found this game"))
+        (status=200,description="Find Transaction Success",body=HistoryTxDTO),
+        (status=NOT_FOUND,description="Can not found this TX"))
 )]
 #[get("/{tx_hash}")]
 pub async fn get_history_tx(

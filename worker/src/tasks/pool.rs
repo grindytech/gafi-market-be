@@ -63,7 +63,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 		let pool: Document = Pool {
 			admin: hex::encode(pool_detail.admin.0),
 			begin_at: pool_detail.mint_settings.start_block.unwrap_or(0).into(),
-			create_at: DateTime::now().timestamp_millis(),
+			created_at: DateTime::now().timestamp_millis(),
 			end_at: pool_detail.mint_settings.end_block.unwrap_or(0).into(),
 			id: None,
 			loot_table: loot_table.clone(),
@@ -73,7 +73,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			owner_deposit: pool_detail.owner_deposit.to_string(),
 			pool_id: ev.pool.to_string(),
 			type_pool: pool_type.to_string(),
-			update_at: DateTime::now().timestamp_millis(),
+			updated_at: DateTime::now().timestamp_millis(),
 		}
 		.into();
 

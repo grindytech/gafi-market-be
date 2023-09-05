@@ -1,4 +1,4 @@
-use mongodb::bson::{doc, oid::ObjectId};
+use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use serde::{Deserialize, Serialize};
 
 use crate::BaseDocument;
@@ -15,19 +15,23 @@ pub struct NFT {
 	pub id: Option<ObjectId>,
 	pub token_id: String,
 	pub collection_id: String,
-	pub amount: i32,
-	pub is_burn: bool,
-	pub name: String,
-	pub description: String,
-	pub status: String,
-	pub external_url: String,
-	pub weight: String,
-	pub img_url: String,
-	pub visitor_count: i32,
-	pub favorite_count: i32,
-	pub propertise: Vec<Propertise>,
-	pub create_at: i64,
-	pub supply: Option<u32>
+
+	pub is_burn: Option<bool>,
+
+	pub name: Option<String>,
+	pub description: Option<String>,
+	pub status: Option<String>,
+
+	pub external_url: Option<String>,
+	pub weight: Option<String>,
+	pub img_url: Option<String>,
+
+	pub visitor_count: Option<i32>,
+	pub favorite_count: Option<i32>,
+
+	pub propertise: Option<Vec<Propertise>>,
+	pub created_at: DateTime,
+	pub supply: Option<u32>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

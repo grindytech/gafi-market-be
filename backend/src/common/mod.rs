@@ -8,9 +8,9 @@ use utoipa::{
 
 use crate::modules::{
 	account::dto::AccountDTO,
-	collection::dto::QueryFindCollections,
-	game::dto::QueryFindGame,
-	nft::dto::{QueryFindNFts, NFTDTO},
+	collection::dto::{QueryFindCollections, NFTCollectionDTO},
+	game::dto::{QueryFindGame, GameDTO},
+	nft::dto::{QueryFindNFts, NFTDTO}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
 };
 
 #[derive(Debug, Serialize)]
@@ -41,7 +41,13 @@ impl<T> ResponseBody<T> {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
-#[aliases(NFTPage = Page<NFTDTO>)]
+#[aliases(
+	NFTPage = Page<NFTDTO>,
+	GamePage=Page<GameDTO>,
+	TxPage = Page<HistoryTxDTO>,
+	CollectionPage = Page<NFTCollectionDTO>,
+	PoolPage = Page<PoolDTO>,
+)]
 pub struct Page<T> {
 	pub message: String,
 	pub data: Vec<T>,
@@ -63,9 +69,14 @@ impl<T> Page<T> {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
-#[aliases(QueryNFT = QueryPage<QueryFindNFts>)]
-/* #[aliases(QueryGame = QueryPage<QueryFindGame>)]
-#[aliases(QueryCollection=QueryPage<QueryFindCollections>)] */
+#[aliases(
+	QueryNFT = QueryPage<QueryFindNFts>, 
+	QueryCollection = QueryPage<QueryFindCollections> ,
+	QueryGame=QueryPage<QueryFindGame>,
+	QueryTransaction=QueryPage<QueryFindTX>,
+	QueryPool=QueryPage<QueryFindPool>
+)]
+
 pub struct QueryPage<T> {
 	pub search: String,
 	pub page: u64,
@@ -73,6 +84,14 @@ pub struct QueryPage<T> {
 	pub order_by: String,
 	pub desc: bool,
 	pub query: T,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TokenPayload {
+	address: String,
+	/* sub: String, */
+	iat: i64,
+	exp: i64,
 }
 
 mod types;

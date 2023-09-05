@@ -1,4 +1,4 @@
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -7,43 +7,25 @@ use shared::models::nft::{Propertise, NFT};
 use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct PropertiseDTO {
-	pub key: String,
-	pub value: String,
-}
-impl Into<Propertise> for PropertiseDTO {
-	fn into(self) -> Propertise {
-		Propertise {
-			key: self.key,
-			value: self.value,
-		}
-	}
-}
-impl From<Propertise> for PropertiseDTO {
-	fn from(value: Propertise) -> Self {
-		PropertiseDTO {
-			key: value.key,
-			value: value.value,
-		}
-	}
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTDTO {
 	pub token_id: String,
 	pub collection_id: String,
-	pub amount: i32,
-	pub is_burn: bool,
-	pub name: String,
-	pub description: String,
-	pub status: String,
-	pub external_url: String,
-	pub weight: String,
-	pub img_url: String,
-	pub visitor_count: i32,
-	pub favorite_count: i32,
-	pub create_at: i64,
-	pub propertise: Vec<PropertiseDTO>,
+
+	pub is_burn: Option<bool>,
+
+	pub name: Option<String>,
+	pub description: Option<String>,
+	pub status: Option<String>,
+
+	pub external_url: Option<String>,
+	pub weight: Option<String>,
+	pub img_url: Option<String>,
+
+	pub visitor_count: Option<i32>,
+	pub favorite_count: Option<i32>,
+
+	pub propertise: Option<Vec<Propertise>>,
+	pub created_at: DateTime,
 	pub supply: Option<u32>,
 }
 impl Into<NFT> for NFTDTO {
@@ -52,7 +34,6 @@ impl Into<NFT> for NFTDTO {
 			token_id: self.token_id,
 			id: None,
 			collection_id: self.collection_id,
-			amount: self.amount,
 			is_burn: self.is_burn,
 			name: self.name,
 			description: self.description,
@@ -62,9 +43,9 @@ impl Into<NFT> for NFTDTO {
 			img_url: self.img_url,
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
-			propertise: self.propertise.iter().map(|value| value.clone().into()).collect(),
-			create_at: self.create_at,
-			supply: self.supply
+			propertise: self.propertise,
+			created_at: self.created_at,
+			supply: self.supply,
 		}
 	}
 }
@@ -73,7 +54,7 @@ impl From<NFT> for NFTDTO {
 		NFTDTO {
 			token_id: value.token_id,
 			collection_id: value.collection_id,
-			amount: value.amount,
+
 			is_burn: value.is_burn,
 			name: value.name,
 			description: value.description,
@@ -83,9 +64,9 @@ impl From<NFT> for NFTDTO {
 			img_url: value.img_url,
 			visitor_count: value.visitor_count,
 			favorite_count: value.favorite_count,
-			propertise: value.propertise.iter().map(|value| value.clone().into()).collect(),
-			create_at: value.create_at,
-			supply: value.supply
+			propertise: value.propertise,
+			created_at: value.created_at,
+			supply: value.supply,
 		}
 	}
 }
@@ -115,8 +96,12 @@ impl DBQuery for QueryFindNFts {
 				"collection_id": collection_id
 			});
 		}
-		doc! {
-			"$and":criteria
+		if criteria.len() == 0 {
+			doc! {}
+		} else {
+			doc! {
+				"$and": criteria
+			}
 		}
 	}
 }

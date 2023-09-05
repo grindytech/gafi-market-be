@@ -1,12 +1,6 @@
-use std::collections::HashMap;
-
-use actix_web::web::Query;
 use futures_util::TryStreamExt;
-use mongodb::{
-	bson::{doc, Document},
-	Collection, Database,
-};
-use serde_json::Value;
+use mongodb::{bson::doc, Collection, Database};
+
 use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
 
 use crate::common::{
@@ -34,7 +28,8 @@ pub async fn find_collections_by_query(
 	params: QueryPage<QueryFindCollections>,
 	db: Database,
 ) -> Result<Option<Page<NFTCollectionDTO>>, mongodb::error::Error> {
-	let col: Collection<NFTCollection> = db.collection(models::nft_collection::NFTCollection::name().as_str());
+	let col: Collection<NFTCollection> =
+		db.collection(models::nft_collection::NFTCollection::name().as_str());
 
 	let query_find = params.query.to_doc();
 	let filter_option = get_filter_option(params.order_by, params.desc).await;

@@ -62,7 +62,7 @@ pub async fn get_nft(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "create_at",
+        "order_by": "created_at",
         "desc": true,
         "query":
 		{
@@ -113,12 +113,13 @@ pub async fn get_list_nft(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "create_at",
+        "order_by": "created_at",
         "desc": true,
         "query":
 		{
-			"name":null,"token_id":"0xd774557b647330c91bf44cfeab205095f7e6c368",
-			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+			"name":null,
+			"token_id":null,
+			"collection_id":null
 		}
     })),
     responses(
@@ -133,9 +134,11 @@ pub async fn search_list_nfts(
 	req: web::Json<QueryPage<QueryFindNFts>>,
 ) -> Result<HttpResponse, AWError> {
 	let list_nfts = find_nfts_by_query(req.0, app_state.db.clone()).await;
+	
 	match list_nfts {
 		Ok(Some(nfts)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(nfts))
+			
 		},
 		Ok(None) => {
 			let rsp =

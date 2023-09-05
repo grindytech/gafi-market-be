@@ -5,6 +5,7 @@ use actix_web::{
 	Error as AWError, HttpResponse, post,
 };
 use shared::constant::EMPTY_STR;
+use utoipa::openapi::Info;
 
 use crate::{
 	app_state::AppState,
@@ -18,11 +19,11 @@ use super::dto::QueryFindCollections;
     context_path="/collection",
 	
     params((
-		"collection_id"=String,Path,description="Collection ID",example="Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+		"collection_id"=String,Path,description="Collection ID",example="12"
 	)),
     responses(
-        (status= 200 , description="Find Collection Success",body= NFTCollectionDTO),
-        (status=NOT_FOUND,description="Collection was not found")
+        (status= StatusCode::OK , description="Find Collection Detail Success",body= NFTCollectionDTO),
+        (status=StatusCode::NOT_FOUND,description="Collection was not found")
     )
 )]
 #[get("/{collection_id}")]
@@ -64,22 +65,24 @@ pub async fn get_collection(
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "create_at",
+        "order_by": "created_at",
         "desc": true,
         "query":
 		{
 			"name":null,
-			"collection_id":"Q29sbGVjdGlvblR5cGU6MjQxOTc3MTc"
+			"collection_id":null,
+			"game_id":null,
 		}
     })),
     responses(
-        (status= 200 , description="Search List Collections Success",body= NFTCollectionDTO),
-        (status=NOT_FOUND,description="Collections was not found")
+        (status= StatusCode::OK , description="Search List Collections Success",body= CollectionPage),
+        (status=StatusCode::NOT_FOUND,description="Collections was not found")
     )
 )]
 #[post("/search")]
 pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<QueryPage<QueryFindCollections>>)->Result<HttpResponse,AWError>{
 	let list_collections=find_collections_by_query(req.0, app_state.db.clone()).await;
+	log::info!("Error {:?}",list_collections);
 	match list_collections {
 		Ok(Some(collections)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(collections))

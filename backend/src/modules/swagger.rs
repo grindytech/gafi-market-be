@@ -1,22 +1,30 @@
 use crate::{
 	common::{NoResponse, Page, QueryPage, ResponseBody},
 	modules::{
-		account::dto::{AccountDTO, SocialInfoDto},
+		account::dto::AccountDTO,
 		collection::dto::NFTCollectionDTO,
 		game::dto::GameDTO,
 		nft::dto::NFTDTO,
 	},
 };
+
+
+use shared::SocialInfo;
 use utoipa::OpenApi;
 
-use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindCollections, game::dto::QueryFindGame};
+use super::{
+	auth::dto::{QueryAuth, QueryNonce},
+	game::dto::QueryFindGame,
+	pool::dto::PoolDTO,
+	transaction::dto::QueryFindTX,
+};
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         crate::modules::account::controller::get_account,
         crate::modules::account::controller::update_favorite,
-        crate::modules::game::controller::get_games_by_address,
+        crate::modules::game::controller::search_games_by_query,
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
         crate::modules::nft::controller::get_list_nft,
@@ -24,7 +32,10 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindC
         crate::modules::collection::controller::get_collection,
         crate::modules::collection::controller::search_list_collections,
         crate::modules::transaction::controller::get_history_tx,
-        crate::modules::transaction::controller::search_history_tx
+        crate::modules::transaction::controller::search_history_tx,
+        crate::modules::auth::controller::get_random_nonce,
+        crate::modules::auth::controller::get_verify_token,
+        crate::modules::pool::controller::search_list_pools,
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -33,18 +44,19 @@ use super::{nft::dto::{PropertiseDTO, QueryFindNFts},collection::dto::QueryFindC
         schemas(
             AccountDTO,
             GameDTO,
-            SocialInfoDto,
+            PoolDTO,
+            SocialInfo,
             NFTDTO,
             NFTCollectionDTO,
-            PropertiseDTO,
             ResponseBody<()>,
             Page<()>,
-            QueryFindCollections,
+            QueryNonce,
+            QueryAuth,
             QueryFindGame,
-            QueryFindNFts,
-            
+            QueryFindTX,
             QueryPage<()>,
-            NoResponse
+            NoResponse,
+        
         )
     ),
     servers(

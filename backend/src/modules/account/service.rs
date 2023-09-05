@@ -33,7 +33,10 @@ pub async fn get_account(
 	col.find_one(filter, None).await
 }
 
-pub async fn create_account(account: AccountDTO, db: Database) -> Result<String, ErrorResponse> {
+pub async fn create_account(
+	account: AccountDTO,
+	db: Database,
+) -> Result<String, mongodb::error::Error> {
 	let col: Collection<Account> = db.collection(models::Account::name().as_str());
 	let entity: Account = Account {
 		address: account.address,
@@ -43,19 +46,17 @@ pub async fn create_account(account: AccountDTO, db: Database) -> Result<String,
 		logo_url: account.logo_url,
 		name: account.name,
 		id: None,
-		is_verified: false,
+		is_verified: None,
 		social: account.social.into(),
-		update_at: account.update_at,
-		create_at: account.create_at,
+		updated_at: account.updated_at,
+		created_at: account.created_at,
 		favorites: None,
+		nonce: None,
 	};
 	let rs = col.insert_one(entity.clone(), None).await;
 	match rs {
 		Ok(r) => Ok(r.inserted_id.to_string()),
-		Err(e) => Err(ErrorResponse {
-			message: e.to_string(),
-			status: http::StatusCode::INTERNAL_SERVER_ERROR.as_u16().to_string(),
-		}),
+		Err(e) => Err(e),
 	}
 }
 pub async fn delete_account_by_address(

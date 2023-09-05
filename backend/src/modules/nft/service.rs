@@ -80,12 +80,14 @@ pub async fn find_nfts_by_query(
 	db: Database,
 ) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
 	let col: Collection<NFT> = db.collection(models::nft::NFT::name().as_str());
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let query_find = params.query.to_doc();
-	let mut cursor_nft = col.find(query_find, filter_option).await?;
+
+	let filter_option = get_filter_option(params.order_by, params.desc).await;
+
+	let mut cursor = col.find(query_find, filter_option).await?;
 
 	let mut list_nfts: Vec<NFTDTO> = Vec::new();
-	while let Some(nft) = cursor_nft.try_next().await? {
+	while let Some(nft) = cursor.try_next().await? {
 		list_nfts.push(nft.into())
 	}
 

@@ -24,8 +24,8 @@ pub struct Pool {
 
 	pub owner_deposit: String,
 
-	pub update_at: i64,
-	pub create_at: i64,
+	pub updated_at: i64,
+	pub created_at: i64,
 
 	pub loot_table: Vec<LootTable>,
 }
@@ -56,8 +56,8 @@ impl Into<Document> for Pool {
 			"begin_at": self.begin_at,
 			"end_at":  self.end_at,
 			"owner_deposit": self.owner_deposit,
-			"updated_at": self.update_at,
-			"create_at": self.create_at,
+			"updated_at": self.updated_at,
+			"created_at": self.created_at,
 		}
 	}
 }
