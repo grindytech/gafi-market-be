@@ -90,8 +90,8 @@ pub struct QueryPage<T> {
 struct TokenPayload {
 	address: String,
 	/* sub: String, */
-	iat: usize,
-	exp: usize,
+	iat: i64,
+	exp: i64,
 }
 
 mod types;

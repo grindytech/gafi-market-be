@@ -84,7 +84,6 @@ pub async fn search_games_by_query(
 	path: web::Json<QueryPage<QueryFindGame>>,
 ) -> Result<HttpResponse, AWError> {
 	let list_games = find_games_by_query(path.0, app_state.db.clone()).await;
-
 	match list_games {
 		Ok(Some(games)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games))

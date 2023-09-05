@@ -52,13 +52,13 @@ pub fn generate_jwt_token(
 	app: Data<AppState>,
 ) -> Result<String, jsonwebtoken::errors::Error> {
 	// Define the current timestamp
-	let current_timestamp = Utc::now().timestamp() as usize;
+	let current_timestamp = Utc::now().timestamp_millis();
 
 	// Define the payload data
 	let payload = TokenPayload {
 		address,
 		iat: current_timestamp,
-		exp: current_timestamp + 3600, // Token expires in 1 hour
+		exp: current_timestamp + app.config.expire_time, // Token expires in 1 hour
 	};
 
 	let token = encode(

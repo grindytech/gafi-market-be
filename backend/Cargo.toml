@@ -25,3 +25,5 @@ shared = {path = "../shared"}
 utoipa = {workspace = true}
 utoipa-swagger-ui = {workspace = true}
 uuid={workspace=true}
+subxt = {workspace=true}
+subxt-signer={workspace=true}

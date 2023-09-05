@@ -162,8 +162,8 @@ impl Worker {
 		let mut state = &mut self.state;
 		state.running = true;
 
-		let end_block = if (i64::from(state.latest_block) - i64::from(state.current_block)) >
-			i64::from(state.max_batch)
+		let end_block = if (i64::from(state.latest_block) - i64::from(state.current_block))
+			> i64::from(state.max_batch)
 		{
 			state.current_block + state.max_batch
 		} else {
@@ -188,7 +188,7 @@ impl Worker {
 			state.current_block += 1;
 
 			if !state.enabled {
-				break
+				break;
 			}
 		}
 
@@ -201,16 +201,17 @@ impl Worker {
 	pub async fn start(&mut self, delay_loop: u64) -> Result<()> {
 		let state = &mut self.state;
 		if state.enabled {
-			return Ok(())
+			return Ok(());
 		}
 		state.enabled = true;
 		loop {
 			let rs = self.run().await;
 			match rs {
-				Ok(enabled) =>
+				Ok(enabled) => {
 					if enabled == false {
-						break
-					},
+						break;
+					}
+				},
 				Err(err) => {
 					let new_client =
 						OnlineClient::<PolkadotConfig>::from_url(&self.state.rpc).await;

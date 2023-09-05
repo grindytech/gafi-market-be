@@ -12,6 +12,12 @@ use crate::{
 };
 
 use super::dto::QueryAuth;
+use std::str::FromStr;
+use subxt_signer::{
+	sr25519::{self, Keypair},
+	SecretUri,
+};
+
 /**
  *  1. FE initialize Sign in  => 2. Backend generate Nonce => 3. Store Nonce in database
  * 2. FE Fetch the nonce => Sign the nonce => Backend get the Signature => Detech Signature => If true return access token and change nonce
@@ -59,7 +65,7 @@ pub async fn update_nonce(
 			db.clone(),
 		)
 		.await;
-		/* let insert_result = col.insert_one(new_account, None). */
+
 		match new_account {
 			Ok(account) => Ok(account),
 			Err(e) => Err(e),
@@ -74,17 +80,30 @@ pub async fn get_access_token(
 	let address = params.address;
 	let signature = params.signature;
 
+	let uri = SecretUri::from_str("//Alice").unwrap();
+	let keypair = Keypair::from_uri(&uri).unwrap();
+	let message = b"Hello world!";
+	let message_2 = b"idonknowwhat";
+	let signature_test = keypair.sign(message);
+
+	let public_key = keypair.public_key();
+
+	log::info!(
+		"Check success {:?}",
+		sr25519::verify(&signature_test, message_2, &public_key)
+	);
+
 	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
-	let nonce = generate_uuid();
+	let new_nonce = generate_uuid();
 	let filter = doc! {
 		"$and": [
 			{"address": address},
-			{"nonce": signature},
+		/* 	{"nonce": signature}, */
 		],
 
 	};
 	let update = doc! {
-		"$set":{"nonce":nonce}
+		"$set":{"nonce":new_nonce}
 	};
 
 	if let Ok(Some(account_detail)) = collection.find_one_and_update(filter, update, None).await {
