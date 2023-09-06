@@ -19,6 +19,7 @@ pub struct GameDTO {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 
+	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
 }
 impl From<Game> for GameDTO {

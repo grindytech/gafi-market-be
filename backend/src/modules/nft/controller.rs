@@ -1,6 +1,6 @@
 use crate::{
 	app_state::AppState,
-	common::{QueryPage, ResponseBody},
+	common::{QueryPage, ResponseBody, QueryNFT},
 	modules::nft::{
 			dto::{QueryFindNFts, NFTDTO},
 			service::{find_nft_by_token, find_nfts_by_address, find_nfts_by_query},
@@ -81,7 +81,7 @@ pub async fn get_nft(
 #[post("/list")]
 pub async fn get_list_nft(
 	app_state: Data<AppState>,
-	req: web::Json<QueryPage<QueryFindNFts>>,
+	req: web::Json<QueryNFT>,
 ) -> Result<HttpResponse, AWError> {
 	let list_nft = find_nfts_by_address(req.0, app_state.db.clone()).await;
 

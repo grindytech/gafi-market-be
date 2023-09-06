@@ -16,7 +16,6 @@ use actix_web::{
 
 use super::service::get_access_token;
 
-
 #[utoipa::path(
         tag = "AuthenticationEndpoints",
         context_path = "/auth",
@@ -24,7 +23,7 @@ use super::service::get_access_token;
 			"address"=String,description="ID of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
 		)),
         responses(
-            (status = OK, description = "Authentication Message", body =  ResponseBody<QueryNonce>),
+            (status = OK, description = "Authentication Message", body =  QueryNonce),
             (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Error",body=NoData)
         ),
 )]
@@ -64,7 +63,7 @@ pub async fn get_random_nonce(
         })
     ),
     responses(
-        (status=StatusCode::OK,description="Authentication Success",body=ResponseBody),
+        (status=StatusCode::OK,description="Authentication Success",body=String),
         (status=401,description="Authentication Failed",body=NoData)
     )
 )]
@@ -79,7 +78,7 @@ pub async fn get_verify_token(
 		Ok(Some(account)) => {
 			let access_token = generate_jwt_token(req.0.clone().address, app_state);
 
-			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true);
+			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true); //fix
 
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 		},

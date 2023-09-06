@@ -7,7 +7,7 @@ use utoipa::{
 };
 
 use crate::modules::{
-	account::dto::AccountDTO,
+	account::dto::{AccountDTO, QueryFindAccount},
 	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::{QueryFindGame, GameDTO},
 	nft::dto::{QueryFindNFts, NFTDTO}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
@@ -20,7 +20,7 @@ pub struct ErrorResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-#[aliases(AccountObject = ResponseBody<AccountDTO>, NoData = ResponseBody<NoResponse>)]
+#[aliases( NoData = ResponseBody<NoResponse>,AccountData = ResponseBody<AccountDTO>)]
 pub struct ResponseBody<T> {
 	pub success: bool,
 	pub message: String,
@@ -74,7 +74,8 @@ impl<T> Page<T> {
 	QueryCollection = QueryPage<QueryFindCollections> ,
 	QueryGame=QueryPage<QueryFindGame>,
 	QueryTransaction=QueryPage<QueryFindTX>,
-	QueryPool=QueryPage<QueryFindPool>
+	QueryPool=QueryPage<QueryFindPool>,
+	QueryAccount=QueryPage<QueryFindAccount>
 )]
 
 pub struct QueryPage<T> {

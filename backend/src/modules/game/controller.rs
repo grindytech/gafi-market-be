@@ -10,7 +10,7 @@ use super::dto::GameDTO;
 
 use crate::{
 	app_state::AppState,
-	common::{QueryPage, ResponseBody},
+	common::{QueryGame, QueryPage, ResponseBody},
 	modules::game::{
 		dto::QueryFindGame,
 		service::{find_game_by_id, find_games_by_query},
@@ -81,7 +81,7 @@ pub async fn get_game(
 
 pub async fn search_games_by_query(
 	app_state: Data<AppState>,
-	path: web::Json<QueryPage<QueryFindGame>>,
+	path: web::Json<QueryGame>,
 ) -> Result<HttpResponse, AWError> {
 	let list_games = find_games_by_query(path.0, app_state.db.clone()).await;
 	match list_games {

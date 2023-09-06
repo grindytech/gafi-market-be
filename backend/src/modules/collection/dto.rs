@@ -19,6 +19,8 @@ pub struct NFTCollectionDTO {
 	pub category: Option<String>,
 
 	pub external_url: Option<String>,
+
+	#[schema(format = "date-time",value_type=String )]
 	pub created_at: DateTime,
 }
 impl From<NFTCollection> for NFTCollectionDTO {

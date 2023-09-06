@@ -7,7 +7,7 @@ use mongodb::{
 use shared::{models, Account, BaseDocument, SocialInfo};
 
 use crate::{
-	common::utils::generate_uuid,
+	common::utils::{generate_uuid, verify_signature},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 
@@ -78,27 +78,19 @@ pub async fn get_access_token(
 	db: Database,
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let address = params.address;
+	let message = params.message;
 	let signature = params.signature;
 
-	let uri = SecretUri::from_str("//Alice").unwrap();
-	let keypair = Keypair::from_uri(&uri).unwrap();
-	let message = b"Hello world!";
-	let message_2 = b"idonknowwhat";
-	let signature_test = keypair.sign(message);
-
-	let public_key = keypair.public_key();
-
-	log::info!(
-		"Check success {:?}",
-		sr25519::verify(&signature_test, message_2, &public_key)
-	);
-
+	let result = verify_signature(&signature, &message, &address);
+	if result == false {
+		return Ok(None);
+	}
 	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
 	let new_nonce = generate_uuid();
 	let filter = doc! {
 		"$and": [
 			{"address": address},
-		/* 	{"nonce": signature}, */
+			{"nonce": signature},
 		],
 
 	};

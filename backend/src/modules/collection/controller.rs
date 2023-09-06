@@ -5,15 +5,15 @@ use actix_web::{
 	Error as AWError, HttpResponse, post,
 };
 use shared::constant::EMPTY_STR;
-use utoipa::openapi::Info;
+
 
 use crate::{
 	app_state::AppState,
-	common::{ResponseBody, QueryPage},
+	common::{ResponseBody, QueryCollection},
 	modules::collection::{dto::NFTCollectionDTO, service::{find_collection_by_id, find_collections_by_query}},
 };
 
-use super::dto::QueryFindCollections;
+
 #[utoipa::path(
     tag="CollectionEndpoints",
     context_path="/collection",
@@ -80,9 +80,9 @@ pub async fn get_collection(
     )
 )]
 #[post("/search")]
-pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<QueryPage<QueryFindCollections>>)->Result<HttpResponse,AWError>{
+pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<QueryCollection>)->Result<HttpResponse,AWError>{
 	let list_collections=find_collections_by_query(req.0, app_state.db.clone()).await;
-	log::info!("Error {:?}",list_collections);
+	/* log::info!("Error {:?}",list_collections); */
 	match list_collections {
 		Ok(Some(collections)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(collections))

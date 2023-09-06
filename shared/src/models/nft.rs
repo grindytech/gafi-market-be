@@ -1,9 +1,10 @@
 use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::BaseDocument;
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct Propertise {
 	pub key: String,
 	pub value: String,
