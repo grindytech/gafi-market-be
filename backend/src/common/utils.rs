@@ -53,6 +53,29 @@ pub fn generate_message_sign_in(wallet_address: &str, nonce: &str) -> String {
 
 	template
 }
+pub fn hex_string_to_signature(hex_string: &str) -> Result<Signature, &'static str> {
+	// Check if the hex string has an even number of characters (2 characters per byte)
+	if hex_string.len() % 2 != 0 {
+		return Err("Invalid hex string length");
+	}
+
+	// Create a vector to hold the bytes
+	let mut bytes = Vec::new();
+
+	// Iterate over pairs of characters in the hex string and parse them as bytes
+	for i in 0..hex_string.len() / 2 {
+		let byte_str = &hex_string[i * 2..(i * 2) + 2];
+		if let Ok(byte) = u8::from_str_radix(byte_str, 16) {
+			bytes.push(byte);
+		} else {
+			return Err("Invalid hex string format");
+		}
+	}
+
+	// Check if the parsed bytes form a valid signature
+
+	Ok(Signature(bytes.try_into().unwrap()))
+}
 
 pub fn verify_signature(signature: Signature, message: &String, config: Config) -> bool {
 	let uri = SecretUri::from_str(&config.key_pair_hash).unwrap();
