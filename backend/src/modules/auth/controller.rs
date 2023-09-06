@@ -72,7 +72,7 @@ pub async fn get_verify_token(
 	app_state: Data<AppState>,
 	req: web::Json<QueryAuth>,
 ) -> Result<HttpResponse, AWError> {
-	let result = get_access_token(req.0.clone(), app_state.db.clone()).await;
+	let result = get_access_token(req.0.clone(), app_state.clone()).await;
 
 	match result {
 		Ok(Some(account)) => {

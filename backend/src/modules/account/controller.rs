@@ -2,7 +2,7 @@ use crate::{
 	app_state::AppState,
 	common::{ResponseBody,QueryAccount},
 	modules::account::{dto::AccountDTO, service::{find_account_by_adress, update_favorites_account}},
-	shared::constant::EMPTY_STR,
+	shared::constant::EMPTY_STR, middleware,
 };
 use actix_web::{
 	get,
@@ -89,6 +89,7 @@ pub async fn get_account(
 pub async fn update_favorite(
 	app_state: Data<AppState>,
 	req: web::Json<QueryAccount>,
+	 _: middleware::JWTMiddleWare,
 ) -> Result<HttpResponse, AWError> {
 	let result = update_favorites_account(req.0, app_state.db.clone()).await;
 	match result {

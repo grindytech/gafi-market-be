@@ -1,5 +1,7 @@
 pub mod utils;
 
+use core::fmt;
+
 use serde::{Deserialize, Serialize};
 use utoipa::{
 	openapi::{Object, ObjectBuilder},
@@ -18,7 +20,11 @@ pub struct ErrorResponse {
 	pub status: String,
 	pub message: String,
 }
-
+impl fmt::Display for ErrorResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[aliases( NoData = ResponseBody<NoResponse>,AccountData = ResponseBody<AccountDTO>)]
 pub struct ResponseBody<T> {
@@ -88,11 +94,11 @@ pub struct QueryPage<T> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct TokenPayload {
-	address: String,
+pub struct TokenPayload {
+	pub address: String,
 	/* sub: String, */
-	iat: i64,
-	exp: i64,
+	pub iat: i64,
+	pub exp: i64,
 }
 
 mod types;

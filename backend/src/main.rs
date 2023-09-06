@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{
 	dev,
 	http::{header, StatusCode},
@@ -12,6 +13,7 @@ use env_logger::Env;
 
 mod app_state;
 mod common;
+mod middleware;
 mod modules;
 pub use shared;
 
@@ -40,15 +42,25 @@ async fn main() -> std::io::Result<()> {
 	db::init_db(database.clone()).await;
 	env_logger::init_from_env(Env::default().default_filter_or("info"));
 	HttpServer::new(move || {
+		let cors = Cors::default()
+			.allowed_origin("http://localhost:3000")
+			.allowed_methods(vec!["GET", "POST"])
+			.allowed_headers(vec![
+				header::CONTENT_TYPE,
+				header::AUTHORIZATION,
+				header::ACCEPT,
+			])
+			.supports_credentials();
 		App::new()
-            /*    .wrap(Logger::default()) */
-            /*   .wrap(Logger::new("%a %t %r %s %b %T")) */
-            .wrap(ErrorHandlers::new().handler(StatusCode::INTERNAL_SERVER_ERROR, add_error_header))
-            .app_data(web::Data::new(AppState {
-                db: database.clone(),
-                config: configuration.clone(),
-            }))
-            .configure(route_config)
+			/*   .wrap(cors)
+				.wrap(Logger::default()) */
+			/*   .wrap(Logger::new("%a %t %r %s %b %T")) */
+			.wrap(ErrorHandlers::new().handler(StatusCode::INTERNAL_SERVER_ERROR, add_error_header))
+			.app_data(web::Data::new(AppState {
+				db: database.clone(),
+				config: configuration.clone(),
+			}))
+			.configure(route_config)
 	})
 	.bind(("0.0.0.0", 8080))?
 	.run()

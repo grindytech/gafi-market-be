@@ -7,8 +7,9 @@ use actix_web::web::Data;
 use chrono::Utc;
 use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use mongodb::bson::doc;
+use shared::Config;
 use subxt_signer::{
-	sr25519::{self, Keypair},
+	sr25519::{self, Keypair, Signature},
 	SecretUri,
 };
 use uuid::Uuid;
@@ -53,12 +54,9 @@ pub fn generate_message_sign_in(wallet_address: &str, nonce: &str) -> String {
 	template
 }
 
-pub fn verify_signature(signature: &String, message: &String, address: &String) -> bool {
-	let uri = SecretUri::from_str(&address).unwrap();
+pub fn verify_signature(signature: Signature, message: &String, config: Config) -> bool {
+	let uri = SecretUri::from_str(&config.key_pair_hash).unwrap();
 	let keypair = Keypair::from_uri(&uri).unwrap();
-	let message = b"Hello world!";
-	let message_2 = b"idonknowwhat";
-	let signature_test = keypair.sign(message);
 
 	let public_key = keypair.public_key();
 
@@ -66,7 +64,7 @@ pub fn verify_signature(signature: &String, message: &String, address: &String) 
 		"Check success {:?}",
 		sr25519::verify(&signature, message_2, &public_key)
 	); */
-	sr25519::verify(&signature_test, message, &public_key)
+	sr25519::verify(&signature, message, &public_key)
 }
 
 pub fn generate_jwt_token(
@@ -80,13 +78,13 @@ pub fn generate_jwt_token(
 	let payload = TokenPayload {
 		address,
 		iat: current_timestamp,
-		exp: current_timestamp + app.config.expire_time, // Token expires in 1 hour
+		exp: current_timestamp + app.config.jwt_expire_time, // Token expires in 1 hour
 	};
 
 	let token = encode(
 		&Header::new(Algorithm::HS256),
 		&payload,
-		&EncodingKey::from_secret(app.config.secret_key.as_ref()),
+		&EncodingKey::from_secret(app.config.jwt_secret_key.as_ref()),
 	);
 	match token {
 		Ok(token) => Ok(token),

@@ -1,22 +1,15 @@
+use actix_web::web::Data;
 use chrono::Utc;
-use mongodb::{
-	bson::doc,
-	options::{FindOneAndUpdateOptions, ReturnDocument},
-	Collection, Database,
-};
+use mongodb::{bson::doc, Collection, Database};
 use shared::{models, Account, BaseDocument, SocialInfo};
 
 use crate::{
+	app_state::AppState,
 	common::utils::{generate_uuid, verify_signature},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 
 use super::dto::QueryAuth;
-use std::str::FromStr;
-use subxt_signer::{
-	sr25519::{self, Keypair},
-	SecretUri,
-};
 
 /**
  *  1. FE initialize Sign in  => 2. Backend generate Nonce => 3. Store Nonce in database
@@ -75,17 +68,18 @@ pub async fn update_nonce(
 
 pub async fn get_access_token(
 	params: QueryAuth,
-	db: Database,
+	app: Data<AppState>,
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let address = params.address;
 	let message = params.message;
 	let signature = params.signature;
 
-	let result = verify_signature(&signature, &message, &address);
+	/* let result = verify_signature(&signature, &message, app.cl);
 	if result == false {
 		return Ok(None);
-	}
-	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
+	} */
+	let collection: Collection<Account> =
+		app.db.clone().collection(models::Account::name().as_str());
 	let new_nonce = generate_uuid();
 	let filter = doc! {
 		"$and": [
