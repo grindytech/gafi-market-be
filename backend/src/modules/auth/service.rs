@@ -5,7 +5,9 @@ use shared::{models, Account, BaseDocument, SocialInfo};
 
 use crate::{
 	app_state::AppState,
-	common::utils::{generate_uuid, hex_string_to_signature, verify_signature},
+	common::utils::{
+		generate_message_sign_in, generate_uuid, hex_string_to_signature, verify_signature,
+	},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 
@@ -66,27 +68,45 @@ pub async fn update_nonce(
 	}
 }
 
+/**
+ *
+ * Check current nonce from the address
+ * compare signature from this
+ */
 pub async fn get_access_token(
 	params: QueryAuth,
 	app: Data<AppState>,
 ) -> Result<Option<Account>, mongodb::error::Error> {
+	let collection: Collection<Account> =
+		app.db.clone().collection(models::Account::name().as_str());
 	let address = params.address;
-	let message = params.message;
+	let mut nonce_value: String = "".to_string();
+	let filter = doc! {
+		"$and": [
+			{"address": &address},
+		],
+
+	};
+
+	if let Ok(Some(account)) = collection.find_one(filter.clone(), None).await {
+		match account.nonce {
+			Some(value) => nonce_value = value,
+			None => (),
+		}
+	} else {
+		return Ok(None);
+	}
+
+	let message = generate_message_sign_in(&address, &nonce_value);
+
 	let signature = hex_string_to_signature(&params.signature).unwrap();
 
 	let result = verify_signature(signature, &message, app.config.clone());
 	if result == false {
 		return Ok(None);
-	}
-	let collection: Collection<Account> =
-		app.db.clone().collection(models::Account::name().as_str());
-	let new_nonce = generate_uuid();
-	let filter = doc! {
-		"$and": [
-			{"address": address},
-		],
-
 	};
+	let new_nonce = generate_uuid();
+
 	let update = doc! {
 		"$set":{"nonce":new_nonce}
 	};

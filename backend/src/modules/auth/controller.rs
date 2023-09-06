@@ -57,7 +57,6 @@ pub async fn get_random_nonce(
         description="Verify Token",
         example=json!({
             "address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600",
-			"message":"Welcome to Gafi Market!\n\nClick to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nYour authentication status will reset after 24 hours.\n\nWallet address:\n0sxbdfc529688922fb5036d9439a7cd61d61114f600\n\nNonce:\na5e81c7c-ca94-43ba-98f3-288ee9ab2262",
             "signature":"",
 
         })

@@ -33,7 +33,7 @@ pub fn generate_uuid() -> String {
 	let uuid = Uuid::new_v4();
 	uuid.to_string()
 }
-pub fn generate_message_sign_in(wallet_address: &str, nonce: &str) -> String {
+pub fn generate_message_sign_in(wallet_address: &String, nonce: &String) -> String {
 	let template = format!(
         "Welcome to Gafi Market!\n\
          \n\
