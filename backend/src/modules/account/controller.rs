@@ -1,8 +1,8 @@
 use crate::{
 	app_state::AppState,
-	common::{ResponseBody, QueryPage},
-	modules::account::{dto::{AccountDTO, QueryFindAccount}, service::{find_account_by_adress, update_favorites_account}},
-	shared::constant::EMPTY_STR,
+	common::{ResponseBody,QueryAccount},
+	modules::account::{dto::AccountDTO, service::{find_account_by_adress, update_favorites_account}},
+	shared::constant::EMPTY_STR, middleware,
 };
 use actix_web::{
 	get,
@@ -18,7 +18,7 @@ use actix_web::{
 			"address"=String,Path,description="Address of account",example="0sxbdfc529688922fb5036d9439a7cd61d61114f600"
 		)),
         responses(
-            (status = StatusCode::OK, description = "Find Account Detail Success", body = AccountObject),
+            (status = StatusCode::OK, description = "Find Account Detail Success", body = AccountData),
 			(status = StatusCode::NOT_FOUND, description = "Can Not Found This Account", body = NoData)
         ),
     )]
@@ -53,7 +53,7 @@ pub async fn get_account(
 	tag="AccountEndpoints",
 	context_path="/account",
 	request_body(
-		content=QueryFindAccount,description="Update New Favorite of a account",
+		content=QueryAccount,description="Update New Favorite of a account",
 		example=json!({
 			"search":"",
 			"page": 1,
@@ -80,7 +80,7 @@ pub async fn get_account(
 		})
 	),
 	responses(
-        (status=StatusCode::OK,description="Update Profile Success",body=AccountDTO),
+        (status=StatusCode::OK,description="Update Profile Success",body=AccountData),
         (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
 
    	 )
@@ -88,8 +88,34 @@ pub async fn get_account(
 #[post("/updateFavorite")]
 pub async fn update_favorite(
 	app_state: Data<AppState>,
-	req: web::Json<QueryPage<QueryFindAccount>>,
+	req: web::Json<QueryAccount>,
+	auth: middleware::JWTMiddleWare,
 ) -> Result<HttpResponse, AWError> {
+	let  current_address=req.0.query.address.clone();
+	
+	match &current_address{
+		Some(value)=>{
+				if value.eq(EMPTY_STR) {
+					let rsp: ResponseBody<Option<_>> =
+				ResponseBody::<Option<()>>::new("Empty Address", None, false);
+				return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+				}
+				if !auth.address.eq(value){
+					let rsp: ResponseBody<Option<_>> =
+					ResponseBody::<Option<()>>::new("Invalid address verify", None, false);
+					return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+				}
+		},
+		None=>{
+				let rsp: ResponseBody<Option<_>> =
+					ResponseBody::<Option<()>>::new("Address is Null", None, false);
+					return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+		}
+	}
+
 	let result = update_favorites_account(req.0, app_state.db.clone()).await;
 	match result {
 		Ok(Some(account)) => Ok(HttpResponse::build(StatusCode::OK)

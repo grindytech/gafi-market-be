@@ -23,7 +23,7 @@ impl Into<Document> for SocialInfo {
 		}
 	}
 }
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct Favorites {
 	pub token_id: String,
 	pub collection_id: String,

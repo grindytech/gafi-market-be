@@ -6,8 +6,10 @@ pub struct Config {
 	pub rpc: String,
 	pub start_block: u32,
 	pub chain_decimal: u32,
-	pub secret_key: String,
-	pub expire_time: i64,
+	pub jwt_secret_key: String,
+	pub jwt_expire_time: i64,
+	pub key_pair_hash: String,
+	pub frontend_link: String,
 }
 
 impl Config {
@@ -17,16 +19,20 @@ impl Config {
 		let mongodb_uri = var("MONGODB_URI").expect("MONGODB_URI must be set");
 		let mongodb_db_name = var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
 		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("18".to_string()).parse().unwrap();
-		let secret_key = var("JWT_TOKEN_SECRET").expect("JWT_TOKEN_SECRET must be set");
-		let expire_time = var("EXPIRE_TIME").unwrap_or("3600".to_string()).parse().unwrap();
+		let jwt_secret_key = var("JWT_TOKEN_SECRET").expect("JWT_TOKEN_SECRET must be set");
+		let jwt_expire_time = var("JWT_EXPIRE_TIME").unwrap_or("3600".to_string()).parse().unwrap();
+		let key_pair_hash = var("KEY_PAIR").expect("KEY_PAIR Must to set");
+		let frontend_link = var("FRONTEND_APP").expect("Frontend link Must to set");
 		Config {
 			mongodb_uri,
 			mongodb_db_name,
 			rpc,
 			start_block,
 			chain_decimal,
-			secret_key,
-			expire_time,
+			jwt_secret_key,
+			jwt_expire_time,
+			key_pair_hash,
+			frontend_link,
 		}
 	}
 }

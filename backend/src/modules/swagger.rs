@@ -9,14 +9,14 @@ use crate::{
 };
 
 
-use shared::SocialInfo;
+use shared::{SocialInfo,Favorites, Propertise, LootTable, LootTableNft};
 use utoipa::OpenApi;
 
 use super::{
 	auth::dto::{QueryAuth, QueryNonce},
 	game::dto::QueryFindGame,
-	pool::dto::PoolDTO,
-	transaction::dto::QueryFindTX,
+	pool::dto::{PoolDTO, QueryFindPool},
+	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts,
 };
 
 #[derive(OpenApi)]
@@ -42,18 +42,26 @@ use super::{
     ), */
     components(
         schemas(
+            Favorites,
             AccountDTO,
             GameDTO,
             PoolDTO,
             SocialInfo,
+            Propertise,
+            LootTable,
+            LootTableNft,
             NFTDTO,
             NFTCollectionDTO,
             ResponseBody<()>,
             Page<()>,
             QueryNonce,
             QueryAuth,
+            QueryFindAccount,
             QueryFindGame,
             QueryFindTX,
+            QueryFindNFts,
+            QueryFindPool,
+            QueryFindCollections,
             QueryPage<()>,
             NoResponse,
         

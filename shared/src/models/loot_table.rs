@@ -1,13 +1,14 @@
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct LootTableNft {
 	pub collection: String,
 	pub item: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct LootTable {
 	pub nft: Option<LootTableNft>,
 	pub weight: u32,

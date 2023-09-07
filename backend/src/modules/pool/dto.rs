@@ -13,7 +13,9 @@ pub struct PoolDTO {
 
 	pub admin: String,
 
+	#[schema(format = "Double", value_type = f64)]
 	pub minting_fee: Decimal128,
+
 	pub begin_at: i64,
 	pub end_at: i64,
 
@@ -21,7 +23,9 @@ pub struct PoolDTO {
 
 	pub updated_at: i64,
 	pub created_at: i64,
+	/* 	#[schema(format = "Object", value_type = Object{
 
+	})] */
 	pub loot_table: Vec<LootTable>,
 }
 impl From<Pool> for PoolDTO {

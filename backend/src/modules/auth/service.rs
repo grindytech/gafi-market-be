@@ -1,22 +1,17 @@
+use actix_web::web::Data;
 use chrono::Utc;
-use mongodb::{
-	bson::doc,
-	options::{FindOneAndUpdateOptions, ReturnDocument},
-	Collection, Database,
-};
+use mongodb::{bson::doc, Collection, Database};
 use shared::{models, Account, BaseDocument, SocialInfo};
 
 use crate::{
-	common::utils::generate_uuid,
+	app_state::AppState,
+	common::utils::{
+		generate_message_sign_in, generate_uuid, hex_string_to_signature, verify_signature,
+	},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 
 use super::dto::QueryAuth;
-use std::str::FromStr;
-use subxt_signer::{
-	sr25519::{self, Keypair},
-	SecretUri,
-};
 
 /**
  *  1. FE initialize Sign in  => 2. Backend generate Nonce => 3. Store Nonce in database
@@ -73,35 +68,45 @@ pub async fn update_nonce(
 	}
 }
 
+/**
+ *
+ * Check current nonce from the address
+ * compare signature from this
+ */
 pub async fn get_access_token(
 	params: QueryAuth,
-	db: Database,
+	app: Data<AppState>,
 ) -> Result<Option<Account>, mongodb::error::Error> {
+	let collection: Collection<Account> =
+		app.db.clone().collection(models::Account::name().as_str());
 	let address = params.address;
-	let signature = params.signature;
-
-	let uri = SecretUri::from_str("//Alice").unwrap();
-	let keypair = Keypair::from_uri(&uri).unwrap();
-	let message = b"Hello world!";
-	let message_2 = b"idonknowwhat";
-	let signature_test = keypair.sign(message);
-
-	let public_key = keypair.public_key();
-
-	log::info!(
-		"Check success {:?}",
-		sr25519::verify(&signature_test, message_2, &public_key)
-	);
-
-	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
-	let new_nonce = generate_uuid();
+	let mut nonce_value: String = "".to_string();
 	let filter = doc! {
 		"$and": [
-			{"address": address},
-		/* 	{"nonce": signature}, */
+			{"address": &address},
 		],
 
 	};
+
+	if let Ok(Some(account)) = collection.find_one(filter.clone(), None).await {
+		match account.nonce {
+			Some(value) => nonce_value = value,
+			None => (),
+		}
+	} else {
+		return Ok(None);
+	}
+
+	let message = generate_message_sign_in(&address, &nonce_value);
+
+	let signature = hex_string_to_signature(&params.signature).unwrap();
+
+	let result = verify_signature(signature, &message, app.config.clone());
+	if result == false {
+		return Ok(None);
+	};
+	let new_nonce = generate_uuid();
+
 	let update = doc! {
 		"$set":{"nonce":new_nonce}
 	};

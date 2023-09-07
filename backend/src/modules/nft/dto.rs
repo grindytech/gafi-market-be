@@ -25,7 +25,10 @@ pub struct NFTDTO {
 	pub favorite_count: Option<i32>,
 
 	pub propertise: Option<Vec<Propertise>>,
+
+	#[schema(format = "date-time",value_type=String )]
 	pub created_at: DateTime,
+
 	pub supply: Option<u32>,
 }
 impl Into<NFT> for NFTDTO {

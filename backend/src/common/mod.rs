@@ -1,5 +1,7 @@
 pub mod utils;
 
+use core::fmt;
+
 use serde::{Deserialize, Serialize};
 use utoipa::{
 	openapi::{Object, ObjectBuilder},
@@ -7,7 +9,7 @@ use utoipa::{
 };
 
 use crate::modules::{
-	account::dto::AccountDTO,
+	account::dto::{AccountDTO, QueryFindAccount},
 	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::{QueryFindGame, GameDTO},
 	nft::dto::{QueryFindNFts, NFTDTO}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
@@ -18,9 +20,13 @@ pub struct ErrorResponse {
 	pub status: String,
 	pub message: String,
 }
-
+impl fmt::Display for ErrorResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-#[aliases(AccountObject = ResponseBody<AccountDTO>, NoData = ResponseBody<NoResponse>)]
+#[aliases( NoData = ResponseBody<NoResponse>,AccountData = ResponseBody<AccountDTO>)]
 pub struct ResponseBody<T> {
 	pub success: bool,
 	pub message: String,
@@ -74,7 +80,8 @@ impl<T> Page<T> {
 	QueryCollection = QueryPage<QueryFindCollections> ,
 	QueryGame=QueryPage<QueryFindGame>,
 	QueryTransaction=QueryPage<QueryFindTX>,
-	QueryPool=QueryPage<QueryFindPool>
+	QueryPool=QueryPage<QueryFindPool>,
+	QueryAccount=QueryPage<QueryFindAccount>
 )]
 
 pub struct QueryPage<T> {
@@ -87,11 +94,11 @@ pub struct QueryPage<T> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct TokenPayload {
-	address: String,
+pub struct TokenPayload {
+	pub address: String,
 	/* sub: String, */
-	iat: i64,
-	exp: i64,
+	pub iat: i64,
+	pub exp: i64,
 }
 
 mod types;
