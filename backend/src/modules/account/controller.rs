@@ -89,8 +89,33 @@ pub async fn get_account(
 pub async fn update_favorite(
 	app_state: Data<AppState>,
 	req: web::Json<QueryAccount>,
-	 _: middleware::JWTMiddleWare,
+	auth: middleware::JWTMiddleWare,
 ) -> Result<HttpResponse, AWError> {
+	let  current_address=req.0.query.address.clone();
+	
+	match &current_address{
+		Some(value)=>{
+				if value.eq(EMPTY_STR) {
+					let rsp: ResponseBody<Option<_>> =
+				ResponseBody::<Option<()>>::new("Empty Address", None, false);
+				return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+				}
+				if !auth.address.eq(value){
+					let rsp: ResponseBody<Option<_>> =
+					ResponseBody::<Option<()>>::new("Invalid address verify", None, false);
+					return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+				}
+		},
+		None=>{
+				let rsp: ResponseBody<Option<_>> =
+					ResponseBody::<Option<()>>::new("Address is Null", None, false);
+					return Ok(HttpResponse::build(StatusCode::BAD_REQUEST)
+				.content_type("application/json").json(rsp))
+		}
+	}
+
 	let result = update_favorites_account(req.0, app_state.db.clone()).await;
 	match result {
 		Ok(Some(account)) => Ok(HttpResponse::build(StatusCode::OK)

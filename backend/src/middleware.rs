@@ -4,14 +4,13 @@ use actix_web::{
 	dev::Payload,
 	error::ErrorUnauthorized,
 	http,
-	web::{self, Data},
-	Error as ActixWebError, FromRequest, HttpMessage,
+	web::{self},
+	Error as ActixWebError, FromRequest, HttpRequest,
 };
-use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 
 use crate::{
 	app_state::AppState,
-	common::{utils::verify_jwt_token, ErrorResponse, TokenPayload},
+	common::{utils::verify_jwt_token, ErrorResponse},
 };
 pub struct JWTMiddleWare {
 	pub address: String,
@@ -20,10 +19,7 @@ impl FromRequest for JWTMiddleWare {
 	type Error = ActixWebError;
 	type Future = Ready<Result<Self, Self::Error>>;
 
-	fn from_request(
-		req: &actix_web::HttpRequest,
-		payload: &mut actix_web::dev::Payload,
-	) -> Self::Future {
+	fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
 		let data = req.app_data::<web::Data<AppState>>().unwrap();
 
 		//seperate get token from cookie

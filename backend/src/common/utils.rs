@@ -128,11 +128,6 @@ pub fn verify_jwt_token(
 	) {
 		Ok(c) => Ok(c.claims),
 		Err(e) => {
-			log::info!("Error {:?}", e);
-			let json_error = ErrorResponse {
-				status: "fail".to_string(),
-				message: "Invalid token".to_string(),
-			};
 			return Err(e);
 		},
 	};

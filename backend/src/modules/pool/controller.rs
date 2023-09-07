@@ -45,7 +45,7 @@ pub async fn search_list_pools(
 	req: web::Json<QueryPage<QueryFindPool>>,
 ) -> Result<HttpResponse, AWError> {
 	let list_pool = find_pool_by_query(req.0, app_state.db.clone()).await;
-	log::info!("List Pool {:?}", list_pool);
+
 	match list_pool {
 		Ok(Some(pool)) => {
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(pool))
