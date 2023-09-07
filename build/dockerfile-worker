@@ -1,9 +1,7 @@
-FROM ubuntu:22.04
-RUN useradd -ms /bin/bash gafi
-USER gafi
+FROM rust:1-alpine
 
 COPY ./build/worker /
 
 ENV RUST_BACKTRACE=1
 
-ENTRYPOINT ["/bin/bash", "-c", "/worker \"$@\"", "--"]
+ENTRYPOINT ["/bin/sh", "-c", "/worker \"$@\"", "--"]
