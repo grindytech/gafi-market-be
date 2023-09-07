@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use crate::common::utils::{generate_jwt_token, verify_jwt_token};
 use crate::{app_state::AppState, common::utils::verify_signature};
 use actix_web::web::Data;
 use dotenv::dotenv;
@@ -49,7 +50,7 @@ async fn sign_test_message(message: String, config: Config) -> Signature {
 
 fn verify_test_signature(message: String, signature: Signature, config: Config) {
 	let result = verify_signature(signature, &message, config);
-	print!("What the hell verify {:?}", result)
+	print!("Verify Signature {:?}", result)
 }
 
 #[actix_web::test]
@@ -57,7 +58,7 @@ async fn test() {
 	dotenv().ok();
 	let configuration = Config::init();
 	print!("Not run ??");
-	let test_message="Welcome to Gafi Market!\n\nClick to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nYour authentication status will reset after 24 hours.\n\nWallet address:\n0sxbdfc529688922fb5036d9439a7cd61d61114f600\n\nNonce:\n0a18302e-c484-42bc-9162-7021638aad0f".to_string();
+	let test_message="Welcome to Gafi Market!\n\nClick to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nYour authentication status will reset after 24 hours.\n\nWallet address:\n0sxbdfc529688922fb5036d9439a7cd61d61114f600\n\nNonce:\ndbb29a2f-4405-4e7d-8317-424d7978d4fe".to_string();
 	let signature = sign_test_message(test_message.clone(), configuration.clone()).await;
 
 	/* let test_re = hex_string_to_signature("A614657C04A7C037F8377F418D400F32CABC8E301C26503B32C842DF602B8D4E46CA797C8BE5AE0C309243D12FED7CE856A012CF02B26E7781DB52A165196186"); */
@@ -66,5 +67,14 @@ async fn test() {
 
 	println!("Signature {:?}", test);
 
-	verify_test_signature(test_message, signature, configuration);
+	verify_test_signature(test_message, signature, configuration.clone());
+
+	//Test Generate JWT and Decode JWT:
+	let jwt_token = generate_jwt_token(
+		"0sxbdfc529688922fb5036d9439a7cd61d61114f600".to_string(),
+		configuration.clone(),
+	);
+	println!("Current JWT TOken {:?}", jwt_token);
+	let result_token = verify_jwt_token(jwt_token.unwrap(), configuration);
+	println!("Result Verify JWT {:?}", result_token);
 }

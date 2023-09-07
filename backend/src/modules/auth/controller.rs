@@ -75,7 +75,7 @@ pub async fn get_verify_token(
 
 	match result {
 		Ok(Some(account)) => {
-			let access_token = generate_jwt_token(req.0.clone().address, app_state);
+			let access_token = generate_jwt_token(req.0.clone().address, app_state.config.clone());
 
 			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true); //fix
 

@@ -1,11 +1,13 @@
-use std::str::FromStr;
+use std::{future::ready, str::FromStr};
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, common::ErrorResponse};
 
 use super::TokenPayload;
-use actix_web::web::Data;
+use actix_web::{error::ErrorUnauthorized, web::Data};
 use chrono::Utc;
-use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
+use jsonwebtoken::{
+	decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
+};
 use mongodb::bson::doc;
 use shared::Config;
 use subxt_signer::{
@@ -54,7 +56,7 @@ pub fn generate_message_sign_in(wallet_address: &String, nonce: &String) -> Stri
 	template
 }
 pub fn hex_string_to_signature(hex_string: &str) -> Result<Signature, &'static str> {
-	// Check if the hex string has an even number of characters (2 characters per byte)
+	// Check if the hex string has an even number of characters (2 char per byte)
 	if hex_string.len() % 2 != 0 {
 		return Err("Invalid hex string length");
 	}
@@ -92,7 +94,7 @@ pub fn verify_signature(signature: Signature, message: &String, config: Config) 
 
 pub fn generate_jwt_token(
 	address: String,
-	app: Data<AppState>,
+	config: Config,
 ) -> Result<String, jsonwebtoken::errors::Error> {
 	// Define the current timestamp
 	let current_timestamp = Utc::now().timestamp_millis();
@@ -101,16 +103,38 @@ pub fn generate_jwt_token(
 	let payload = TokenPayload {
 		address,
 		iat: current_timestamp,
-		exp: current_timestamp + app.config.jwt_expire_time, // Token expires in 1 hour
+		exp: current_timestamp + config.jwt_expire_time, // Token expires in 1 hour
 	};
 
 	let token = encode(
 		&Header::new(Algorithm::HS256),
 		&payload,
-		&EncodingKey::from_secret(app.config.jwt_secret_key.as_ref()),
+		&EncodingKey::from_secret(config.jwt_secret_key.as_ref()),
 	);
 	match token {
 		Ok(token) => Ok(token),
 		Err(e) => Err(e),
 	}
+}
+
+pub fn verify_jwt_token(
+	token: String,
+	config: Config,
+) -> Result<TokenPayload, jsonwebtoken::errors::Error> {
+	let claims = match decode::<TokenPayload>(
+		&token,
+		&DecodingKey::from_secret(config.jwt_secret_key.as_ref()),
+		&Validation::new(Algorithm::HS256),
+	) {
+		Ok(c) => Ok(c.claims),
+		Err(e) => {
+			log::info!("Error {:?}", e);
+			let json_error = ErrorResponse {
+				status: "fail".to_string(),
+				message: "Invalid token".to_string(),
+			};
+			return Err(e);
+		},
+	};
+	claims
 }

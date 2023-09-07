@@ -42,15 +42,15 @@ async fn main() -> std::io::Result<()> {
 	db::init_db(database.clone()).await;
 	env_logger::init_from_env(Env::default().default_filter_or("info"));
 	HttpServer::new(move || {
-		let cors = Cors::default()
-			.allowed_origin("http://localhost:3000")
-			.allowed_methods(vec!["GET", "POST"])
-			.allowed_headers(vec![
-				header::CONTENT_TYPE,
-				header::AUTHORIZATION,
-				header::ACCEPT,
-			])
-			.supports_credentials();
+		/* let cors = Cors::default()
+		.allowed_origin("http://localhost:3000")
+		.allowed_methods(vec!["GET", "POST"])
+		.allowed_headers(vec![
+			header::CONTENT_TYPE,
+			header::AUTHORIZATION,
+			header::ACCEPT,
+		])
+		.supports_credentials(); */
 		App::new()
 			/*   .wrap(cors)
 				.wrap(Logger::default()) */
