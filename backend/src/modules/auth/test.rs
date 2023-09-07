@@ -57,7 +57,6 @@ fn verify_test_signature(message: String, signature: Signature, config: Config) 
 async fn test() {
 	dotenv().ok();
 	let configuration = Config::init();
-	print!("Not run ??");
 	let test_message="Welcome to Gafi Market!\n\nClick to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nYour authentication status will reset after 24 hours.\n\nWallet address:\n0sxbdfc529688922fb5036d9439a7cd61d61114f600\n\nNonce:\ndbb29a2f-4405-4e7d-8317-424d7978d4fe".to_string();
 	let signature = sign_test_message(test_message.clone(), configuration.clone()).await;
 
