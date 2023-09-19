@@ -92,8 +92,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
-//add item
-// remove item
+
 pub fn tasks() -> Vec<Task> {
 	vec![Task::new(EVENT_MINING_POOL_CREATED, move |params| {
 		Box::pin(on_pool_created(params))

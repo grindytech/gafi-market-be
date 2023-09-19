@@ -5,7 +5,7 @@ use mongodb::{
 pub use shared::types::Result;
 
 use crate::{
-	gafi::{self, game::events::CollectionCreated},
+	gafi::{self, game::events::CollectionCreated, nfts::events::CollectionMetadataSet},
 	workers::{HandleParams, Task},
 };
 use serde::Deserialize;
@@ -15,6 +15,8 @@ use shared::{
 	BaseDocument, NFTCollection,
 };
 
+/// - Handles the creation of an NFT collection. 
+/// - Updates the MongoDB collection with the new collection data and logs the event.
 async fn on_collection_created(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<CollectionCreated>()?;
 	if let Some(collection) = event_parse {
@@ -46,7 +48,6 @@ struct CollectionMetadata {
 	image: String,
 	external_url: String,
 }
-//CollectionMetadataSet
 async fn on_collection_metadata_set(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::nfts::events::CollectionMetadataSet>()?;
 	if let Some(ev) = event_parse {
