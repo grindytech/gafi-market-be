@@ -17,7 +17,7 @@ pub struct NFTCollection {
 	pub is_verified: Option<bool>,
 	pub updated_at: Option<DateTime>,
 	pub created_at: DateTime,
-	// pub raw: String,
+	pub metadata: Option<String>,
 	pub owner: String,
 	pub external_url: Option<String>,
 	pub games: Option<Vec<String>>,
