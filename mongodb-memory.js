@@ -9,13 +9,16 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
     process.env.MONGOMS_DOWNLOAD_URL = "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1804-6.0.5.tgz"
   }
   var args = process.argv.slice(2);
-  const port = Number(args[0]);
 
   // This will create an new instance of "MongoMemoryServer" and automatically start it
-  const mongod = await MongoMemoryServer.create({
-    instance: {
-      port: port || 50846,
-    },
-  });
+  const mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
+  console.log(uri)
+
+  if (args[0]) {
+    const timeOut = Number(args[0]);
+    setTimeout(() => {
+      mongod.stop()
+    }, timeOut);
+  }
 })();
