@@ -3,7 +3,7 @@ pub use shared::types::Result;
 use crate::{
 	gafi::{self, game::events::CollectionCreated},
 	services,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 use shared::constant::{EVENT_COLLECTION_CREATED, EVENT_COLLECTION_METADATA_SET};
@@ -35,12 +35,12 @@ async fn on_collection_metadata_set(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_COLLECTION_CREATED, move |params| {
+		EventHandle::new(EVENT_COLLECTION_CREATED, move |params| {
 			Box::pin(on_collection_created(params))
 		}),
-		Task::new(EVENT_COLLECTION_METADATA_SET, move |params| {
+		EventHandle::new(EVENT_COLLECTION_METADATA_SET, move |params| {
 			Box::pin(on_collection_metadata_set(params))
 		}),
 	]

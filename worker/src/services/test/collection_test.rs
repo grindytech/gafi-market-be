@@ -18,7 +18,7 @@ async fn on_collection_created_handle() {
 }
 
 #[tokio::test]
-async fn on_collection_metadata_set_handle() {
+async fn collection_metadata_set() {
 	let (mut db_process, db) = tests::utils::get_test_db(60000).await;
 	let metadata = r#"
 		{
@@ -45,8 +45,35 @@ async fn on_collection_metadata_set_handle() {
 			.unwrap();
 
 	let nft_collection =
-		services::nft_collection::get_collection_by_id(&db, &collection.to_string()).await;
-	let nft_collection = nft_collection.unwrap().unwrap();
-	assert!(metadata == nft_collection.metadata.unwrap());
+		services::nft_collection::get_collection_by_id(&db, &collection.to_string())
+			.await
+			.unwrap()
+			.unwrap();
+	assert!(
+		nft_collection.name == Some("chess".to_string())
+			&& nft_collection.logo_url == Some("/chess.svg".to_string())
+			&& nft_collection.external_url == Some("https://chess.com".to_string())
+			&& metadata == nft_collection.metadata.unwrap()
+	);
+
+	//meta data not in json format
+	let metadata = r#""other": "other data""#;
+	let _rs =
+		services::nft_collection::update_collection_metadata(metadata.to_string(), collection, &db)
+			.await
+			.unwrap();
+
+	let nft_collection =
+		services::nft_collection::get_collection_by_id(&db, &collection.to_string())
+			.await
+			.unwrap()
+			.unwrap();
+	assert!(
+		nft_collection.name == None
+			&& nft_collection.logo_url == None
+			&& nft_collection.external_url == None
+			&& metadata == nft_collection.metadata.unwrap()
+	);
+
 	let _ = db_process.kill();
 }

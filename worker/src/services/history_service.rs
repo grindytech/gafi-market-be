@@ -1,11 +1,15 @@
 use mongodb::{
 	bson::{doc, Document},
 	options::UpdateOptions,
+	results::UpdateResult,
 	Database,
 };
-use shared::{types::Result, BaseDocument, HistoryTx};
+use shared::{BaseDocument, HistoryTx};
 
-pub async fn upsert(history: HistoryTx, db: &Database) -> Result<()> {
+pub async fn upsert(
+	history: HistoryTx,
+	db: &Database,
+) -> Result<UpdateResult, mongodb::error::Error> {
 	let history_db: mongodb::Collection<HistoryTx> =
 		db.collection::<HistoryTx>(HistoryTx::name().as_str());
 	let query = doc! {
@@ -16,6 +20,6 @@ pub async fn upsert(history: HistoryTx, db: &Database) -> Result<()> {
 	let history_doc: Document = history.into();
 	let upsert = doc! { "$set": history_doc };
 	let options = UpdateOptions::builder().upsert(true).build();
-	history_db.update_one(query, upsert, options).await?;
-	Ok(())
+	let rs = history_db.update_one(query, upsert, options).await?;
+	Ok(rs)
 }

@@ -10,7 +10,6 @@ dotenv = {workspace = true}
 mongodb = {workspace = true}
 serde = {workspace = true}
 utoipa = {workspace = true}
-async-trait = {workspace = true}
 log = {workspace = true}
 tokio = {version = "1.32.0", features = ["full"]}
 subxt ={workspace = true}

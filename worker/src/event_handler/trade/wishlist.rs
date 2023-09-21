@@ -15,7 +15,7 @@ pub use shared::{
 
 use crate::{
 	gafi, services,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_wishlist_filled(params: HandleParams<'_>) -> Result<()> {
@@ -55,9 +55,9 @@ async fn on_wishlist_filled(params: HandleParams<'_>) -> Result<()> {
 				.parse()?,
 			),
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 		for nft in trade.wish_list.unwrap() {
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				ev.who.clone(),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -67,7 +67,7 @@ async fn on_wishlist_filled(params: HandleParams<'_>) -> Result<()> {
 			.await?;
 
 			let owner_u8 = shared::utils::vec_to_array(hex::decode(trade.owner.clone())?);
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				subxt::utils::AccountId32::from(owner_u8),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -137,12 +137,12 @@ async fn on_wishlist_set(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_SET_WISH_LIST, move |params| {
+		EventHandle::new(EVENT_SET_WISH_LIST, move |params| {
 			Box::pin(on_wishlist_set(params))
 		}),
-		Task::new(EVENT_WIST_LIST_FILLED, move |params| {
+		EventHandle::new(EVENT_WIST_LIST_FILLED, move |params| {
 			Box::pin(on_wishlist_filled(params))
 		}),
 	]

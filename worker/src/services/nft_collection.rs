@@ -1,5 +1,5 @@
 use mongodb::{
-	bson::{doc, DateTime},
+	bson::{doc, Bson, DateTime},
 	error,
 	options::{InsertOneOptions, UpdateOptions},
 	Database,
@@ -54,7 +54,6 @@ pub async fn create_collection_without_metadata(
 	Ok(nft_collection)
 }
 
-
 pub async fn upsert_without_metadata(
 	collection_id: &str,
 	who: &str,
@@ -73,14 +72,9 @@ pub async fn upsert_without_metadata(
 		}
 	};
 	collection_db.update_one(query, new_collection, option).await?;
-	log::info!(
-		"NFT Collection created {} {}",
-		collection_id,
-		who
-	);
+	log::info!("NFT Collection created {} {}", collection_id, who);
 	Ok(())
 }
-
 
 #[derive(Deserialize, Debug)]
 struct CollectionMetadata {
@@ -93,30 +87,34 @@ pub async fn update_collection_metadata(
 	collection: u32,
 	db: &Database,
 ) -> shared::Result<()> {
-	let object: std::result::Result<CollectionMetadata, _> = serde_json::from_str(&metadata);
+	let object = serde_json::from_str::<CollectionMetadata>(&metadata);
+	let update;
 	match object {
 		Ok(data) => {
-			let collection_db: mongodb::Collection<NFTCollection> =
-				db.collection::<NFTCollection>(NFTCollection::name().as_str());
-			let option = UpdateOptions::builder().upsert(true).build();
-			let query = doc! {"collection_id": collection.to_string()};
-			let update = doc! {"$set": {
-				"logo_url": data.image,
-				"name": data.title,
-				"updated_at": DateTime::now(),
-				"external_url": data.external_url,
-				"metadata": metadata.clone(),
-			}};
-			collection_db.update_one(query, update, option).await?;
-			log::info!(
-				"CollectionMetadataSet collection {}, data: {}",
-				collection,
-				metadata
-			);
+			update = doc! {
+					"$set": {
+					"logo_url": data.image,
+					"name": data.title,
+					"updated_at": DateTime::now(),
+					"external_url": data.external_url,
+					"metadata": metadata.clone(),
+				}
+			};
 		},
-		Err(err) => {
-			log::warn!("{:?}", err)
+		Err(_) => {
+			update = doc! {"$set": {
+				"updated_at": DateTime::now(),
+				"metadata": metadata.clone(),
+				"logo_url": Bson::Null,
+				"name": Bson::Null,
+				"external_url": Bson::Null,
+			}};
 		},
 	}
+	let collection_db: mongodb::Collection<NFTCollection> =
+		db.collection::<NFTCollection>(NFTCollection::name().as_str());
+	let option = UpdateOptions::builder().upsert(true).build();
+	let query = doc! {"collection_id": collection.to_string()};
+	collection_db.update_one(query, update, option).await?;
 	Ok(())
 }

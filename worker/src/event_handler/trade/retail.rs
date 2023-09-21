@@ -16,13 +16,13 @@ pub use shared::{
 
 use crate::{
 	gafi, services,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_item_bought(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::ItemBought>()?;
 	if let Some(ev) = event_parse {
-		let trade = services::trade::get_by_trade_id(params.db, &ev.trade.to_string())
+		let trade = services::trade_service::get_by_trade_id(params.db, &ev.trade.to_string())
 			.await?
 			.unwrap();
 
@@ -62,7 +62,7 @@ async fn on_item_bought(params: HandleParams<'_>) -> Result<()> {
 			source: None,
 			trade_type: None,
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 
 		//always update trade in last of func
 		// update trade
@@ -179,7 +179,7 @@ async fn on_set_buy(params: HandleParams<'_>) -> Result<()> {
 			source: None,
 			trade_type: None,
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 	}
 	Ok(())
 }
@@ -259,10 +259,10 @@ async fn on_set_price(params: HandleParams<'_>) -> Result<()> {
 			source: None,
 			trade_type: None,
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 
 		//refetch balance
-		services::nft::refresh_balance(
+		services::nft_service::refresh_balance(
 			ev.who,
 			ev.collection.to_string(),
 			ev.item.to_string(),
@@ -274,13 +274,13 @@ async fn on_set_price(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_SET_PRICE, move |params| {
+		EventHandle::new(EVENT_SET_PRICE, move |params| {
 			Box::pin(on_set_price(params))
 		}),
-		Task::new(EVENT_SET_BUY, move |params| Box::pin(on_set_buy(params))),
-		Task::new(EVENT_BOUGHT_ITEM, move |params| {
+		EventHandle::new(EVENT_SET_BUY, move |params| Box::pin(on_set_buy(params))),
+		EventHandle::new(EVENT_BOUGHT_ITEM, move |params| {
 			Box::pin(on_item_bought(params))
 		}),
 	]

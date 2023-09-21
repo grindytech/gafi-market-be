@@ -28,10 +28,11 @@ pub async fn get_database() -> Database {
 pub fn start_test_db(max_life_time: u32) -> Child {
 	let mut path = env::current_exe().unwrap();
 	path.pop(); // remove the binary name
-	let end_index = path.to_string_lossy().find("/target").unwrap_or(path.to_string_lossy().len());
+	let full_path = path.to_string_lossy();
+	let end_index = full_path.find("/target").unwrap_or(full_path.len());
 	let full_path_js_file = format!(
 		"{}/mongodb-memory.js",
-		&path.to_string_lossy()[0..end_index]
+		&full_path[0..end_index]
 	);
 
 	let cmd = Command::new("node")
@@ -48,7 +49,6 @@ pub async fn get_test_db(max_life_time: u32) -> (Child, Database) {
 	let stdout = db_process.stdout.take().expect("child did not have a handle to stdout");
 	let mut stdout_reader = BufReader::new(stdout).lines();
 	let db_connect_string = stdout_reader.next_line().await.unwrap().unwrap();
-	println!("{}", db_connect_string);
 	let db = db::get_database(db_connect_string, "test".to_string()).await;
 	(db_process, db)
 }

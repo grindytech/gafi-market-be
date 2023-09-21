@@ -11,7 +11,7 @@ pub use shared::{
 use crate::{
 	gafi::{self},
 	services,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_trade_cancelled(params: HandleParams<'_>) -> Result<()> {
@@ -54,12 +54,12 @@ async fn on_trade_cancelled(params: HandleParams<'_>) -> Result<()> {
 			source: None,
 			trade_type: Some(trade.trade_type),
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 	}
 	Ok(())
 }
-pub fn tasks() -> Vec<Task> {
-	vec![Task::new(EVENT_TRADE_CANCELLED, move |params| {
+pub fn tasks() -> Vec<EventHandle> {
+	vec![EventHandle::new(EVENT_TRADE_CANCELLED, move |params| {
 		Box::pin(on_trade_cancelled(params))
 	})]
 }

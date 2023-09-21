@@ -10,7 +10,7 @@ fn get_db_track_name(name: &str) -> String {
 
 /// Worker's state and configuration.:
 ///
-/// - tasks: Tasks execution each block - handle events.
+/// - tasks: EventHandles execution each block - handle events.
 /// - current_block: An unsigned 32-bit integer indicating the current block number.
 /// - latest_block: An unsigned 32-bit integer representing the latest block number.
 /// - db: Database.
@@ -20,7 +20,7 @@ fn get_db_track_name(name: &str) -> String {
 /// - running: Running state of the worker.
 /// - max_batch: Specifying the maximum number of blocks to process in a loop before it delay.
 pub struct WorkerState {
-	tasks: Vec<Task>,
+	tasks: Vec<EventHandle>,
 	current_block: u32,
 	latest_block: u32,
 	db: Database,
@@ -69,7 +69,7 @@ impl WorkerState {
 		Ok(state)
 	}
 
-	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+	pub fn add_tasks(&mut self, tasks: &mut Vec<EventHandle>) {
 		self.tasks.append(tasks);
 	}
 }
@@ -91,7 +91,7 @@ impl Worker {
 		Ok(Self { name, state })
 	}
 
-	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+	pub fn add_tasks(&mut self, tasks: &mut Vec<EventHandle>) {
 		self.state.add_tasks(tasks);
 	}
 
@@ -116,14 +116,14 @@ impl Worker {
 	/// It takes input parameters:
 	///     - `api`: A reference to the RpcClient used to interact with the blockchain.
 	///     - `db`: A reference to the Database used to store data related to the block processing.
-	///     - `tasks`: A vector of Task objects representing the tasks to be executed for matching events.
+	///     - `tasks`: A vector of EventHandle objects representing the tasks to be executed for matching events.
 	///     - `block_number`: The block number of the block to be processed.
 	///
 	/// It returns a Result containing the processed Block if successful, or an error if there was a failure.
 	async fn process_block(
 		api: &RpcClient,
 		db: &Database,
-		tasks: &Vec<Task>,
+		tasks: &Vec<EventHandle>,
 		block_number: u32,
 	) -> Result<Block> {
 		let block_hash = api

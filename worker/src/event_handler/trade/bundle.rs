@@ -16,7 +16,7 @@ pub use shared::{
 
 use crate::{
 	gafi, services,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
@@ -56,9 +56,9 @@ async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
 				.parse()?,
 			),
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 		for nft in trade.bundle.unwrap() {
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				ev.who.clone(),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -68,7 +68,7 @@ async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
 			.await?;
 
 			let owner_u8 = shared::utils::vec_to_array(hex::decode(trade.owner.clone())?);
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				subxt::utils::AccountId32::from(owner_u8),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -135,7 +135,7 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 		trade_db.update_one(query, upsert, options).await?;
 		//refetch balance
 		for nft in bundle {
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				ev.who.clone(),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -148,12 +148,12 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_SET_BUNDLE, move |params| {
+		EventHandle::new(EVENT_SET_BUNDLE, move |params| {
 			Box::pin(on_bundle_set(params))
 		}),
-		Task::new(EVENT_BUNDLE_BOUGHT, move |params| {
+		EventHandle::new(EVENT_BUNDLE_BOUGHT, move |params| {
 			Box::pin(on_bundle_bought(params))
 		}),
 	]

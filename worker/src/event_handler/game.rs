@@ -4,7 +4,7 @@ use shared::constant::{EVENT_COLLECTION_ADDED, EVENT_COLLECTION_REMOVED, EVENT_G
 use crate::{
 	gafi::{self},
 	services::game_service,
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_collection_added(params: HandleParams<'_>) -> Result<()> {
@@ -41,15 +41,15 @@ async fn on_game_created(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_GAME_CREATED, move |params| {
+		EventHandle::new(EVENT_GAME_CREATED, move |params| {
 			Box::pin(on_game_created(params))
 		}),
-		Task::new(EVENT_COLLECTION_ADDED, move |params| {
+		EventHandle::new(EVENT_COLLECTION_ADDED, move |params| {
 			Box::pin(on_collection_added(params))
 		}),
-		Task::new(EVENT_COLLECTION_REMOVED, move |params| {
+		EventHandle::new(EVENT_COLLECTION_REMOVED, move |params| {
 			Box::pin(on_collection_removed(params))
 		}),
 	]

@@ -20,11 +20,11 @@ pub type RpcClient = OnlineClient<PolkadotConfig>;
 
 /// - key: A string representing the event name to handle. The format of the key is PalletName:EventName. 
 /// - runner: A function that will be executed when the event specified by the key occurs.
-pub struct Task {
+pub struct EventHandle {
 	pub key: String,
 	pub runner: Box<dyn Fn(HandleParams) -> BoxFuture<Result<()>> + Send + Sync>,
 }
-impl Task {
+impl EventHandle {
 	pub fn new<Func>(key: &str, func: Func) -> Self
 	where
 		Func: Fn(HandleParams) -> BoxFuture<Result<()>> + Send + Sync + 'static,

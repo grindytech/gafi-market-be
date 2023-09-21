@@ -9,7 +9,7 @@ use crate::{
 };
 
 
-use shared::{SocialInfo,Favorites, Propertise, LootTable, LootTableNft};
+use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft};
 use utoipa::OpenApi;
 
 use super::{
@@ -47,7 +47,7 @@ use super::{
             GameDTO,
             PoolDTO,
             SocialInfo,
-            Propertise,
+            Property,
             LootTable,
             LootTableNft,
             NFTDTO,
