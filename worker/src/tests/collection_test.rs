@@ -1,4 +1,4 @@
-use crate::{gafi::game::events::CollectionCreated, services};
+use crate::services;
 use shared::tests;
 
 #[tokio::test]

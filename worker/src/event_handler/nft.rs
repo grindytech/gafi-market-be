@@ -1,16 +1,13 @@
 use std::collections::HashMap;
 
-use mongodb::{
-	bson::{doc, DateTime, Decimal128},
-	options::UpdateOptions,
-};
+use mongodb::bson::Decimal128;
 pub use shared::types::Result;
 use shared::{
 	constant::{
 		EVENT_ITEM_ADDED, EVENT_ITEM_CREATED, EVENT_ITEM_METADATA_SET, EVENT_MINTED,
 		EVENT_REQUEST_MINT, EVENT_TRANSFERRED,
 	},
-	BaseDocument, HistoryTx, RequestMint, NFT,
+	HistoryTx, RequestMint,
 };
 
 use crate::{

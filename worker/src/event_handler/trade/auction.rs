@@ -1,13 +1,9 @@
-use mongodb::{
-	bson::{doc, Decimal128, Document},
-	options::UpdateOptions,
-};
+use mongodb::bson::Decimal128;
 use shared::{
-	config,
 	constant::{
-		EVENT_AUCTION_CLAIMED, EVENT_SET_AUCTION, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
+		EVENT_AUCTION_CLAIMED, EVENT_SET_AUCTION,
 	},
-	history_tx, models, BaseDocument, Trade,
+	models,
 };
 pub use shared::{
 	constant::{TRADE_SET_AUCTION, TRADE_SET_WIST_LIST},
@@ -18,9 +14,9 @@ use crate::{
 	gafi,
 	services::{
 		self,
-		trade_service::{self, AuctionClaimParams, AuctionSetParams},
+		trade_service,
 	},
-	workers::{EventHandle, HandleParams},
+	workers::{EventHandle, HandleParams}, types::{AuctionSetParams, AuctionClaimParams},
 };
 
 async fn on_auction_claimed(params: HandleParams<'_>) -> Result<()> {
@@ -123,6 +119,9 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 				start_block: ev.start_block,
 				source: source.clone(),
 				trade_id: ev.trade.to_string(),
+				block_height: params.block.height,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
 			},
 			params.db,
 		)
@@ -142,6 +141,8 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
+
+//ask price
 
 pub fn tasks() -> Vec<EventHandle> {
 	vec![

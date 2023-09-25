@@ -142,12 +142,6 @@ impl Worker {
 				Phase::Finalization => extrinsic_index = Some(-1),
 				Phase::Initialization => extrinsic_index = Some(-2),
 			}
-			// log::debug!("phase {:?}", ev.phase());
-			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
-			// 	log::debug!("{ev:?}");
-			// } else {
-			// 	log::warn!("<Cannot decode event>");
-			// }
 			for task in tasks {
 				if task.key == format!("{}:{}", ev.pallet_name(), ev.variant_name()) {
 					task.run(HandleParams {
@@ -171,11 +165,11 @@ impl Worker {
 		})
 	}
 
-	pub async fn stop(&mut self) -> Result<()> {
-		let state = &mut self.state;
-		state.enabled = false;
-		Ok(())
-	}
+	// pub async fn stop(&mut self) -> Result<()> {
+	// 	let state = &mut self.state;
+	// 	state.enabled = false;
+	// 	Ok(())
+	// }
 	/// - Runs a process to handle blocks.
 	/// - Returns a Result indicating whether it was enabled or not.
 	async fn run(&mut self) -> Result<bool> {

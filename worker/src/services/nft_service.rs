@@ -5,7 +5,7 @@ use mongodb::{
 	Database,
 };
 use serde::Deserialize;
-use shared::{block, types::Result, BaseDocument, NFTOwner, RequestMint, NFT};
+use shared::{types::Result, BaseDocument, NFTOwner, RequestMint, NFT};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};

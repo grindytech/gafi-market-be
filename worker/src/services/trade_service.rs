@@ -5,7 +5,8 @@ use mongodb::{
 };
 use shared::{
 	constant::{
-		EVENT_AUCTION_CLAIMED, TRADE_SET_AUCTION, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
+		EVENT_AUCTION_CLAIMED, EVENT_BOUGHT_ITEM, EVENT_SET_AUCTION, TRADE_SET_AUCTION,
+		TRADE_SET_BUY, TRADE_SET_PRICE, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
 	},
 	history_tx, models, BaseDocument, Trade,
 };
@@ -19,6 +20,7 @@ use crate::{
 			pallet_game::types::TradeConfig,
 		},
 	},
+	types::{AuctionClaimParams, AuctionSetParams, ItemBoughtParams, SetPriceParams},
 	workers::RpcClient,
 };
 
@@ -81,26 +83,36 @@ pub async fn bundle_of(
 	Ok(trade_config)
 }
 
-pub struct AuctionSetParams {
-	pub source: Vec<models::trade::Nft>,
-	pub maybe_price: Decimal128,
-	pub owner: String,
-	pub start_block: Option<u32>,
-	pub duration: u32,
-	pub trade_id: String,
-}
-pub async fn auction_set(
-	params: AuctionSetParams,
+pub async fn upsert_trade(
+	trade: Trade,
 	db: &Database,
 ) -> Result<mongodb::results::UpdateResult, mongodb::error::Error> {
-	let trade: Document = Trade {
+	let trade_db = db.collection::<Trade>(&Trade::name());
+	let options = UpdateOptions::builder().upsert(true).build();
+	let query = doc! {
+	  "trade_id": trade.trade_id.clone(),
+	};
+	let trade_doc: Document = trade.into();
+	let upsert = doc! {
+	  "$set": trade_doc,
+	};
+	let rs = trade_db.update_one(query, upsert, options).await?;
+	Ok(rs)
+}
+
+/// Set auction.
+/// - create trade
+/// - create history
+pub async fn auction_set(params: AuctionSetParams, db: &Database) -> shared::Result<()> {
+	let trade = Trade {
 		maybe_price: Some(params.maybe_price),
 		start_block: params.start_block,
 		duration: Some(params.duration),
 		trade_id: params.trade_id.clone(),
 		trade_type: TRADE_SET_AUCTION.to_string(),
 		status: TRADE_STATUS_FOR_SALE.to_string(),
-		source: Some(params.source),
+		source: Some(params.source.clone()),
+		owner: params.owner.clone(),
 
 		id: None,
 		nft: None,
@@ -109,23 +121,29 @@ pub async fn auction_set(
 		wish_list: None,
 		unit_price: None,
 		price: None,
-		owner: params.owner,
 		end_block: None,
-		sold: None,
-	}
-	.into();
-
-	//create sale
-	let trade_db = db.collection::<Trade>(&Trade::name());
-	let options = UpdateOptions::builder().upsert(true).build();
-	let query = doc! {
-	  "trade_id": params.trade_id,
 	};
-	let upsert = doc! {
-	  "$set": trade,
+	upsert_trade(trade, db).await?;
+	let history = history_tx::HistoryTx {
+		id: None,
+		amount: None,
+		price: Some(params.maybe_price),
+		block_height: params.block_height,
+		event: EVENT_SET_AUCTION.to_string(),
+		event_index: params.event_index,
+		extrinsic_index: params.extrinsic_index,
+		from: params.owner,
+		source: Some(params.source),
+		trade_id: Some(params.trade_id),
+		trade_type: Some(TRADE_SET_AUCTION.to_string()),
+		to: None,
+		pool: None,
+		tx_hash: None,
+		value: None,
+		nfts: None,
 	};
-	let rs = trade_db.update_one(query, upsert, options).await?;
-	Ok(rs)
+	history_service::upsert(history, db).await?;
+	Ok(())
 }
 
 pub async fn update_trade_status(
@@ -138,11 +156,12 @@ pub async fn update_trade_status(
 	  "trade_id": trade_id,
 	};
 	let update = doc! {
-	  "status": status,
+	 "$set": { "status": status,}
 	};
 	let rs = trade_db.update_one(query.clone(), update, None).await?;
 	Ok(rs)
 }
+
 pub async fn get_trade_by_trade_id(
 	trade_id: &str,
 	db: &Database,
@@ -155,18 +174,9 @@ pub async fn get_trade_by_trade_id(
 	Ok(trade)
 }
 
-pub struct AuctionClaimParams {
-	pub trade_id: String,
-	pub trade_type: String,
-	pub from: String,
-	pub to: Option<String>,
-	pub price: Option<Decimal128>,
-	pub block_height: u32,
-	pub event_index: u32,
-	pub extrinsic_index: i32,
-	pub nfts: Option<Vec<models::trade::Nft>>,
-	pub ask_price: Option<Decimal128>,
-}
+/// Claim an auction.
+/// - update trade status to SOLD
+/// - create history
 pub async fn auction_claim(params: AuctionClaimParams, db: &Database) -> shared::Result<()> {
 	update_trade_status(&params.trade_id, TRADE_STATUS_SOLD, db).await?;
 	let history = history_tx::HistoryTx {
@@ -179,14 +189,155 @@ pub async fn auction_claim(params: AuctionClaimParams, db: &Database) -> shared:
 		extrinsic_index: params.extrinsic_index,
 		from: params.from,
 		to: params.to,
-		nfts: params.nfts,
-		pool: None,
-		source: None,
+		source: params.nfts,
+		value: params.ask_price,
 		trade_id: Some(params.trade_id),
 		trade_type: Some(params.trade_type),
+
 		tx_hash: None,
-		value: params.ask_price,
+		nfts: None,
+		pool: None,
 	};
 	history_service::upsert(history, db).await?;
+	Ok(())
+}
+
+/// On set price for a nft
+/// - create trade
+/// - create history
+pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<()> {
+	let trade = Trade {
+		nft: Some(params.nft.clone()),
+		trade_id: params.trade_id.clone(),
+		owner: params.who.clone(),
+		unit_price: Some(params.unit_price),
+		trade_type: TRADE_SET_PRICE.to_string(),
+		status: TRADE_STATUS_FOR_SALE.to_string(),
+		start_block: params.start_block,
+		end_block: params.end_block,
+
+		maybe_required: None,
+		source: None,
+		bundle: None,
+		wish_list: None,
+		duration: None,
+		maybe_price: None,
+		price: None,
+		id: None,
+	};
+	let history = history_tx::HistoryTx {
+		amount: None,
+		block_height: params.block_height,
+		event: TRADE_SET_PRICE.to_string(),
+		event_index: params.event_index,
+		extrinsic_index: params.extrinsic_index,
+		from: params.who,
+		nfts: Some(vec![params.nft]),
+		price: Some(params.unit_price),
+		trade_id: Some(params.trade_id),
+
+		pool: None,
+		to: None,
+		tx_hash: None,
+		value: None,
+		source: None,
+		trade_type: None,
+		id: None,
+	};
+
+	upsert_trade(trade, db).await?;
+	history_service::upsert(history, db).await?;
+
+	Ok(())
+}
+
+/// On set price for a nft
+/// - create trade
+/// - create history
+pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()> {
+	let trade = Trade {
+		nft: Some(params.nft.clone()),
+		unit_price: Some(params.unit_price),
+		owner: params.who.clone(),
+		start_block: params.start_block,
+		end_block: params.end_block,
+		trade_id: params.trade_id.clone(),
+		trade_type: TRADE_SET_BUY.to_string(),
+		status: TRADE_STATUS_FOR_SALE.to_string(),
+
+		duration: None,
+		id: None,
+		maybe_required: None,
+		source: None,
+		bundle: None,
+		wish_list: None,
+		maybe_price: None,
+		price: None,
+	};
+	let history = history_tx::HistoryTx {
+		amount: None,
+		block_height: params.block_height,
+		event: TRADE_SET_BUY.to_string(),
+		event_index: params.event_index,
+		extrinsic_index: params.extrinsic_index,
+		from: params.who,
+		nfts: Some(vec![params.nft]),
+		trade_id: Some(params.trade_id),
+		price: Some(params.unit_price),
+
+		pool: None,
+		to: None,
+		tx_hash: None,
+		value: None,
+		source: None,
+		trade_type: None,
+		id: None,
+	};
+
+	upsert_trade(trade, db).await?;
+	history_service::upsert(history, db).await?;
+
+	Ok(())
+}
+
+/// On set price for a nft
+/// - update trade status
+/// - create history
+pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Result<()> {
+	let trade = get_by_trade_id(db, &params.trade_id).await?.ok_or("trade not found")?;
+	let config = shared::config::Config::init();
+	let total_value: u128 = trade
+		.unit_price
+		.ok_or("unit price parse u128 fail")?
+		.to_string()
+		.parse::<u128>()?
+		* u128::from(params.amount);
+	let total_value_decimal: Decimal128 = shared::utils::string_decimal_to_number(
+		&total_value.to_string(),
+		config.chain_decimal as i32,
+	)
+	.parse()?;
+	let history = models::HistoryTx {
+		block_height: params.block_height,
+		event: EVENT_BOUGHT_ITEM.to_string(),
+		event_index: params.event_index,
+		extrinsic_index: params.extrinsic_index,
+		from: trade.owner,
+		to: Some(params.who),
+		nfts: Some(vec![params.nft.clone()]),
+		value: Some(total_value_decimal),
+		amount: Some(params.amount),
+		price: trade.price,
+		trade_id: Some(trade.trade_id.clone()),
+		id: None,
+		pool: None,
+		tx_hash: None,
+		source: None,
+		trade_type: None,
+	};
+	history_service::upsert(history, db).await?;
+	if params.is_sold {
+		update_trade_status(&trade.trade_id, TRADE_STATUS_SOLD, db).await?;
+	}
 	Ok(())
 }

@@ -12,14 +12,11 @@ pub async fn get_database(uri: String, database_name: String) -> Database {
 	let database = client.database(&database_name);
 	database
 }
-// async fn create_collection(client: &Client, db_name: &str, coll_name: &str) {
-// 	let db = client.database(db_name);
-// 	db.create_collection(coll_name, None).await.unwrap();
-// }
+
 /**
  * init data code here: create index, init data,...
  */
-pub async fn init_db(db: Database) {
+pub async fn init_db(_db: Database) {
 	//TODO create indexes
 	/*  let options = IndexOptions::builder().unique(true).build();
 	let model = IndexModel::builder()

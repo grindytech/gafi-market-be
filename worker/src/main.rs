@@ -8,9 +8,11 @@ use workers::Worker;
 #[subxt::subxt(runtime_metadata_path = "./metadata.scale")]
 pub mod gafi {}
 
-mod services;
 mod event_handler;
+mod services;
+mod tests;
 mod workers;
+mod types;
 
 async fn get_db() -> Database {
 	let configuration = Config::init();
@@ -50,7 +52,7 @@ async fn main() -> Result<()> {
 		nft_worker.add_tasks(&mut event_handler::trade::wishlist::tasks());
 		nft_worker.add_tasks(&mut event_handler::trade::auction::tasks());
 		nft_worker.add_tasks(&mut event_handler::trade::cancel_trade::tasks());
-		
+
 		let _ = nft_worker.start(1000).await;
 	};
 
@@ -72,7 +74,7 @@ async fn main() -> Result<()> {
 		other_tasks.append(&mut event_handler::collection::tasks());
 		other_tasks.append(&mut event_handler::pool::tasks());
 		other_tasks.append(&mut event_handler::game::tasks());
-		
+
 		other_worker.add_tasks(&mut other_tasks);
 		let _ = other_worker.start(1000).await;
 	};
