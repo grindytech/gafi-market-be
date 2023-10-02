@@ -1,4 +1,4 @@
-use std::{error, fmt};
+use std::error;
 
 // Change the alias to `Box<error::Error>`.
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error + Send + Sync>>;

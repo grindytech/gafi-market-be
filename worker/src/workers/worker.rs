@@ -8,8 +8,19 @@ fn get_db_track_name(name: &str) -> String {
 	format!("{}_{}", name, block::Block::name())
 }
 
+/// Worker's state and configuration.:
+///
+/// - tasks: EventHandles execution each block - handle events.
+/// - current_block: An unsigned 32-bit integer indicating the current block number.
+/// - latest_block: An unsigned 32-bit integer representing the latest block number.
+/// - db: Database.
+/// - api: An RpcClient object used for making RPC calls.
+/// - rpc: Endpoint for the RPC server.
+/// - enabled: Worker is enabled or not.
+/// - running: Running state of the worker.
+/// - max_batch: Specifying the maximum number of blocks to process in a loop before it delay.
 pub struct WorkerState {
-	tasks: Vec<Task>,
+	tasks: Vec<EventHandle>,
 	current_block: u32,
 	latest_block: u32,
 	db: Database,
@@ -58,7 +69,7 @@ impl WorkerState {
 		Ok(state)
 	}
 
-	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+	pub fn add_tasks(&mut self, tasks: &mut Vec<EventHandle>) {
 		self.tasks.append(tasks);
 	}
 }
@@ -67,6 +78,7 @@ pub struct Worker {
 	state: WorkerState,
 	pub name: String,
 }
+
 impl Worker {
 	pub async fn new(
 		name: String,
@@ -79,7 +91,7 @@ impl Worker {
 		Ok(Self { name, state })
 	}
 
-	pub fn add_tasks(&mut self, tasks: &mut Vec<Task>) {
+	pub fn add_tasks(&mut self, tasks: &mut Vec<EventHandle>) {
 		self.state.add_tasks(tasks);
 	}
 
@@ -100,10 +112,18 @@ impl Worker {
 		})
 	}
 
+	/// This function processes a block by executing tasks associated with the events in the block.
+	/// It takes input parameters:
+	///     - `api`: A reference to the RpcClient used to interact with the blockchain.
+	///     - `db`: A reference to the Database used to store data related to the block processing.
+	///     - `tasks`: A vector of EventHandle objects representing the tasks to be executed for matching events.
+	///     - `block_number`: The block number of the block to be processed.
+	///
+	/// It returns a Result containing the processed Block if successful, or an error if there was a failure.
 	async fn process_block(
 		api: &RpcClient,
 		db: &Database,
-		tasks: &Vec<Task>,
+		tasks: &Vec<EventHandle>,
 		block_number: u32,
 	) -> Result<Block> {
 		let block_hash = api
@@ -116,19 +136,12 @@ impl Worker {
 		let events = api.events().at(block_hash).await?;
 		for ev in events.iter() {
 			let ev = ev?;
-
 			let extrinsic_index: Option<i32>;
 			match ev.phase() {
 				Phase::ApplyExtrinsic(i) => extrinsic_index = Some(i as i32),
 				Phase::Finalization => extrinsic_index = Some(-1),
 				Phase::Initialization => extrinsic_index = Some(-2),
 			}
-			// log::debug!("phase {:?}", ev.phase());
-			// if let Ok(ev) = ev.as_root_event::<gafi::Event>() {
-			// 	log::debug!("{ev:?}");
-			// } else {
-			// 	log::warn!("<Cannot decode event>");
-			// }
 			for task in tasks {
 				if task.key == format!("{}:{}", ev.pallet_name(), ev.variant_name()) {
 					task.run(HandleParams {
@@ -141,7 +154,7 @@ impl Worker {
 						},
 						extrinsic_index,
 					})
-					.await?; //TODO process in multi threads
+					.await?;
 				}
 			}
 		}
@@ -152,14 +165,15 @@ impl Worker {
 		})
 	}
 
-	pub async fn stop(&mut self) -> Result<()> {
-		let state = &mut self.state;
-		state.enabled = false;
-		Ok(())
-	}
-	/// return false if worker disabled
+	// pub async fn stop(&mut self) -> Result<()> {
+	// 	let state = &mut self.state;
+	// 	state.enabled = false;
+	// 	Ok(())
+	// }
+	/// - Runs a process to handle blocks.
+	/// - Returns a Result indicating whether it was enabled or not.
 	async fn run(&mut self) -> Result<bool> {
-		let mut state = &mut self.state;
+		let state = &mut self.state;
 		state.running = true;
 
 		let end_block = if (i64::from(state.latest_block) - i64::from(state.current_block))
@@ -198,6 +212,8 @@ impl Worker {
 		Ok(state.enabled.clone())
 	}
 
+	/// Starts the execution of a task with a specified delay loop.
+	/// - `delay_loop` - The delay time in milliseconds between each execution of the task.
 	pub async fn start(&mut self, delay_loop: u64) -> Result<()> {
 		let state = &mut self.state;
 		if state.enabled {

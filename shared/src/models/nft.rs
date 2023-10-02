@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -5,7 +7,7 @@ use utoipa::ToSchema;
 use crate::BaseDocument;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
-pub struct Propertise {
+pub struct Property {
 	pub key: String,
 	pub value: String,
 }
@@ -30,9 +32,14 @@ pub struct NFT {
 	pub visitor_count: Option<i32>,
 	pub favorite_count: Option<i32>,
 
-	pub propertise: Option<Vec<Propertise>>,
+	pub properties: Option<Vec<Property>>,
 	pub created_at: DateTime,
+	pub updated_at: Option<DateTime>,
 	pub supply: Option<u32>,
+
+	pub created_by: String,
+	pub metadata: Option<String>,
+	pub attributes: Option<HashMap<String, String>>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

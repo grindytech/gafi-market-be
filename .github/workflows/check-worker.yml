@@ -39,6 +39,11 @@ jobs:
       # Rust cache
       - uses: Swatinem/rust-cache@v2
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+
       - name: Check Build
         run: |
           cargo check -r -p worker

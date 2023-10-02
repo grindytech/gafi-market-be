@@ -50,8 +50,6 @@ pub struct Trade {
 	pub maybe_required: Option<Vec<Nft>>,//swap
 	pub bundle: Option<Vec<Nft>>,//bundle
 	pub wish_list: Option<Vec<Nft>>,
-
-	pub sold: Option<u32>,//sold out amount in retail sale
 	pub status: String,//ForSale, Sold, Canceled, Expired
 }
 
@@ -122,8 +120,6 @@ impl Into<Document> for Trade {
 			"source": source,
 			"bundle": bundle,
 			"wish_list": wish_list,
-
-			"sold": self.sold,
 			"status": self.status
 		}
 	}

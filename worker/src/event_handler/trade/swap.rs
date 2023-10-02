@@ -17,7 +17,7 @@ pub use shared::{
 use crate::{
 	gafi,
 	services::{self},
-	workers::{HandleParams, Task},
+	workers::{HandleParams, EventHandle},
 };
 
 async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
@@ -56,12 +56,12 @@ async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
 			tx_hash: None,
 			value: Some(maybe_price),
 		};
-		services::history::upsert(history, params.db).await?;
+		services::history_service::upsert(history, params.db).await?;
 
 		//refresh balance
 		if trade.maybe_required.is_some() {
 			for nft in trade.maybe_required.unwrap() {
-				services::nft::refresh_balance(
+				services::nft_service::refresh_balance(
 					ev.who.clone(),
 					nft.collection.to_string(),
 					nft.item.to_string(),
@@ -71,7 +71,7 @@ async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
 				.await?;
 
 				let owner_u8 = shared::utils::vec_to_array(hex::decode(trade.owner.clone())?);
-				services::nft::refresh_balance(
+				services::nft_service::refresh_balance(
 					subxt::utils::AccountId32::from(owner_u8),
 					nft.collection.to_string(),
 					nft.item.to_string(),
@@ -83,7 +83,7 @@ async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
 		}
 		if trade.source.is_some() {
 			for nft in trade.source.unwrap() {
-				services::nft::refresh_balance(
+				services::nft_service::refresh_balance(
 					ev.who.clone(),
 					nft.collection.to_string(),
 					nft.item.to_string(),
@@ -93,7 +93,7 @@ async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
 				.await?;
 
 				let owner_u8 = shared::utils::vec_to_array(hex::decode(trade.owner.clone())?);
-				services::nft::refresh_balance(
+				services::nft_service::refresh_balance(
 					subxt::utils::AccountId32::from(owner_u8),
 					nft.collection.to_string(),
 					nft.item.to_string(),
@@ -160,7 +160,7 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 			trade_id: ev.trade.to_string(),
 			trade_type: TRADE_SET_SWAP.to_string(),
 
-			sold: None,
+			
 			status: TRADE_STATUS_FOR_SALE.to_string(),
 		}
 		.into();
@@ -178,7 +178,7 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 
 		//refetch balance
 		for nft in source {
-			services::nft::refresh_balance(
+			services::nft_service::refresh_balance(
 				ev.who.clone(),
 				nft.collection.to_string(),
 				nft.item.to_string(),
@@ -191,10 +191,10 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-pub fn tasks() -> Vec<Task> {
+pub fn tasks() -> Vec<EventHandle> {
 	vec![
-		Task::new(EVENT_SET_SWAP, move |params| Box::pin(on_swap_set(params))),
-		Task::new(EVENT_SWAP_CLAIMED, move |params| {
+		EventHandle::new(EVENT_SET_SWAP, move |params| Box::pin(on_swap_set(params))),
+		EventHandle::new(EVENT_SWAP_CLAIMED, move |params| {
 			Box::pin(on_swap_claimed(params))
 		}),
 	]

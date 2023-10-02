@@ -1,13 +1,11 @@
 use crate::{
 	gafi::{self, runtime_types::gafi_support::game::types::PoolType},
-	workers::{HandleParams, Task},
+	services::pool_service,
+	workers::{HandleParams, EventHandle},
 };
-use mongodb::{
-	bson::{doc, DateTime, Document},
-	options::UpdateOptions,
-};
+use mongodb::bson::DateTime;
 use shared::{
-	constant::EVENT_MINING_POOL_CREATED, types::Result, BaseDocument, LootTable, LootTableNft, Pool,
+	constant::EVENT_MINING_POOL_CREATED, types::Result, LootTable, LootTableNft, Pool,
 };
 
 async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
@@ -17,10 +15,6 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			PoolType::Dynamic => "Dynamic",
 			PoolType::Stable => "Stable",
 		};
-
-		let pool_db = params.db.collection::<Pool>(Pool::name().as_str());
-		let option = UpdateOptions::builder().upsert(true).build();
-		let query = doc! {"pool_id": ev.pool.to_string()};
 
 		let pool_storage_address = gafi::storage().game().pool_of(ev.pool);
 		let pool_detail = params
@@ -59,8 +53,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			&pool_detail.mint_settings.price.to_string(),
 			config.chain_decimal as i32,
 		);
-		// let owner_deposit
-		let pool: Document = Pool {
+		let pool = Pool {
 			admin: hex::encode(pool_detail.admin.0),
 			begin_at: pool_detail.mint_settings.start_block.unwrap_or(0).into(),
 			created_at: DateTime::now().timestamp_millis(),
@@ -74,14 +67,9 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			pool_id: ev.pool.to_string(),
 			type_pool: pool_type.to_string(),
 			updated_at: DateTime::now().timestamp_millis(),
-		}
-		.into();
-
-		let upsert = doc! {
-			"$set": pool
 		};
-
-		pool_db.update_one(query, upsert, option).await?;
+		
+		pool_service::upsert_pool(pool, params.db).await?;
 		log::info!(
 			"MiningPoolCreated created {} {}, who: {}, loot_table: {:?}",
 			ev.pool.to_string(),
@@ -92,10 +80,9 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
-//add item
-// remove item
-pub fn tasks() -> Vec<Task> {
-	vec![Task::new(EVENT_MINING_POOL_CREATED, move |params| {
+
+pub fn tasks() -> Vec<EventHandle> {
+	vec![EventHandle::new(EVENT_MINING_POOL_CREATED, move |params| {
 		Box::pin(on_pool_created(params))
 	})]
 }

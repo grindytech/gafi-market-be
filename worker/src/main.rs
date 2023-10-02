@@ -8,9 +8,11 @@ use workers::Worker;
 #[subxt::subxt(runtime_metadata_path = "./metadata.scale")]
 pub mod gafi {}
 
+mod event_handler;
 mod services;
-mod tasks;
+mod tests;
 mod workers;
+mod types;
 
 async fn get_db() -> Database {
 	let configuration = Config::init();
@@ -43,13 +45,13 @@ async fn main() -> Result<()> {
 		.await
 		.unwrap();
 
-		nft_worker.add_tasks(&mut tasks::nft::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::retail::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::bundle::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::swap::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::wishlist::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::auction::tasks());
-		nft_worker.add_tasks(&mut tasks::trade::cancel_trade::tasks());
+		nft_worker.add_tasks(&mut event_handler::nft::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::retail::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::bundle::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::swap::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::wishlist::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::auction::tasks());
+		nft_worker.add_tasks(&mut event_handler::trade::cancel_trade::tasks());
 
 		let _ = nft_worker.start(1000).await;
 	};
@@ -69,10 +71,10 @@ async fn main() -> Result<()> {
 		.unwrap();
 		let mut other_tasks = vec![];
 
-		other_tasks.append(&mut tasks::collection::tasks());
-		other_tasks.append(&mut tasks::pool::tasks());
-		other_tasks.append(&mut tasks::game::tasks());
-		
+		other_tasks.append(&mut event_handler::collection::tasks());
+		other_tasks.append(&mut event_handler::pool::tasks());
+		other_tasks.append(&mut event_handler::game::tasks());
+
 		other_worker.add_tasks(&mut other_tasks);
 		let _ = other_worker.start(1000).await;
 	};

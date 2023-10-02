@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use shared::models::nft::{Propertise, NFT};
+use shared::models::nft::{Property, NFT};
 
 use crate::common::DBQuery;
 
@@ -20,14 +22,20 @@ pub struct NFTDTO {
 	pub external_url: Option<String>,
 	pub weight: Option<String>,
 	pub img_url: Option<String>,
+	pub metadata: Option<String>,
+	pub attributes: Option<HashMap<String, String>>,
 
 	pub visitor_count: Option<i32>,
 	pub favorite_count: Option<i32>,
 
-	pub propertise: Option<Vec<Propertise>>,
+	pub propertise: Option<Vec<Property>>,
 
 	#[schema(format = "date-time",value_type=String )]
 	pub created_at: DateTime,
+	#[schema(format = "date-time",value_type=String )]
+	pub updated_at: Option<DateTime>,
+
+	pub created_by: String,
 
 	pub supply: Option<u32>,
 }
@@ -46,9 +54,13 @@ impl Into<NFT> for NFTDTO {
 			img_url: self.img_url,
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
-			propertise: self.propertise,
+			properties: self.propertise,
 			created_at: self.created_at,
 			supply: self.supply,
+			updated_at: self.updated_at,
+			created_by: self.created_by,
+			metadata: self.metadata,
+			attributes: self.attributes,
 		}
 	}
 }
@@ -67,9 +79,13 @@ impl From<NFT> for NFTDTO {
 			img_url: value.img_url,
 			visitor_count: value.visitor_count,
 			favorite_count: value.favorite_count,
-			propertise: value.propertise,
+			propertise: value.properties,
 			created_at: value.created_at,
 			supply: value.supply,
+			metadata: value.metadata,
+			updated_at: value.updated_at,
+			created_by: value.created_by,
+			attributes: value.attributes,
 		}
 	}
 }
