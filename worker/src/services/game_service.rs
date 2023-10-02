@@ -1,10 +1,11 @@
 use mongodb::{
-	bson::{doc, DateTime},
+	bson::{doc, Bson, DateTime},
 	options::UpdateOptions,
 	results::UpdateResult,
 	Database,
 };
-use shared::{BaseDocument, Game, NFTCollection};
+use serde_json::Value;
+use shared::{utils::serde_json_to_doc, BaseDocument, Game, NFTCollection};
 
 pub async fn add_collection(
 	game_id: &str,
@@ -158,4 +159,90 @@ pub async fn get_game_by_id(
 		)
 		.await?;
 	Ok(game)
+}
+
+pub async fn update_metadata(
+	metadata: String,
+	game: u32,
+	db: &Database,
+) -> Result<UpdateResult, mongodb::error::Error> {
+	let parsed: Result<Value, serde_json::Error> = serde_json::from_str(&metadata);
+	let update;
+	match parsed {
+		Ok(data) => {
+			let parsed_obj = serde_json_to_doc(data);
+			match parsed_obj {
+				Ok((doc, obj)) => {
+					let empty_val = Value::String("".to_string());
+					let banner_url =
+						obj.get("banner_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let logo_url = obj.get("logo_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let description =
+						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
+					update = doc! {
+							"$set": {
+							"banner_url": banner_url.to_string(),
+							"logo_url": logo_url.to_string(),
+							"description": description.to_string(),
+							"name": name.to_string(),
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": doc,
+						}
+					};
+				},
+				Err(_) => {
+					update = doc! {
+							"$set": {
+							"banner_url": Bson::Null,
+							"logo_url": Bson::Null,
+							"description": Bson::Null,
+							"name":  Bson::Null,
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": Bson::Null,
+						}
+					};
+				},
+			}
+		},
+		Err(_) => {
+			update = doc! {"$set": {
+				"updated_at": DateTime::now(),
+				"metadata": metadata.clone(),
+				"banner_url": Bson::Null,
+				"logo_url": Bson::Null,
+				"description": Bson::Null,
+				"name":  Bson::Null,
+				"attributes": Bson::Null,
+			}};
+		},
+	}
+	let game_db: mongodb::Collection<Game> = db.collection::<Game>(Game::name().as_str());
+	let option = UpdateOptions::builder().upsert(true).build();
+	let query = doc! {"game_id": game.to_string()};
+	let rs = game_db.update_one(query, update, option).await?;
+	Ok(rs)
+}
+
+pub async fn clear_metadata(
+	game_id: &str,
+	db: &Database,
+) -> Result<UpdateResult, mongodb::error::Error> {
+	let game_db: mongodb::Collection<Game> = db.collection::<Game>(Game::name().as_str());
+	let query = doc! {"game_id": game_id.to_string()};
+	let update = doc! {
+			"$set": {
+				"updated_at": DateTime::now(),
+				"metadata": Bson::Null,
+				"banner_url": Bson::Null,
+				"logo_url": Bson::Null,
+				"description": Bson::Null,
+				"name":  Bson::Null,
+				"attributes": Bson::Null,
+		}
+	};
+	let rs = game_db.update_one(query, update, None).await?;
+	Ok(rs)
 }

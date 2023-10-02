@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -37,7 +39,7 @@ pub struct NFT {
 
 	pub created_by: String,
 	pub metadata: Option<String>,
-
+	pub attributes: Option<HashMap<String, String>>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

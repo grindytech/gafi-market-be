@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
@@ -13,7 +15,6 @@ pub struct NFTCollection {
 	pub category: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
-	// pub minting_fee: String,
 	pub is_verified: Option<bool>,
 	pub updated_at: Option<DateTime>,
 	pub created_at: DateTime,
@@ -21,6 +22,8 @@ pub struct NFTCollection {
 	pub owner: String,
 	pub external_url: Option<String>,
 	pub games: Option<Vec<String>>,
+
+	pub attributes: Option<HashMap<String, String>>,
 }
 
 impl BaseDocument for NFTCollection {
@@ -39,7 +42,6 @@ impl Into<Document> for NFTCollection {
 			"category": self.category,
 			"logo_url": self.logo_url,
 			"banner_url": self.banner_url,
-			// "minting_fee": self.minting_fee,
 			"is_verified": self.is_verified,
 			"updated_at": DateTime::now(),
 			"created_at": self.created_at,

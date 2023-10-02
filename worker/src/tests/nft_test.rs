@@ -45,7 +45,10 @@ async fn upsert_nft_without_metadata() {
 	)
 	.await
 	.unwrap();
-	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db).await.unwrap().unwrap();
+	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db)
+		.await
+		.unwrap()
+		.unwrap();
 
 	nft_mock.id = nft.id;
 	nft_mock.created_at = nft.created_at;
@@ -95,24 +98,44 @@ pub async fn nft_metadata_set() {
 	.await
 	.unwrap();
 
-	services::nft_service::nft_metadata_set(&metadata, &nft_mock.collection_id, &nft_mock.token_id, &db)
-		.await
-		.unwrap();
+	services::nft_service::nft_metadata_set(
+		&metadata,
+		&nft_mock.collection_id,
+		&nft_mock.token_id,
+		&db,
+	)
+	.await
+	.unwrap();
 
-	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db).await.unwrap().unwrap();
+	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db)
+		.await
+		.unwrap()
+		.unwrap();
 
 	assert!(
 		nft.name == Some("hero".to_string())
 			&& nft.img_url == Some("/hero.png".to_string())
 			&& nft.metadata == Some(metadata.to_string())
 	);
+	assert_eq!(
+		nft.attributes.unwrap().get("title"),
+		Some(&"\"hero\"".to_string())
+	);
 
 	//meta data not in json format
 	let metadata = r#""other": "other data""#;
-	services::nft_service::nft_metadata_set(&metadata, &nft_mock.collection_id, &nft_mock.token_id, &db)
+	services::nft_service::nft_metadata_set(
+		&metadata,
+		&nft_mock.collection_id,
+		&nft_mock.token_id,
+		&db,
+	)
+	.await
+	.unwrap();
+	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db)
 		.await
+		.unwrap()
 		.unwrap();
-	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db).await.unwrap().unwrap();
 	assert!(nft.name == None && nft.img_url == None && nft.metadata == Some(metadata.to_string()));
 
 	let _ = db_process.kill();

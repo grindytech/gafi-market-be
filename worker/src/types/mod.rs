@@ -1,4 +1,5 @@
 use mongodb::bson::Decimal128;
+use serde::Deserialize;
 use shared::models;
 
 pub struct AuctionClaimParams {

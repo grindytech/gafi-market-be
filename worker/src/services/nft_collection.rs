@@ -2,10 +2,11 @@ use mongodb::{
 	bson::{doc, Bson, DateTime},
 	error,
 	options::{InsertOneOptions, UpdateOptions},
+	results::UpdateResult,
 	Database,
 };
-use serde::Deserialize;
-use shared::{BaseDocument, NFTCollection};
+use serde_json::Value;
+use shared::{utils::serde_json_to_doc, BaseDocument, NFTCollection};
 
 pub async fn get_collection_by_id(
 	db: &Database,
@@ -47,6 +48,7 @@ pub async fn create_collection_without_metadata(
 				banner_url: None,
 				category: None,
 				metadata: None,
+				attributes: None,
 			},
 			option,
 		)
@@ -58,7 +60,7 @@ pub async fn upsert_without_metadata(
 	collection_id: &str,
 	who: &str,
 	db: &Database,
-) -> shared::Result<()> {
+) -> Result<UpdateResult, mongodb::error::Error> {
 	let collection_db: mongodb::Collection<NFTCollection> =
 		db.collection::<NFTCollection>(NFTCollection::name().as_str());
 	let option = UpdateOptions::builder().upsert(true).build();
@@ -71,35 +73,52 @@ pub async fn upsert_without_metadata(
 			"updated_at": DateTime::now(),
 		}
 	};
-	collection_db.update_one(query, new_collection, option).await?;
+	let rs = collection_db.update_one(query, new_collection, option).await?;
 	log::info!("NFT Collection created {} {}", collection_id, who);
-	Ok(())
+	Ok(rs)
 }
 
-#[derive(Deserialize, Debug)]
-struct CollectionMetadata {
-	title: Option<String>,
-	image: Option<String>,
-	external_url: Option<String>,
-}
 pub async fn update_collection_metadata(
 	metadata: String,
 	collection: u32,
 	db: &Database,
-) -> shared::Result<()> {
-	let object = serde_json::from_str::<CollectionMetadata>(&metadata);
+) -> Result<UpdateResult, mongodb::error::Error> {
+	let parsed: Result<Value, serde_json::Error> = serde_json::from_str(&metadata);
 	let update;
-	match object {
+	match parsed {
 		Ok(data) => {
-			update = doc! {
-					"$set": {
-					"logo_url": data.image,
-					"name": data.title,
-					"updated_at": DateTime::now(),
-					"external_url": data.external_url,
-					"metadata": metadata.clone(),
-				}
-			};
+			let parsed_obj = serde_json_to_doc(data);
+			match parsed_obj {
+				Ok((doc, obj)) => {
+					let empty_val = Value::String("".to_string());
+					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let external_url =
+						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					update = doc! {
+							"$set": {
+							"logo_url": image.to_string(),
+							"name": title.to_string(),
+							"external_url": external_url.to_string(),
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": doc,
+						}
+					};
+				},
+				Err(_) => {
+					update = doc! {
+							"$set": {
+							"logo_url": Bson::Null,
+							"name": Bson::Null,
+							"external_url": Bson::Null,
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": Bson::Null,
+						}
+					};
+				},
+			}
 		},
 		Err(_) => {
 			update = doc! {"$set": {
@@ -108,6 +127,7 @@ pub async fn update_collection_metadata(
 				"logo_url": Bson::Null,
 				"name": Bson::Null,
 				"external_url": Bson::Null,
+				"attributes": Bson::Null,
 			}};
 		},
 	}
@@ -115,6 +135,28 @@ pub async fn update_collection_metadata(
 		db.collection::<NFTCollection>(NFTCollection::name().as_str());
 	let option = UpdateOptions::builder().upsert(true).build();
 	let query = doc! {"collection_id": collection.to_string()};
-	collection_db.update_one(query, update, option).await?;
-	Ok(())
+	let rs = collection_db.update_one(query, update, option).await?;
+	Ok(rs)
+}
+
+pub async fn clear_metadata(
+	collection_id: &str,
+	db: &Database,
+) -> Result<UpdateResult, mongodb::error::Error> {
+	let collection_db: mongodb::Collection<NFTCollection> =
+		db.collection::<NFTCollection>(NFTCollection::name().as_str());
+
+	let query = doc! {"collection_id": collection_id.to_string()};
+	let new_collection = doc! {
+			"$set": {
+				"metadata": Bson::Null,
+				"logo_url": Bson::Null,
+				"name": Bson::Null,
+				"external_url": Bson::Null,
+				"attributes": Bson::Null,
+				"updated_at": DateTime::now(),
+		}
+	};
+	let rs = collection_db.update_one(query, new_collection, None).await?;
+	Ok(rs)
 }

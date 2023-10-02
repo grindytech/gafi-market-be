@@ -27,17 +27,18 @@ pub const EVENT_MINTED: &str = "Game:Minted";
 pub const EVENT_TRANSFERRED: &str = "Game:Transferred";
 pub const EVENT_ITEM_ADDED: &str = "Game:ItemAdded";
 pub const EVENT_ITEM_METADATA_SET: &str = "Nfts:ItemMetadataSet";
+pub const EVENT_ITEM_METADATA_CLEARED: &str = "Nfts:ItemMetadataCleared";
 pub const EVENT_BUNDLE_BOUGHT: &str = "Game:BundleBought";
 pub const EVENT_WIST_LIST_FILLED: &str = "Game:WishlistFilled";
 pub const EVENT_GAME_CREATED: &str = "Game:GameCreated";
+pub const EVENT_GAME_SET_METADATA: &str = "Game:GameSetMetadata";
+pub const EVENT_GAME_METADATA_CLEARED: &str = "Game:GameMetadataCleared";
 pub const EVENT_COLLECTION_ADDED: &str = "Game:CollectionAdded";
 pub const EVENT_COLLECTION_REMOVED: &str = "Game:CollectionRemoved";
 pub const EVENT_COLLECTION_CREATED: &str = "Game:CollectionCreated";
 pub const EVENT_COLLECTION_METADATA_SET: &str = "Nfts:CollectionMetadataSet";
+pub const EVENT_COLLECTION_METADATA_CLEARED: &str = "Nfts:CollectionMetadataCleared";
 pub const EVENT_REQUEST_MINT: &str = "Game:RequestMint";
-
-
-
 
 pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
 
@@ -46,15 +47,3 @@ pub const EVENT_SWAP_CLAIMED: &str = "Game:SwapClaimed";
 pub const EVENT_TRADE_CANCELLED: &str = "Game:TradeCanceled";
 
 pub const EVENT_MINING_POOL_CREATED: &str = "Game:MiningPoolCreated";
-
-
-
-
-
-
-
-
-
-
-
-

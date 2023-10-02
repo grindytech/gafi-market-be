@@ -3909,6 +3909,7 @@ dependencies = [
  "log",
  "mongodb",
  "serde",
+ "serde_json",
  "subxt",
  "tokio",
  "utoipa",

@@ -1,4 +1,6 @@
-use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
+use std::collections::HashMap;
+
+use mongodb::bson::{doc, oid::ObjectId, Bson, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
 use crate::BaseDocument;
@@ -14,16 +16,18 @@ pub struct Game {
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
-	pub name: Option<String>,
 	pub slug: Option<String>,
 
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+	pub name: Option<String>,
+	pub metadata: Option<String>,
 
 	pub updated_at: Option<DateTime>,
 	pub created_at: Option<DateTime>,
 	pub collections: Option<Vec<String>>,
+	pub attributes: Option<HashMap<String, String>>,
 }
 
 impl BaseDocument for Game {
@@ -37,6 +41,17 @@ impl Into<Document> for Game {
 		let social = match self.social {
 			Some(s) => {
 				let doc: Document = s.into();
+				Some(doc)
+			},
+			None => None,
+		};
+		let attributes = match self.attributes {
+			Some(attr) => {
+				let mut bson_map = HashMap::<String, Bson>::new();
+				attr.into_iter().for_each(|(key, val)| {
+					bson_map.insert(key, Bson::String(val));
+				});
+				let doc: Document = bson_map.into_iter().collect();
 				Some(doc)
 			},
 			None => None,
@@ -56,6 +71,8 @@ impl Into<Document> for Game {
 			"updated_at": DateTime::now(),
 			"created_at": self.created_at,
 			"collections": self.collections,
+			"attributes": attributes,
+			"metadata": self.metadata,
 		}
 	}
 }

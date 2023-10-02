@@ -5,7 +5,8 @@ use mongodb::{
 	Database,
 };
 use serde::Deserialize;
-use shared::{types::Result, BaseDocument, NFTOwner, RequestMint, NFT};
+use serde_json::Value;
+use shared::{types::Result, utils::serde_json_to_doc, BaseDocument, NFTOwner, RequestMint, NFT};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};
@@ -108,29 +109,49 @@ pub async fn get_rq_mint(
 	let rs = request_mint_db.find_one(query, None).await?;
 	Ok(rs)
 }
-#[derive(Deserialize, Debug)]
-struct NftMetadata {
-	title: Option<String>,
-	image: Option<String>,
-}
+
 pub async fn nft_metadata_set(
 	metadata: &str,
 	collection_id: &str,
 	token_id: &str,
 	db: &Database,
-) -> shared::Result<()> {
-	let data = serde_json::from_str::<NftMetadata>(&metadata);
-	let update: Document;
-	match data {
+) -> std::result::Result<UpdateResult, mongodb::error::Error> {
+	let parsed: std::result::Result<Value, serde_json::Error> = serde_json::from_str(&metadata);
+	let update;
+	match parsed {
 		Ok(data) => {
-			update = doc! {
-					"$set": {
-					"img_url": data.image,
-					"name": data.title,
-					"updated_at": DateTime::now(),
-					"metadata": metadata,
-				}
-			};
+			let parsed_obj = serde_json_to_doc(data);
+			match parsed_obj {
+				Ok((doc, obj)) => {
+					let empty_val = Value::String("".to_string());
+					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let external_url =
+						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					update = doc! {
+							"$set": {
+							"img_url": image.to_string(),
+							"name": title.to_string(),
+							"external_url": external_url.to_string(),
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": doc,
+						}
+					};
+				},
+				Err(_) => {
+					update = doc! {
+							"$set": {
+							"img_url": Bson::Null,
+							"name": Bson::Null,
+							"external_url": Bson::Null,
+							"updated_at": DateTime::now(),
+							"metadata": metadata.clone(),
+							"attributes": Bson::Null,
+						}
+					};
+				},
+			}
 		},
 		Err(_) => {
 			update = doc! {
@@ -139,6 +160,8 @@ pub async fn nft_metadata_set(
 					"metadata": metadata,
 					"img_url": Bson::Null,
 					"name": Bson::Null,
+					"external_url": Bson::Null,
+					"attributes": Bson::Null,
 				}
 			};
 		},
@@ -148,8 +171,32 @@ pub async fn nft_metadata_set(
 		"token_id": token_id.to_string(),
 		"collection_id": collection_id.to_string()
 	};
-	nft_db.update_one(query, update, None).await?;
-	Ok(())
+	let rs = nft_db.update_one(query, update, None).await?;
+	Ok(rs)
+}
+
+pub async fn clear_metadata(
+	collection_id: &str,
+	token_id: &str,
+	db: &Database,
+) -> std::result::Result<UpdateResult, mongodb::error::Error> {
+	let nft_db = db.collection::<NFT>(NFT::name().as_str());
+	let query = doc! {
+		"token_id": token_id.to_string(),
+		"collection_id": collection_id.to_string()
+	};
+	let update = doc! {
+			"$set": {
+				"updated_at": DateTime::now(),
+				"metadata": Bson::Null,
+				"img_url": Bson::Null,
+				"name": Bson::Null,
+				"external_url": Bson::Null,
+				"attributes": Bson::Null,
+		}
+	};
+	let rs = nft_db.update_one(query, update, None).await?;
+	Ok(rs)
 }
 
 pub async fn upsert_nft_without_metadata(
