@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
