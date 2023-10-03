@@ -1,7 +1,11 @@
 use actix_web::Result;
 
-use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Collection, Database};
+use futures_util::{StreamExt, TryStreamExt};
+use mongodb::{
+	bson::{doc, Bson, Document},
+	options::{AggregateOptions, FindOptions},
+	Collection, Database,
+};
 
 use crate::{
 	common::{
@@ -11,7 +15,7 @@ use crate::{
 	shared::constant::EMPTY_STR,
 };
 
-use super::dto::{QueryFindNFts, NFTDTO};
+use super::dto::{NFTOwnerOfDto, QueryFindNFts, NFTDTO};
 use shared::{
 	models::{self, nft::NFT, nft_owner::NFTOwner},
 	BaseDocument,
@@ -31,47 +35,79 @@ pub async fn find_nft_by_token(
 	}
 }
 
-pub async fn find_nfts_by_address(
+pub async fn find_nfts_with_owner(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
-) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
+) -> Result<Option<Page<NFTOwnerOfDto>>, mongodb::error::Error> {
 	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NFTOwner::name().as_str());
-	let address = params.query.address;
-	let filter = doc! {"address": address};
-
-	// Get List nftowner of this address
-	let cursor = col.find(filter, None).await?;
-	let list_nftowner: Vec<NFTOwner> = cursor.try_collect().await.unwrap();
-	/* log::info!("DATA {:?}", list_nftowner); */
-	let mut or_filters = Vec::new();
-
-	for filter in &list_nftowner {
-		or_filters.push(doc! {
-			"$and": [
-				{"token_id": &filter.token_id},
-				{"collection_id": &filter.collection_id},
-			]
-		});
-	}
-
-	let query = doc! {
-		"$or": or_filters
+	let filter = params.query.to_doc();
+	let filter_match = doc! {
+		"$match": filter,
 	};
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
-	let col_nft: Collection<NFT> = db.collection(models::nft::NFT::name().as_str());
-	let mut cursor_nft = col_nft.find(query, filter_option).await?;
-	let mut list_nfts: Vec<NFTDTO> = Vec::new();
+	let filter_lookup = doc! {
+		"$lookup": {
+			"from": "nft",
+			"let": {
+				"nft_collection_id": "$collection_id",
+				"nft_token_id": "$token_id"
+			},
+			"pipeline": [
+				{
+					"$match": {
+						"$expr": {
+							"$and": [
+								{
+									"$eq": [ "$collection_id", "$$nft_collection_id" ]
+								},
+								{
+									"$eq": [ "$token_id", "$$nft_token_id" ]
+								}
+							]
+						}
+						//more NFT filter here
+					},
+				},
+				{
+					"$sort": params.sort(),
+				},
+			],
+			"as": "nft",
+		},
+	};
+	let paging = doc! {
+	  "$facet":{
+			"paginatedResults": [ { "$skip": params.skip() }, { "$limit": params.size() } ],
+		  "totalCount": [ { "$count": "count" } ]
+		},
+	};
+	let mut cursor = col.aggregate(vec![filter_match, filter_lookup, paging], None).await?;
+	let mut list_nfts: Vec<NFTOwnerOfDto> = Vec::new();
+	let document = cursor.try_next().await?.expect("cursor try_next failed");
 
-	while let Some(nft) = cursor_nft.try_next().await? {
-		list_nfts.push(nft.into())
-	}
-	let total = get_total_page(list_nfts.len(), params.size).await;
-	Ok(Some(Page::<NFTDTO> {
+	let paginated_results =
+		document.get_array("paginatedResults").expect("get paginatedResults as array");
+
+	paginated_results.into_iter().for_each(|rs| {
+		let nft_str = serde_json::to_string(&rs).expect("fail to parse string");
+		let owner_nft: NFTOwner = serde_json::from_str(&nft_str).expect("fail to parse NFTOwner");
+		list_nfts.push(owner_nft.into());
+	});
+
+	let count_arr = document.get_array("totalCount").expect("expect count");
+	let count = count_arr
+		.get(0)
+		.expect("get count")
+		.as_document()
+		.expect("as document")
+		.get_i32("count")
+		.expect("get count");
+
+	Ok(Some(Page::<NFTOwnerOfDto> {
 		data: list_nfts,
 		message: EMPTY_STR.to_string(),
 		page: params.page,
 		size: params.size,
-		total,
+		total: count as u64,
 	}))
 }
 

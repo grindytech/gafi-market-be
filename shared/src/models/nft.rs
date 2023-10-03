@@ -12,7 +12,7 @@ pub struct Property {
 	pub value: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFT {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -26,13 +26,11 @@ pub struct NFT {
 	pub status: Option<String>,
 
 	pub external_url: Option<String>,
-	pub weight: Option<String>,
 	pub img_url: Option<String>,
 
 	pub visitor_count: Option<i32>,
 	pub favorite_count: Option<i32>,
 
-	pub properties: Option<Vec<Property>>,
 	pub created_at: DateTime,
 	pub updated_at: Option<DateTime>,
 	pub supply: Option<u32>,
