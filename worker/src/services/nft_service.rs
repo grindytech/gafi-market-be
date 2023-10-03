@@ -4,7 +4,6 @@ use mongodb::{
 	results::UpdateResult,
 	Database,
 };
-use serde::Deserialize;
 use serde_json::Value;
 use shared::{types::Result, utils::serde_json_to_doc, BaseDocument, NFTOwner, RequestMint, NFT};
 use subxt::utils::AccountId32;

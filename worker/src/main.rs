@@ -10,6 +10,7 @@ pub mod gafi {}
 
 mod event_handler;
 mod services;
+#[cfg(test)]
 mod tests;
 mod workers;
 mod types;
