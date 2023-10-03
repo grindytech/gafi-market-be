@@ -81,9 +81,8 @@ async fn main() -> Result<()> {
 	};
 
 	let t1 = tokio::spawn(run_worker_1);
-	// let t2: tokio::task::JoinHandle<_> = tokio::spawn(run_worker_2);
-	// let (_, _) = (t1.await?, t2.await?);
-	let _ = t1.await?;
+	let t2: tokio::task::JoinHandle<_> = tokio::spawn(run_worker_2);
+	let (_, _) = (t1.await?, t2.await?);
 
 	Ok(())
 }
