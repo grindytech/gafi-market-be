@@ -17,7 +17,7 @@ version = "0.1.0"
 [workspace.dependencies]
 actix-cors = "0.6.4"
 actix-rt = "2.8.0"
-actix-web = "4.3.1"
+actix-web = "4.4.0"
 argon2 = "0.5.1"
 assert_cmd = "2.0.12"
 chrono = "0.4.26"
