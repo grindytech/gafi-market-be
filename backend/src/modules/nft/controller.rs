@@ -3,7 +3,7 @@ use crate::{
 	common::{QueryPage, ResponseBody, QueryNFT},
 	modules::nft::{
 			dto::{QueryFindNFts, NFTDTO},
-			service::{find_nft_by_token, find_nfts_by_address, find_nfts_by_query},
+			service::{find_nft_by_token, find_nfts_by_query, find_nfts_with_owner},
 		},
 };
 use actix_web::{
@@ -72,7 +72,7 @@ pub async fn get_nft(
     })),
 	
     responses(
-        (status=StatusCode::OK,description="Find List NFTs Success",body=NFTPage),
+        (status=StatusCode::OK,description="Find List NFTs Success",body=NFTWithOwnerPage),
         (status=StatusCode::INTERNAL_SERVER_ERROR,description="Error",body=NoData)
 
     )
@@ -83,7 +83,7 @@ pub async fn get_list_nft(
 	app_state: Data<AppState>,
 	req: web::Json<QueryNFT>,
 ) -> Result<HttpResponse, AWError> {
-	let list_nft = find_nfts_by_address(req.0, app_state.db.clone()).await;
+	let list_nft = find_nfts_with_owner(req.0, app_state.db.clone()).await;
 
 	match list_nft {
 		Ok(Some(nfts)) => {
@@ -97,6 +97,7 @@ pub async fn get_list_nft(
 				.json(rsp))
 		},
 		Err(e) => {
+			log::error!("{:?}",e);
 			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},

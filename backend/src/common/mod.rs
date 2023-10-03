@@ -2,6 +2,7 @@ pub mod utils;
 
 use core::fmt;
 
+use mongodb::bson::Document;
 use serde::{Deserialize, Serialize};
 use utoipa::{
 	openapi::{Object, ObjectBuilder},
@@ -12,7 +13,7 @@ use crate::modules::{
 	account::dto::{AccountDTO, QueryFindAccount},
 	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::{QueryFindGame, GameDTO},
-	nft::dto::{QueryFindNFts, NFTDTO}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
+	nft::dto::{QueryFindNFts, NFTDTO,NFTOwnerOfDto}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
 };
 
 #[derive(Debug, Serialize)]
@@ -49,6 +50,7 @@ impl<T> ResponseBody<T> {
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[aliases(
 	NFTPage = Page<NFTDTO>,
+	NFTWithOwnerPage = Page<NFTOwnerOfDto>,
 	GamePage=Page<GameDTO>,
 	TxPage = Page<HistoryTxDTO>,
 	CollectionPage = Page<NFTCollectionDTO>,
@@ -91,6 +93,28 @@ pub struct QueryPage<T> {
 	pub order_by: String,
 	pub desc: bool,
 	pub query: T,
+}
+
+impl <T> QueryPage<T> {
+	pub fn skip(&self) -> i64 {
+		let skip = (self.page -1) * self.size;
+		skip.to_string().parse::<i64>().unwrap_or(10)
+	}
+	pub fn size(&self) -> i64 {
+		if self.size > 100 {
+			return 100
+		}
+		self.size.to_string().parse().unwrap_or(10)
+	}
+	pub fn sort(&self) -> Document {
+		let mut doc =Document::new();
+		let mut desc = -1;
+		if !self.desc {
+			desc = 1;
+		}
+		doc.insert(self.order_by.clone(), desc);
+		doc
+	}
 }
 
 #[derive(Debug, Serialize, Deserialize)]
