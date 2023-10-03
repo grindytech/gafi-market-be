@@ -16,7 +16,7 @@ serde = {workspace = true}
 serde_json.workspace = true
 shared = {path = "../shared"}
 subxt ={workspace = true}
-subxt-codegen = "0.31.0"
+subxt-codegen = "0.32.0"
 subxt-metadata = "0.31.0"
 tokio = {version = "1.32.0", features = ["full"]}
 # debounce = {workspace = true}
