@@ -1,4 +1,4 @@
-use crate::common::DBQuery;
+use crate::{common::DBQuery, modules::collection::dto::NFTCollectionDTO};
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::{models::game::Game, SocialInfo};
@@ -22,6 +22,8 @@ pub struct GameDTO {
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
 	pub update_at: i64,
+
+	collections: Option<Vec<NFTCollectionDTO>>,
 }
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
