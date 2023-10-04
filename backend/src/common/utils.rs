@@ -1,13 +1,11 @@
-use std::{future::ready, str::FromStr};
+use std::str::FromStr;
 
 use crate::{app_state::AppState, common::ErrorResponse};
 
 use super::TokenPayload;
 use actix_web::{error::ErrorUnauthorized, web::Data};
 use chrono::Utc;
-use jsonwebtoken::{
-	decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
-};
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use mongodb::bson::doc;
 use shared::Config;
 use subxt_signer::{
@@ -132,4 +130,15 @@ pub fn verify_jwt_token(
 		},
 	};
 	claims
+}
+pub fn convert_hex_account_to_string(value: String) -> String {
+	let mut result = "".to_string();
+	let data = hex::decode(value);
+	match data {
+		Ok(v) => {
+			result = subxt::utils::AccountId32::from(shared::utils::vec_to_array(v)).to_string()
+		},
+		Err(_) => result = "error".to_string(),
+	}
+	result
 }

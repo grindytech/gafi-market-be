@@ -22,7 +22,7 @@ use shared::constant::EMPTY_STR;
     tag = "GameEndpoints",
     context_path = "/game",
     params((
-		"game_id"=String,Path,description="ID of Game",example="7"
+		"game_id"=String,Path,description="ID of Game",example="0"
 	)),
     responses(
         (status=200,description="Find Game Detail Success",body=GameDTO),

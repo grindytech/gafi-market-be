@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::common::DBQuery;
+use crate::{
+	common::DBQuery,
+	modules::{game::dto::GameDTO, nft::dto::NFTDTO},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -22,6 +25,7 @@ pub struct NFTCollectionDTO {
 
 	#[schema(format = "date-time",value_type=String )]
 	pub created_at: i64,
+	pub games: Option<Vec<GameDTO>>,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
@@ -36,6 +40,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			external_url: value.external_url,
 			owner: value.owner,
 			created_at: value.created_at.timestamp_millis(),
+			games: None,
 		}
 	}
 }

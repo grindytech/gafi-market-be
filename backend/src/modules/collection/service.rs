@@ -32,6 +32,10 @@ pub async fn find_collections_by_query(
 		db.collection(models::nft_collection::NFTCollection::name().as_str());
 
 	let query_find = params.query.to_doc();
+	/* let filter_match = doc! {
+		"$match":query_find,
+	}; */
+
 	let filter_option = get_filter_option(params.order_by, params.desc).await;
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut collections: Vec<NFTCollectionDTO> = Vec::new();

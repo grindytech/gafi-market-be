@@ -12,7 +12,7 @@ pub struct CategoriesDTO {
 	pub name: String,
 	pub slug: String,
 	#[schema(format = "date-time",value_type=String )]
-	pub createdAt: DateTime,
+	pub create_at: i64,
 }
 #[allow(non_snake_case)]
 impl From<Categories> for CategoriesDTO {
@@ -21,20 +21,11 @@ impl From<Categories> for CategoriesDTO {
 			id: value.id,
 			name: value.name,
 			slug: value.slug,
-			createdAt: value.created_at,
+			create_at: value.created_at.timestamp_millis(),
 		}
 	}
 }
-impl Into<Categories> for CategoriesDTO {
-	fn into(self) -> Categories {
-		Categories {
-			id: self.id,
-			name: self.name,
-			slug: self.slug,
-			created_at: self.createdAt,
-		}
-	}
-}
+
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryCategory {
 	pub name: String,
