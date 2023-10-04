@@ -21,6 +21,7 @@ pub struct GameDTO {
 
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
+	pub update_at: i64,
 }
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
@@ -41,7 +42,7 @@ impl From<Game> for GameDTO {
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			created_at: value.created_at,
-			/* 	create_at: value.create_at, */
+			update_at: value.updated_at.unwrap().timestamp_millis(),
 		}
 	}
 }
@@ -86,12 +87,3 @@ impl DBQuery for QueryFindGame {
 		}
 	}
 }
-
-/* #[derive(Deserialize, IntoParams)]
-pub struct GameParams {
-	pub search: String,
-	pub page: u64,
-	pub size: u64,
-	pub order_by: String,
-	pub desc: bool,
-} */

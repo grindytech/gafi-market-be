@@ -1,11 +1,7 @@
 use actix_web::Result;
 
-use futures_util::{StreamExt, TryStreamExt};
-use mongodb::{
-	bson::{doc, Bson, Document},
-	options::{AggregateOptions, FindOptions},
-	Collection, Database,
-};
+use futures_util::TryStreamExt;
+use mongodb::{bson::doc, Collection, Database};
 
 use crate::{
 	common::{

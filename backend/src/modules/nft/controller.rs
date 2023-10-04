@@ -66,7 +66,7 @@ pub async fn get_nft(
         "desc": true,
         "query":
 		{
-			"address":"0sxbdfc529688922fb5036d9439a7cd61d61114f600",
+			"address":"ec84321d9751c066fb923035073a73d467d44642c457915e7496c52f45db1f65",
 			
 		}
     })),

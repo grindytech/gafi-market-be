@@ -3,6 +3,8 @@ pub use account::*;
 pub mod block;
 pub use block::*;
 
+pub mod categories;
+
 pub mod game;
 pub use game::*;
 pub mod history_tx;

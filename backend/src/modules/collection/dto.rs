@@ -21,7 +21,7 @@ pub struct NFTCollectionDTO {
 	pub external_url: Option<String>,
 
 	#[schema(format = "date-time",value_type=String )]
-	pub created_at: DateTime,
+	pub created_at: i64,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
@@ -35,7 +35,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			category: value.category,
 			external_url: value.external_url,
 			owner: value.owner,
-			created_at: value.created_at,
+			created_at: value.created_at.timestamp_millis(),
 		}
 	}
 }
