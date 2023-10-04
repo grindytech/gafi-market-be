@@ -38,7 +38,7 @@ pub async fn find_nft_by_token(
 pub async fn find_nfts_with_owner(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
-) -> Result<Option<Page<NFTOwnerOfDto>>, mongodb::error::Error> {
+) -> shared::Result<Option<Page<NFTOwnerOfDto>>> {
 	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NFTOwner::name().as_str());
 	let filter = params.query.to_doc();
 	let filter_match = doc! {
@@ -80,12 +80,12 @@ pub async fn find_nfts_with_owner(
 		  "totalCount": [ { "$count": "count" } ]
 		},
 	};
+
 	let mut cursor = col.aggregate(vec![filter_match, filter_lookup, paging], None).await?;
 	let mut list_nfts: Vec<NFTOwnerOfDto> = Vec::new();
-	let document = cursor.try_next().await?.expect("cursor try_next failed");
+	let document = cursor.try_next().await?.ok_or("cursor try_next failed")?;
 
-	let paginated_results =
-		document.get_array("paginatedResults").expect("get paginatedResults as array");
+	let paginated_results = document.get_array("paginatedResults")?;
 
 	paginated_results.into_iter().for_each(|rs| {
 		let nft_str = serde_json::to_string(&rs).expect("fail to parse string");
@@ -93,14 +93,15 @@ pub async fn find_nfts_with_owner(
 		list_nfts.push(owner_nft.into());
 	});
 
-	let count_arr = document.get_array("totalCount").expect("expect count");
-	let count = count_arr
-		.get(0)
-		.expect("get count")
-		.as_document()
-		.expect("as document")
-		.get_i32("count")
-		.expect("get count");
+	let count_arr = document.get_array("totalCount")?;
+	let count_0 = count_arr.get(0).ok_or("get count");
+	let mut count = 0;
+	match count_0 {
+		Ok(c) => {
+			count = c.as_document().ok_or("as document")?.get_i32("count")?;
+		},
+		Err(_) => {},
+	}
 
 	Ok(Some(Page::<NFTOwnerOfDto> {
 		data: list_nfts,
