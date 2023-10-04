@@ -116,28 +116,19 @@ pub struct QueryFindNFts {
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
+		if let Some(address) = &self.address {
+			criteria.insert("address", address);
+		}
 		if let Some(name) = &self.name {
-			criteria.push(doc! {
-				"name": name
-			});
+			criteria.insert("name", name);
 		}
 		if let Some(token_id) = &self.token_id {
-			criteria.push(doc! {
-				"token_id": token_id
-			});
+			criteria.insert("token_id", token_id);
 		}
 		if let Some(collection_id) = &self.collection_id {
-			criteria.push(doc! {
-				"collection_id": collection_id
-			});
+			criteria.insert("collection_id", collection_id);
 		}
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }

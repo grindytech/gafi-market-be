@@ -1,4 +1,3 @@
-use actix_cors::Cors;
 use actix_web::{
 	dev,
 	http::{header, StatusCode},
