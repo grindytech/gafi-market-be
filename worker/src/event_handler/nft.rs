@@ -5,7 +5,7 @@ pub use shared::types::Result;
 use shared::{
 	constant::{
 		EVENT_ITEM_ADDED, EVENT_ITEM_CREATED, EVENT_ITEM_METADATA_SET, EVENT_MINTED,
-		EVENT_REQUEST_MINT, EVENT_TRANSFERRED,
+		EVENT_REQUEST_MINT, EVENT_TRANSFERRED, EVENT_ITEM_METADATA_CLEARED,
 	},
 	HistoryTx, RequestMint,
 };
@@ -43,7 +43,8 @@ async fn on_metadata_set(params: HandleParams<'_>) -> Result<()> {
 async fn on_item_added(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::ItemAdded>()?;
 	if let Some(ev) = event_parse {
-		services::nft_service::refresh_supply(ev.collection, ev.item, params.db, params.api).await?;
+		services::nft_service::refresh_supply(ev.collection, ev.item, params.db, params.api)
+			.await?;
 	}
 	Ok(())
 }
@@ -211,6 +212,19 @@ async fn on_request_mint(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
+async fn on_nft_metadata_cleared(params: HandleParams<'_>) -> Result<()> {
+	let event_parse = params.ev.as_event::<gafi::nfts::events::ItemMetadataCleared>()?;
+	if let Some(ev) = event_parse {
+		services::nft_service::clear_metadata(
+			&ev.collection.to_string(),
+			&ev.item.to_string(),
+			params.db,
+		)
+		.await?;
+	};
+	Ok(())
+}
+
 pub fn tasks() -> Vec<EventHandle> {
 	vec![
 		EventHandle::new(EVENT_MINTED, move |params| Box::pin(on_mint_nft(params))),
@@ -228,6 +242,9 @@ pub fn tasks() -> Vec<EventHandle> {
 		}),
 		EventHandle::new(EVENT_REQUEST_MINT, move |params| {
 			Box::pin(on_request_mint(params))
+		}),
+		EventHandle::new(EVENT_ITEM_METADATA_CLEARED, move |params| {
+			Box::pin(on_nft_metadata_cleared(params))
 		}),
 	]
 }

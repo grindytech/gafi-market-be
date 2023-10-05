@@ -6,7 +6,7 @@ use mongodb::{
 	Database,
 };
 use serde_json::Value;
-use shared::{utils::serde_json_to_doc, BaseDocument, NFTCollection};
+use shared::{utils::serde_json_to_properties, BaseDocument, NFTCollection};
 
 pub async fn get_collection_by_id(
 	db: &Database,
@@ -38,14 +38,10 @@ pub async fn create_collection_without_metadata(
 				owner: who.to_string(),
 				created_at: DateTime::now(),
 				updated_at: Some(DateTime::now()),
-				external_url: None,
 				games: None,
 				id: None,
 				is_verified: None,
-				logo_url: None,
-				name: None,
 				slug: None,
-				banner_url: None,
 				category: None,
 				metadata: None,
 				attributes: None,
@@ -87,19 +83,11 @@ pub async fn update_collection_metadata(
 	let update;
 	match parsed {
 		Ok(data) => {
-			let parsed_obj = serde_json_to_doc(data);
+			let parsed_obj = serde_json_to_properties(data);
 			match parsed_obj {
-				Ok((doc, obj)) => {
-					let empty_val = Value::String("".to_string());
-					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let external_url =
-						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+				Ok((doc, _properties, _obj)) => {
 					update = doc! {
 							"$set": {
-							"logo_url": image.to_string(),
-							"name": title.to_string(),
-							"external_url": external_url.to_string(),
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": doc,
@@ -109,9 +97,6 @@ pub async fn update_collection_metadata(
 				Err(_) => {
 					update = doc! {
 							"$set": {
-							"logo_url": Bson::Null,
-							"name": Bson::Null,
-							"external_url": Bson::Null,
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": Bson::Null,
@@ -124,9 +109,6 @@ pub async fn update_collection_metadata(
 			update = doc! {"$set": {
 				"updated_at": DateTime::now(),
 				"metadata": metadata.clone(),
-				"logo_url": Bson::Null,
-				"name": Bson::Null,
-				"external_url": Bson::Null,
 				"attributes": Bson::Null,
 			}};
 		},
@@ -150,9 +132,6 @@ pub async fn clear_metadata(
 	let new_collection = doc! {
 			"$set": {
 				"metadata": Bson::Null,
-				"logo_url": Bson::Null,
-				"name": Bson::Null,
-				"external_url": Bson::Null,
 				"attributes": Bson::Null,
 				"updated_at": DateTime::now(),
 		}

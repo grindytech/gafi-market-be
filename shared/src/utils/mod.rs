@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use mongodb::bson::{Bson, Document};
 use serde_json::{Map, Value};
 
-use crate::types;
+use crate::{types, Property};
 
 pub fn string_decimal_to_number(str: &str, decimal: i32) -> String {
 	let left_len = (str.chars().count() as i32) - decimal;
@@ -48,4 +48,40 @@ pub fn serde_json_to_doc(data: Value) -> types::Result<(Document, Map<String, Va
 	});
 	let attributes: Document = attributes_map.into_iter().collect();
 	Ok((attributes, obj))
+}
+pub fn serde_json_to_properties(
+	data: Value,
+) -> types::Result<(Vec<Document>, Vec<Property>, Map<String, Value>)> {
+	let obj: Map<String, Value> = data.as_object().ok_or("Not an object")?.clone();
+	let properties: Vec<Property> = obj
+		.clone()
+		.into_iter()
+		.map(|(k, v)| Property {
+			key: k,
+			value: v.to_string(),
+		})
+		.collect();
+	let documents: Vec<Document> = properties
+		.clone()
+		.into_iter()
+		.map(|property| {
+			let doc: Document = property.into();
+			doc
+		})
+		.collect();
+	Ok((documents, properties, obj))
+}
+pub fn vec_property_to_hashmap(properties: Vec<Property>) -> HashMap<String, String> {
+	let mut map: HashMap<String, String> = HashMap::new();
+	properties.into_iter().for_each(|p| {
+		map.insert(p.key, p.value);
+	});
+	map
+}
+pub fn hashmap_to_vec_property(map: HashMap<String, String>) -> Vec<Property> {
+	let mut vec_property: Vec<Property> = vec![];
+	map.into_iter().for_each(|(k, v)| {
+		vec_property.push(Property { key: k, value: v });
+	});
+	vec_property
 }

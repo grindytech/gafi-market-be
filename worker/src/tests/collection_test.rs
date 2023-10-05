@@ -24,9 +24,7 @@ async fn collection_metadata_set() {
 		{
 			"title": "chess",
 			"image": "/chess.svg",
-			"external_url": "https://chess.com",
-			"other": "other data",
-			"score": 1000
+			"external_url": "https://chess.com"
 		}
 	"#;
 	let collection = 0;
@@ -51,12 +49,15 @@ async fn collection_metadata_set() {
 			.unwrap()
 			.unwrap();
 
-	assert!(
-		nft_collection.name == Some("chess".to_string())
-			&& nft_collection.logo_url == Some("/chess.svg".to_string())
-			&& nft_collection.external_url == Some("https://chess.com".to_string())
-			&& metadata == nft_collection.metadata.unwrap()
-	);
+	let attributes = nft_collection.attributes.unwrap();
+
+	assert_eq!(metadata, nft_collection.metadata.unwrap());
+	assert_eq!(attributes.get(0).unwrap().key, "title");
+	assert_eq!(attributes.get(0).unwrap().value, "\"chess\"");
+	assert_eq!(attributes.get(1).unwrap().key, "image");
+	assert_eq!(attributes.get(1).unwrap().value, "\"/chess.svg\"");
+	assert_eq!(attributes.get(2).unwrap().key, "external_url");
+	assert_eq!(attributes.get(2).unwrap().value, "\"https://chess.com\"");
 
 	//meta data not in json format
 	let metadata = r#""other": "other data""#;
@@ -70,12 +71,7 @@ async fn collection_metadata_set() {
 			.await
 			.unwrap()
 			.unwrap();
-	assert!(
-		nft_collection.name == None
-			&& nft_collection.logo_url == None
-			&& nft_collection.external_url == None
-			&& metadata == nft_collection.metadata.unwrap()
-	);
+	assert_eq!(metadata, nft_collection.metadata.unwrap());
 
 	let _ = db_process.kill();
 }
@@ -117,5 +113,7 @@ async fn collection_metadata_cleared() {
 			.unwrap();
 
 	assert_eq!(nft_collection.metadata, None);
+	assert_eq!(nft_collection.attributes, None);
+
 	let _ = db_process.kill();
 }

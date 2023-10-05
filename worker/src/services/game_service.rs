@@ -5,7 +5,10 @@ use mongodb::{
 	Database,
 };
 use serde_json::Value;
-use shared::{utils::serde_json_to_doc, BaseDocument, Game, NFTCollection};
+use shared::{
+	utils::serde_json_to_properties,
+	BaseDocument, Game, NFTCollection,
+};
 
 pub async fn add_collection(
 	game_id: &str,
@@ -170,22 +173,11 @@ pub async fn update_metadata(
 	let update;
 	match parsed {
 		Ok(data) => {
-			let parsed_obj = serde_json_to_doc(data);
+			let parsed_obj = serde_json_to_properties(data);
 			match parsed_obj {
-				Ok((doc, obj)) => {
-					let empty_val = Value::String("".to_string());
-					let banner_url =
-						obj.get("banner_url").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let logo_url = obj.get("logo_url").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let description =
-						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
+				Ok((doc, _properties, _obj)) => {
 					update = doc! {
 							"$set": {
-							"banner_url": banner_url.to_string(),
-							"logo_url": logo_url.to_string(),
-							"description": description.to_string(),
-							"name": name.to_string(),
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": doc,
@@ -195,10 +187,6 @@ pub async fn update_metadata(
 				Err(_) => {
 					update = doc! {
 							"$set": {
-							"banner_url": Bson::Null,
-							"logo_url": Bson::Null,
-							"description": Bson::Null,
-							"name":  Bson::Null,
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": Bson::Null,
@@ -211,10 +199,6 @@ pub async fn update_metadata(
 			update = doc! {"$set": {
 				"updated_at": DateTime::now(),
 				"metadata": metadata.clone(),
-				"banner_url": Bson::Null,
-				"logo_url": Bson::Null,
-				"description": Bson::Null,
-				"name":  Bson::Null,
 				"attributes": Bson::Null,
 			}};
 		},
@@ -236,10 +220,6 @@ pub async fn clear_metadata(
 			"$set": {
 				"updated_at": DateTime::now(),
 				"metadata": Bson::Null,
-				"banner_url": Bson::Null,
-				"logo_url": Bson::Null,
-				"description": Bson::Null,
-				"name":  Bson::Null,
 				"attributes": Bson::Null,
 		}
 	};
