@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
-use mongodb::bson::{doc, oid::ObjectId, Bson, DateTime, Document};
+use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
-use crate::BaseDocument;
+use crate::{BaseDocument, Property};
 
 use super::account::SocialInfo;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -11,23 +9,19 @@ pub struct Game {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub game_id: String,
-	pub owner: String, // Reffence to account address
+	pub owner: String,
 
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
 	pub slug: Option<String>,
 
-	pub description: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
-	pub name: Option<String>,
 	pub metadata: Option<String>,
+	pub attributes: Option<Vec<Property>>,
 
 	pub updated_at: Option<DateTime>,
 	pub created_at: Option<DateTime>,
 	pub collections: Option<Vec<String>>,
-	pub attributes: Option<HashMap<String, String>>,
 }
 
 impl BaseDocument for Game {
@@ -47,12 +41,12 @@ impl Into<Document> for Game {
 		};
 		let attributes = match self.attributes {
 			Some(attr) => {
-				let mut bson_map = HashMap::<String, Bson>::new();
-				attr.into_iter().for_each(|(key, val)| {
-					bson_map.insert(key, Bson::String(val));
+				let mut doc_vec: Vec<Document> = vec![];
+				attr.into_iter().for_each(|property| {
+					let doc = property.into();
+					doc_vec.push(doc);
 				});
-				let doc: Document = bson_map.into_iter().collect();
-				Some(doc)
+				Some(doc_vec)
 			},
 			None => None,
 		};
@@ -63,11 +57,7 @@ impl Into<Document> for Game {
 			"is_verified":self.is_verified,
 			"social":social,
 			"category":self.category,
-			"name": self.name,
 			"slug": self.slug,
-			"description": self.description,
-			"logo_url": self.logo_url,
-			"banner_url": self.banner_url,
 			"updated_at": DateTime::now(),
 			"created_at": self.created_at,
 			"collections": self.collections,

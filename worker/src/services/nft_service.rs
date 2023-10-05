@@ -5,7 +5,11 @@ use mongodb::{
 	Database,
 };
 use serde_json::Value;
-use shared::{types::Result, utils::serde_json_to_doc, BaseDocument, NFTOwner, RequestMint, NFT};
+use shared::{
+	types::Result,
+	utils::serde_json_to_properties,
+	BaseDocument, NFTOwner, RequestMint, NFT,
+};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};
@@ -119,19 +123,11 @@ pub async fn nft_metadata_set(
 	let update;
 	match parsed {
 		Ok(data) => {
-			let parsed_obj = serde_json_to_doc(data);
+			let parsed_obj = serde_json_to_properties(data);
 			match parsed_obj {
-				Ok((doc, obj)) => {
-					let empty_val = Value::String("".to_string());
-					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let external_url =
-						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+				Ok((doc, _properties, _obj)) => {
 					update = doc! {
 							"$set": {
-							"img_url": image.to_string(),
-							"name": title.to_string(),
-							"external_url": external_url.to_string(),
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": doc,
@@ -141,9 +137,6 @@ pub async fn nft_metadata_set(
 				Err(_) => {
 					update = doc! {
 							"$set": {
-							"img_url": Bson::Null,
-							"name": Bson::Null,
-							"external_url": Bson::Null,
 							"updated_at": DateTime::now(),
 							"metadata": metadata.clone(),
 							"attributes": Bson::Null,
@@ -157,9 +150,6 @@ pub async fn nft_metadata_set(
 					"$set": {
 					"updated_at": DateTime::now(),
 					"metadata": metadata,
-					"img_url": Bson::Null,
-					"name": Bson::Null,
-					"external_url": Bson::Null,
 					"attributes": Bson::Null,
 				}
 			};
@@ -188,9 +178,6 @@ pub async fn clear_metadata(
 			"$set": {
 				"updated_at": DateTime::now(),
 				"metadata": Bson::Null,
-				"img_url": Bson::Null,
-				"name": Bson::Null,
-				"external_url": Bson::Null,
 				"attributes": Bson::Null,
 		}
 	};

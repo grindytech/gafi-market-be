@@ -16,12 +16,8 @@ pub struct NFTDTO {
 
 	pub is_burn: Option<bool>,
 
-	pub name: Option<String>,
-	pub description: Option<String>,
 	pub status: Option<String>,
 
-	pub external_url: Option<String>,
-	pub img_url: Option<String>,
 	pub metadata: Option<String>,
 	pub attributes: Option<HashMap<String, String>>,
 	pub visitor_count: Option<i32>,
@@ -42,11 +38,7 @@ impl Into<NFT> for NFTDTO {
 			id: None,
 			collection_id: self.collection_id,
 			is_burn: self.is_burn,
-			name: self.name,
-			description: self.description,
 			status: self.status,
-			external_url: self.external_url,
-			img_url: self.img_url,
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
 			created_at: DateTime::from_millis(self.created_at),
@@ -55,7 +47,9 @@ impl Into<NFT> for NFTDTO {
 			)),
 			created_by: self.created_by,
 			metadata: self.metadata,
-			attributes: self.attributes,
+			attributes: Some(shared::utils::hashmap_to_vec_property(
+				self.attributes.unwrap_or(HashMap::new()),
+			)),
 			supply: self.supply,
 		}
 	}
@@ -67,11 +61,7 @@ impl From<NFT> for NFTDTO {
 			token_id: value.token_id,
 			collection_id: value.collection_id,
 			is_burn: value.is_burn,
-			name: value.name,
-			description: value.description,
 			status: value.status,
-			external_url: value.external_url,
-			img_url: value.img_url,
 			visitor_count: value.visitor_count,
 			favorite_count: value.favorite_count,
 			supply: value.supply,
@@ -79,7 +69,9 @@ impl From<NFT> for NFTDTO {
 			updated_at: Some(value.updated_at.unwrap_or(value.created_at).timestamp_millis()),
 			created_at: value.created_at.timestamp_millis(),
 			created_by: value.created_by,
-			attributes: value.attributes,
+			attributes: Some(shared::utils::vec_property_to_hashmap(
+				value.attributes.unwrap_or(vec![]),
+			)),
 		}
 	}
 }

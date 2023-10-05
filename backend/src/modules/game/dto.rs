@@ -1,4 +1,6 @@
-use crate::{common::DBQuery, modules::collection::dto::NFTCollectionDTO};
+use std::collections::HashMap;
+
+use crate::common::DBQuery;
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::{models::game::Game, SocialInfo};
@@ -8,43 +10,41 @@ use utoipa::ToSchema;
 pub struct GameDTO {
 	pub game_id: String,
 	pub owner: String,
+	pub id: Option<String>,
 
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
-	pub name: Option<String>,
 	pub slug: Option<String>,
 
-	pub description: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub metadata: Option<String>,
+	pub attributes: Option<HashMap<String, String>>,
 
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
-	pub update_at: i64,
-	pub collections: Option<Vec<NFTCollectionDTO>>,
+	#[schema(format = "date-time",value_type=Option<String> )]
+	pub updated_at: Option<DateTime>,
 }
 
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
 		GameDTO {
+			id: Some(value.id.unwrap().to_string()),
 			game_id: value.game_id,
 			owner: value.owner,
-			/* is_verified: value.is_verified.unwrap_or(false), */
 			is_verified: value.is_verified,
 			social: match value.social {
 				Some(s) => Some(s.into()),
 				None => None,
 			},
 			category: value.category,
-			name: value.name,
 			slug: value.slug,
-			description: value.description,
-			logo_url: value.logo_url,
-			banner_url: value.banner_url,
 			created_at: value.created_at,
-			update_at: value.updated_at.unwrap().timestamp_millis(),
-			collections: None,
+			attributes: Some(shared::utils::vec_property_to_hashmap(
+				value.attributes.unwrap_or(vec![]),
+			)),
+			metadata: value.metadata,
+			updated_at: value.updated_at,
 		}
 	}
 }

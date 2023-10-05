@@ -10,11 +10,8 @@ use super::dto::GameDTO;
 
 use crate::{
 	app_state::AppState,
-	common::{QueryGame, QueryPage, ResponseBody},
-	modules::game::{
-		dto::QueryFindGame,
-		service::{find_game_by_id, find_games_by_query},
-	},
+	common::{QueryGame, ResponseBody},
+	modules::game::service::{find_game_by_id, find_games_by_query},
 };
 use shared::constant::EMPTY_STR;
 

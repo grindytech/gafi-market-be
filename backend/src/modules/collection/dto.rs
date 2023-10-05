@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
@@ -10,37 +12,37 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
+	pub id: Option<String>,
 	pub collection_id: String,
 	pub owner: String,
-
-	pub name: Option<String>,
 	pub slug: Option<String>,
-
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
 	pub is_verified: Option<bool>,
 	pub category: Option<String>,
+	#[schema(format = "date-time",value_type=Option<String> )]
+	pub created_at: Option<DateTime>,
+	#[schema(format = "date-time",value_type=Option<String> )]
+	pub updated_at: Option<DateTime>,
+	pub games: Option<Vec<String>>,
 
-	pub external_url: Option<String>,
-
-	#[schema(format = "date-time",value_type=String )]
-	pub created_at: i64,
-	pub games: Option<Vec<GameDTO>>,
+	pub metadata: Option<String>,
+	pub attributes: Option<HashMap<String, String>>,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
-			name: value.name,
 			slug: value.slug,
-			logo_url: value.logo_url,
-			banner_url: value.banner_url,
 			is_verified: value.is_verified,
 			category: value.category,
-			external_url: value.external_url,
 			owner: value.owner,
-			created_at: value.created_at.timestamp_millis(),
-			games: None,
+			created_at: Some(value.created_at),
+			attributes: Some(shared::utils::vec_property_to_hashmap(
+				value.attributes.unwrap_or(vec![]),
+			)),
+			games: value.games,
+			id: Some(value.id.unwrap().to_string()),
+			metadata: value.metadata,
+			updated_at: value.updated_at,
 		}
 	}
 }
