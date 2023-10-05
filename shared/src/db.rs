@@ -1,4 +1,6 @@
-use mongodb::{Client, Database};
+use mongodb::{bson::doc, options::IndexOptions, Client, Database, IndexModel};
+
+use crate::{Account, BaseDocument, Block};
 
 /**
  * The Client struct is the main entry point for the driver
@@ -16,15 +18,29 @@ pub async fn get_database(uri: String, database_name: String) -> Database {
 /**
  * init data code here: create index, init data,...
  */
-pub async fn init_db(_db: Database) {
-	//TODO create indexes
-	/*  let options = IndexOptions::builder().unique(true).build();
-	let model = IndexModel::builder()
-		.keys(doc! { "username": 1 })
-		.options(options)
-		.build();
-	db.collection::<models::account::Account>(models::account::NAME)
+pub async fn init_db(db: Database) {
+	//Account index
+	let options = IndexOptions::builder().unique(true).build();
+	let model = IndexModel::builder().keys(doc! { "address": 1 }).options(options).build();
+	db.collection::<Account>(&Account::name())
 		.create_index(model, None)
 		.await
-		.expect("creating an index should succeed"); */
+		.expect("creating Account index should succeed");
+
+	//BLock index
+	let options = IndexOptions::builder().unique(true).build();
+	let model = IndexModel::builder()
+		.keys(doc! { "height": 1 ,"hash": 1})
+		.options(options)
+		.build();
+	db.collection::<Block>("nft_block")
+		.create_index(model.clone(), None)
+		.await
+		.expect("creating Block index should succeed");
+	db.collection::<Block>("other_block")
+		.create_index(model.clone(), None)
+		.await
+		.expect("creating Block index should succeed");
+
+	//TODO db indexes
 }

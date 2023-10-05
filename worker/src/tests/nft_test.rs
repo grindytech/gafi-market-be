@@ -112,15 +112,14 @@ pub async fn nft_metadata_set() {
 		.unwrap()
 		.unwrap();
 
-	assert!(
-		nft.name == Some("hero".to_string())
-			&& nft.img_url == Some("/hero.png".to_string())
-			&& nft.metadata == Some(metadata.to_string())
-	);
-	assert_eq!(
-		nft.attributes.unwrap().get("title"),
-		Some(&"\"hero\"".to_string())
-	);
+	let attributes = nft.attributes.unwrap();
+	assert_eq!(nft.metadata, Some(metadata.to_string()));
+	assert_eq!(attributes.get(0).unwrap().key, "title");
+	assert_eq!(attributes.get(0).unwrap().value, "\"hero\"");
+	assert_eq!(attributes.get(1).unwrap().key, "image");
+	assert_eq!(attributes.get(1).unwrap().value, "\"/hero.png\"");
+	assert_eq!(attributes.get(2).unwrap().key, "other");
+	assert_eq!(attributes.get(2).unwrap().value, "\"other data\"");
 
 	//meta data not in json format
 	let metadata = r#""other": "other data""#;
@@ -136,7 +135,18 @@ pub async fn nft_metadata_set() {
 		.await
 		.unwrap()
 		.unwrap();
-	assert!(nft.name == None && nft.img_url == None && nft.metadata == Some(metadata.to_string()));
+	assert_eq!(nft.metadata, Some(metadata.to_string()));
+
+	// clear metadata
+	services::nft_service::clear_metadata(&nft.collection_id, &nft.token_id, &db)
+		.await
+		.unwrap();
+	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db)
+		.await
+		.unwrap()
+		.unwrap();
+	assert_eq!(None, nft.metadata);
+	assert_eq!(None, nft.attributes);
 
 	let _ = db_process.kill();
 }

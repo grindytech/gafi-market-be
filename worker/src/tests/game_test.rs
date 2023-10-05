@@ -67,18 +67,17 @@ pub async fn set_and_clear_metadata() {
 		.unwrap()
 		.unwrap();
 
-	assert_eq!(game_entity.name, Some("chess".to_string()));
-	assert_eq!(game_entity.banner_url, Some("/chess.svg".to_string()));
-	assert_eq!(game_entity.logo_url, Some("/chess.svg".to_string()));
-	assert_eq!(
-		game_entity.description,
-		Some("description data".to_string())
-	);
+	let attributes = game_entity.attributes.unwrap();
+
 	assert_eq!(metadata, game_entity.metadata.unwrap());
-	assert_eq!(
-		game_entity.attributes.unwrap().get("name").unwrap(),
-		"\"chess\""
-	);
+	assert_eq!(attributes.get(0).unwrap().key, "name");
+	assert_eq!(attributes.get(0).unwrap().value, "\"chess\"");
+	assert_eq!(attributes.get(1).unwrap().key, "banner_url");
+	assert_eq!(attributes.get(1).unwrap().value, "\"/chess.svg\"");
+	assert_eq!(attributes.get(2).unwrap().key, "logo_url");
+	assert_eq!(attributes.get(2).unwrap().value, "\"/chess.svg\"");
+	assert_eq!(attributes.get(3).unwrap().key, "description");
+	assert_eq!(attributes.get(3).unwrap().value, "\"description data\"");
 
 
 	// clear metadata
@@ -87,10 +86,6 @@ pub async fn set_and_clear_metadata() {
 		.await
 		.unwrap()
 		.unwrap();
-	assert_eq!(game_entity.name, None);
-	assert_eq!(game_entity.banner_url, None);
-	assert_eq!(game_entity.logo_url, None);
-	assert_eq!(game_entity.description, None);
 	assert_eq!(None, game_entity.metadata);
 	assert_eq!(None, game_entity.attributes);
 
