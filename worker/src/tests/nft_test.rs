@@ -82,9 +82,15 @@ pub async fn upsert_request_mint() {
 #[tokio::test]
 pub async fn nft_metadata_set() {
 	let metadata = r#"{
-      "title": "hero",
+      "name": "hero",
       "image": "/hero.png",
-      "other": "other data"
+			"description": "description",
+			"external_url": "external_url",
+			"animation_url": "animation_url",
+			"attributes": {
+				"tier": "King",
+				"elo": 2733
+			}
     }"#;
 	let (mut db_process, db) = tests::utils::get_test_db(10000).await;
 	let nft_mock: NFT = serde_json::from_str(NFT_MOCK).unwrap();
@@ -112,30 +118,17 @@ pub async fn nft_metadata_set() {
 		.unwrap()
 		.unwrap();
 
-	let attributes = nft.attributes.unwrap();
-	assert_eq!(nft.metadata, Some(metadata.to_string()));
-	assert_eq!(attributes.get(0).unwrap().key, "title");
-	assert_eq!(attributes.get(0).unwrap().value, "\"hero\"");
-	assert_eq!(attributes.get(1).unwrap().key, "image");
-	assert_eq!(attributes.get(1).unwrap().value, "\"/hero.png\"");
-	assert_eq!(attributes.get(2).unwrap().key, "other");
-	assert_eq!(attributes.get(2).unwrap().value, "\"other data\"");
+	assert_eq!(&nft.name.unwrap(), "hero");
+	assert_eq!(&nft.animation_url.unwrap(), "animation_url");
+	assert_eq!(&nft.external_url.unwrap(), "external_url");
+	assert_eq!(&nft.description.unwrap(), "description");
+	assert_eq!(&nft.image.unwrap(), "/hero.png");
 
-	//meta data not in json format
-	let metadata = r#""other": "other data""#;
-	services::nft_service::nft_metadata_set(
-		&metadata,
-		&nft_mock.collection_id,
-		&nft_mock.token_id,
-		&db,
-	)
-	.await
-	.unwrap();
-	let nft = services::nft_service::get_nft_by_token_id("0", "0", &db)
-		.await
-		.unwrap()
-		.unwrap();
-	assert_eq!(nft.metadata, Some(metadata.to_string()));
+	let attributes = nft.attributes.unwrap();
+	assert_eq!(attributes.get(0).unwrap().key, "tier");
+	assert_eq!(attributes.get(0).unwrap().value, "\"King\"");
+	assert_eq!(attributes.get(1).unwrap().key, "elo");
+	assert_eq!(attributes.get(1).unwrap().value, "2733");
 
 	// clear metadata
 	services::nft_service::clear_metadata(&nft.collection_id, &nft.token_id, &db)
@@ -145,8 +138,13 @@ pub async fn nft_metadata_set() {
 		.await
 		.unwrap()
 		.unwrap();
-	assert_eq!(None, nft.metadata);
-	assert_eq!(None, nft.attributes);
+
+	assert_eq!(nft.attributes, None);
+	assert_eq!(nft.name, None);
+	assert_eq!(nft.animation_url, None);
+	assert_eq!(nft.external_url, None);
+	assert_eq!(nft.description, None);
+	assert_eq!(nft.image, None);
 
 	let _ = db_process.kill();
 }

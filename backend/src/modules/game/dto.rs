@@ -17,13 +17,15 @@ pub struct GameDTO {
 	pub category: Option<String>,
 	pub slug: Option<String>,
 
-	pub metadata: Option<String>,
-	pub attributes: Option<HashMap<String, String>>,
-
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub updated_at: Option<DateTime>,
+
+	pub description: Option<String>,
+	pub logo_url: Option<String>,
+	pub banner_url: Option<String>,
+	pub name: Option<String>,
 }
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
@@ -39,11 +41,12 @@ impl From<Game> for GameDTO {
 			category: value.category,
 			slug: value.slug,
 			created_at: value.created_at,
-			attributes: Some(shared::utils::vec_property_to_hashmap(
-				value.attributes.unwrap_or(vec![]),
-			)),
-			metadata: value.metadata,
 			updated_at: value.updated_at,
+
+			description: value.description,
+			logo_url: value.logo_url,
+			banner_url: value.banner_url,
+			name: value.name
 		}
 	}
 }

@@ -21,8 +21,10 @@ pub struct NFTCollectionDTO {
 	pub updated_at: Option<DateTime>,
 	pub games: Option<Vec<String>>,
 
-	pub metadata: Option<String>,
-	pub attributes: Option<HashMap<String, String>>,
+	pub name: Option<String>,
+	pub logo_url: Option<String>,
+	pub banner_url: Option<String>,
+	pub external_url: Option<String>,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
@@ -33,13 +35,14 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			category: value.category,
 			owner: value.owner,
 			created_at: Some(value.created_at),
-			attributes: Some(shared::utils::vec_property_to_hashmap(
-				value.attributes.unwrap_or(vec![]),
-			)),
 			games: value.games,
 			id: Some(value.id.unwrap().to_string()),
-			metadata: value.metadata,
 			updated_at: value.updated_at,
+
+			name: value.name,
+			logo_url: value.logo_url,
+			banner_url: value.banner_url,
+			external_url: value.external_url,
 		}
 	}
 }

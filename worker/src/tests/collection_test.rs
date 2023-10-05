@@ -49,15 +49,13 @@ async fn collection_metadata_set() {
 			.unwrap()
 			.unwrap();
 
-	let attributes = nft_collection.attributes.unwrap();
-
-	assert_eq!(metadata, nft_collection.metadata.unwrap());
-	assert_eq!(attributes.get(0).unwrap().key, "title");
-	assert_eq!(attributes.get(0).unwrap().value, "\"chess\"");
-	assert_eq!(attributes.get(1).unwrap().key, "image");
-	assert_eq!(attributes.get(1).unwrap().value, "\"/chess.svg\"");
-	assert_eq!(attributes.get(2).unwrap().key, "external_url");
-	assert_eq!(attributes.get(2).unwrap().value, "\"https://chess.com\"");
+	assert_eq!(nft_collection.banner_url, Some("".to_string()));
+	assert_eq!(nft_collection.name, Some("chess".to_string()));
+	assert_eq!(
+		nft_collection.external_url,
+		Some("https://chess.com".to_string())
+	);
+	assert_eq!(nft_collection.logo_url, Some("/chess.svg".to_string()));
 
 	//meta data not in json format
 	let metadata = r#""other": "other data""#;
@@ -71,7 +69,11 @@ async fn collection_metadata_set() {
 			.await
 			.unwrap()
 			.unwrap();
-	assert_eq!(metadata, nft_collection.metadata.unwrap());
+
+	assert_eq!(nft_collection.banner_url, None);
+	assert_eq!(nft_collection.name, None);
+	assert_eq!(nft_collection.external_url, None);
+	assert_eq!(nft_collection.logo_url, None);
 
 	let _ = db_process.kill();
 }
@@ -112,8 +114,10 @@ async fn collection_metadata_cleared() {
 			.unwrap()
 			.unwrap();
 
-	assert_eq!(nft_collection.metadata, None);
-	assert_eq!(nft_collection.attributes, None);
+	assert_eq!(nft_collection.banner_url, None);
+	assert_eq!(nft_collection.name, None);
+	assert_eq!(nft_collection.external_url, None);
+	assert_eq!(nft_collection.logo_url, None);
 
 	let _ = db_process.kill();
 }

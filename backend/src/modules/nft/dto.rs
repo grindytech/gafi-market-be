@@ -18,7 +18,6 @@ pub struct NFTDTO {
 
 	pub status: Option<String>,
 
-	pub metadata: Option<String>,
 	pub attributes: Option<HashMap<String, String>>,
 	pub visitor_count: Option<i32>,
 	pub favorite_count: Option<i32>,
@@ -30,6 +29,12 @@ pub struct NFTDTO {
 
 	pub created_by: String,
 	pub supply: Option<u32>,
+
+	pub name: Option<String>,
+	pub description: Option<String>,
+	pub external_url: Option<String>,
+	pub image: Option<String>,
+	pub animation_url: Option<String>,
 }
 impl Into<NFT> for NFTDTO {
 	fn into(self) -> NFT {
@@ -46,11 +51,15 @@ impl Into<NFT> for NFTDTO {
 				self.updated_at.unwrap_or(self.created_at),
 			)),
 			created_by: self.created_by,
-			metadata: self.metadata,
 			attributes: Some(shared::utils::hashmap_to_vec_property(
 				self.attributes.unwrap_or(HashMap::new()),
 			)),
 			supply: self.supply,
+			name: self.name,
+			description: self.description,
+			external_url: self.external_url,
+			image: self.image,
+			animation_url: self.animation_url,
 		}
 	}
 }
@@ -65,13 +74,17 @@ impl From<NFT> for NFTDTO {
 			visitor_count: value.visitor_count,
 			favorite_count: value.favorite_count,
 			supply: value.supply,
-			metadata: value.metadata,
 			updated_at: Some(value.updated_at.unwrap_or(value.created_at).timestamp_millis()),
 			created_at: value.created_at.timestamp_millis(),
 			created_by: value.created_by,
 			attributes: Some(shared::utils::vec_property_to_hashmap(
 				value.attributes.unwrap_or(vec![]),
 			)),
+			name: value.name,
+			description: value.description,
+			external_url: value.external_url,
+			image: value.image,
+			animation_url: value.animation_url,
 		}
 	}
 }

@@ -5,10 +5,7 @@ use mongodb::{
 	Database,
 };
 use serde_json::Value;
-use shared::{
-	utils::serde_json_to_properties,
-	BaseDocument, Game, NFTCollection,
-};
+use shared::{utils::serde_json_to_doc, BaseDocument, Game, NFTCollection};
 
 pub async fn add_collection(
 	game_id: &str,
@@ -163,7 +160,6 @@ pub async fn get_game_by_id(
 		.await?;
 	Ok(game)
 }
-
 pub async fn update_metadata(
 	metadata: String,
 	game: u32,
@@ -173,23 +169,34 @@ pub async fn update_metadata(
 	let update;
 	match parsed {
 		Ok(data) => {
-			let parsed_obj = serde_json_to_properties(data);
+			let parsed_obj = serde_json_to_doc(data);
 			match parsed_obj {
-				Ok((doc, _properties, _obj)) => {
+				Ok((_doc, obj)) => {
+					let empty_val = Value::String("".to_string());
+					let banner_url =
+						obj.get("banner_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let logo_url = obj.get("logo_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let description =
+						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
 					update = doc! {
 							"$set": {
+							"banner_url": banner_url.to_string(),
+							"logo_url": logo_url.to_string(),
+							"description": description.to_string(),
+							"name": name.to_string(),
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
-							"attributes": doc,
 						}
 					};
 				},
 				Err(_) => {
 					update = doc! {
 							"$set": {
+							"banner_url": Bson::Null,
+							"logo_url": Bson::Null,
+							"description": Bson::Null,
+							"name":  Bson::Null,
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
-							"attributes": Bson::Null,
 						}
 					};
 				},
@@ -198,8 +205,10 @@ pub async fn update_metadata(
 		Err(_) => {
 			update = doc! {"$set": {
 				"updated_at": DateTime::now(),
-				"metadata": metadata.clone(),
-				"attributes": Bson::Null,
+				"banner_url": Bson::Null,
+				"logo_url": Bson::Null,
+				"description": Bson::Null,
+				"name":  Bson::Null,
 			}};
 		},
 	}
@@ -219,8 +228,10 @@ pub async fn clear_metadata(
 	let update = doc! {
 			"$set": {
 				"updated_at": DateTime::now(),
-				"metadata": Bson::Null,
-				"attributes": Bson::Null,
+				"banner_url": Bson::Null,
+				"logo_url": Bson::Null,
+				"description": Bson::Null,
+				"name":  Bson::Null,
 		}
 	};
 	let rs = game_db.update_one(query, update, None).await?;

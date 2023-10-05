@@ -1,15 +1,29 @@
-FROM rust:buster as builder
+FROM rust:latest as deps
+RUN apt-get update && apt-get install build-essential clang libclang-dev protobuf-compiler -y
 
 WORKDIR /app
-ADD . /app
+
+COPY ./Cargo.toml .
+COPY ./Cargo.lock .
+COPY ./worker/Cargo.toml ./worker/Cargo.toml
+COPY ./backend/Cargo.toml ./backend/Cargo.toml
+COPY ./shared/Cargo.toml ./shared/Cargo.toml
+RUN mkdir ./worker/src && echo 'fn main() { println!("Dummy!"); }' > ./worker/src/main.rs
+RUN mkdir ./backend/src && echo 'fn main() { println!("Dummy!"); }' > ./backend/src/main.rs
+RUN mkdir ./shared/src && echo 'fn main() { println!("Dummy!"); }' > ./shared/src/main.rs
+
 RUN cargo build -r -p backend
 
-FROM debian:buster-slim
-RUN useradd -ms /bin/bash gafi
-USER gafi
+FROM deps as builder
+WORKDIR /app
+COPY ./backend /app/backend
+COPY ./shared /app/shared
 
-COPY --from=builder /app/target/release/backend /
+RUN cargo build -r -p backend
+
+FROM rust:1-alpine as runner
+COPY --from=builder /app/target/release/backend /usr/local/bin/backend
 
 ENV RUST_BACKTRACE=1
-
-ENTRYPOINT ["/bin/bash", "-c", "/backend \"$@\"", "--"]
+WORKDIR /usr/local/bin
+ENTRYPOINT ["backend"]
