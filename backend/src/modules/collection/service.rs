@@ -1,12 +1,12 @@
 use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Collection, Database};
+use mongodb::{
+	bson::{doc, Document},
+	Collection, Database,
+};
 
 use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
 
-use crate::common::{
-	utils::{get_filter_option, get_total_page},
-	DBQuery, Page, QueryPage,
-};
+use crate::common::{utils::get_total_page, DBQuery, Page, QueryPage};
 
 use super::dto::{NFTCollectionDTO, QueryFindCollections};
 use shared::constant::EMPTY_STR;
@@ -24,6 +24,7 @@ pub async fn find_collection_by_id(
 		Ok(None)
 	}
 }
+
 pub async fn find_collections_by_query(
 	params: QueryPage<QueryFindCollections>,
 	db: Database,
@@ -32,11 +33,9 @@ pub async fn find_collections_by_query(
 		db.collection(models::nft_collection::NFTCollection::name().as_str());
 
 	let query_find = params.query.to_doc();
-	/* let filter_match = doc! {
-		"$match":query_find,
-	}; */
 
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
+	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
+
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut collections: Vec<NFTCollectionDTO> = Vec::new();
 	while let Some(nft) = cursor.try_next().await? {
@@ -53,3 +52,19 @@ pub async fn find_collections_by_query(
 }
 
 // Find Collections
+
+pub async fn get_list_collections(
+	query: Document,
+	db: Database,
+) -> Result<Vec<NFTCollectionDTO>, mongodb::error::Error> {
+	let col: Collection<NFTCollection> = db.collection(models::NFTCollection::name().as_str());
+
+	let mut cursor = col.find(query, None).await?;
+	let mut collections: Vec<NFTCollectionDTO> = Vec::new();
+	while let Some(nft) = cursor.try_next().await? {
+		collections.push(nft.into())
+	}
+	Ok(collections)
+}
+
+/* db.game.aggregate([{$match: {game_id: "1"}},{$unwind: "$collections"}, {$lookup:{from: "nft_collection", localField: "collections", foreignField: "collection_id", as: "collection_detail"}},{$group: {_id: "$_id", collections: {$push: {$first: "$collection_detail"}}}}]) */

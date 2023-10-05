@@ -22,9 +22,9 @@ pub struct GameDTO {
 	#[schema(format = "date-time",value_type=Option<String> )]
 	pub created_at: Option<DateTime>,
 	pub update_at: i64,
-
-	collections: Option<Vec<NFTCollectionDTO>>,
+	pub collections: Option<Vec<NFTCollectionDTO>>,
 }
+
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
 		GameDTO {
@@ -39,12 +39,12 @@ impl From<Game> for GameDTO {
 			category: value.category,
 			name: value.name,
 			slug: value.slug,
-
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			created_at: value.created_at,
 			update_at: value.updated_at.unwrap().timestamp_millis(),
+			collections: None,
 		}
 	}
 }

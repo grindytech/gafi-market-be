@@ -96,6 +96,7 @@ pub async fn search_games_by_query(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
