@@ -4713,7 +4713,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "scale-info",
- "subxt-metadata 0.32.0",
+ "subxt-metadata 0.32.1",
  "syn 2.0.29",
  "thiserror",
  "tokio",
@@ -4763,9 +4763,9 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.32.0"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9928f1b9679351800285f4acab6980d2b8e04b7a6decfbf71e258ee6e74a2dc8"
+checksum = "b6898275765d36a37e5ef564358e0341cf41b5f3a91683d7d8b859381b65ac8a"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -5919,7 +5919,7 @@ dependencies = [
  "shared",
  "subxt",
  "subxt-codegen 0.32.0",
- "subxt-metadata 0.32.0",
+ "subxt-metadata 0.32.1",
  "tokio",
 ]
 
