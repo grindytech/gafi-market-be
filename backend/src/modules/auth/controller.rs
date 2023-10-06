@@ -34,10 +34,11 @@ pub async fn get_random_nonce(
 ) -> Result<HttpResponse, AWError> {
 	let nonce = generate_uuid();
 	let address = path.into_inner();
-	/* log::info!("address {:?}", address); */
+
 	let result = update_nonce(&address, nonce.clone(), app_state.db.clone()).await;
 
 	let data = generate_message_sign_in(&address, &nonce);
+
 	let rsp = ResponseBody::<QueryNonce>::new(
 		"Signature Request",
 		QueryNonce {

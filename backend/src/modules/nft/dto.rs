@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use shared::models::nft::NFT;
 
-use crate::{common::DBQuery, modules::game::dto::GameDTO};
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTDTO {

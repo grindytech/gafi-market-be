@@ -20,10 +20,10 @@ pub struct GameDTO {
 	pub metadata: Option<String>,
 	pub attributes: Option<HashMap<String, String>>,
 
+	/* #[schema(format = "date-time",value_type=Option<String> )]
+	pub created_at: Option<i64>, */
 	#[schema(format = "date-time",value_type=Option<String> )]
-	pub created_at: Option<DateTime>,
-	#[schema(format = "date-time",value_type=Option<String> )]
-	pub updated_at: Option<DateTime>,
+	pub updated_at: i64,
 }
 
 impl From<Game> for GameDTO {
@@ -39,12 +39,12 @@ impl From<Game> for GameDTO {
 			},
 			category: value.category,
 			slug: value.slug,
-			created_at: value.created_at,
+			/* 	created_at: Some(value.created_at.unwrap_or(value.updated_at).timestamp_millis()), */
 			attributes: Some(shared::utils::vec_property_to_hashmap(
 				value.attributes.unwrap_or(vec![]),
 			)),
 			metadata: value.metadata,
-			updated_at: value.updated_at,
+			updated_at: value.updated_at.timestamp_millis(),
 		}
 	}
 }
@@ -53,8 +53,8 @@ impl From<Game> for GameDTO {
 pub struct QueryFindGame {
 	pub game_id: Option<String>,
 	pub owner: Option<String>,
-	pub category: Option<String>,
-	pub is_verified: Option<bool>,
+	pub name: Option<String>,
+	pub collection: Option<String>,
 }
 
 impl DBQuery for QueryFindGame {
@@ -70,14 +70,14 @@ impl DBQuery for QueryFindGame {
 				"owner": owner
 			});
 		}
-		if let Some(category) = &self.category {
+		if let Some(name) = &self.name {
 			criteria.push(doc! {
-				"category": category
+				"name": name
 			});
 		}
-		if let Some(is_verified) = &self.is_verified {
+		if let Some(collection_id) = &self.collection {
 			criteria.push(doc! {
-				"is_verified": is_verified
+				"collection_id": collection_id
 			});
 		}
 		if criteria.len() == 0 {

@@ -1,22 +1,20 @@
-use actix_web::web::Data;
-use chrono::Utc;
-use mongodb::{bson::doc, Collection, Database};
-use shared::{models, Account, BaseDocument, SocialInfo};
+use std::str::FromStr;
 
 use crate::{
 	app_state::AppState,
-	common::utils::{
-		generate_message_sign_in, generate_uuid, hex_string_to_signature, verify_signature,
-	},
+	common::utils::{generate_message_sign_in, generate_uuid},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
+use actix_web::web::Data;
+use chrono::Utc;
+use mongodb::{bson::doc, Collection, Database};
+
+use shared::{models, utils::vec_to_array_64, Account, BaseDocument, SocialInfo};
+
+use subxt_signer::sr25519::{PublicKey, Signature};
 
 use super::dto::QueryAuth;
 
-/**
- *  1. FE initialize Sign in  => 2. Backend generate Nonce => 3. Store Nonce in database
- * 2. FE Fetch the nonce => Sign the nonce => Backend get the Signature => Detech Signature => If true return access token and change nonce
- */
 pub async fn update_nonce(
 	address: &String,
 	nonce: String,
@@ -73,13 +71,20 @@ pub async fn update_nonce(
  * Check current nonce from the address
  * compare signature from this
  */
+
 pub async fn get_access_token(
 	params: QueryAuth,
 	app: Data<AppState>,
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let collection: Collection<Account> =
 		app.db.clone().collection(models::Account::name().as_str());
+
 	let address = params.address;
+	let signature = params.signature;
+
+	log::info!("Address : {:?}", &address);
+	log::info!("Signature : {:?}", &signature);
+
 	let mut nonce_value: String = "".to_string();
 	let filter = doc! {
 		"$and": [
@@ -99,9 +104,18 @@ pub async fn get_access_token(
 
 	let message = generate_message_sign_in(&address, &nonce_value);
 
-	let signature = hex_string_to_signature(&params.signature).unwrap();
+	// decodate address from public account 32
+	let public_key = subxt::utils::AccountId32::from_str(&address).unwrap();
 
-	let result = verify_signature(signature, &message, app.config.clone());
+	let sign = &signature[2..].to_string();
+
+	let signature = hex::decode(&sign).unwrap();
+	/* log::info!("Current Signature Decode {:?}", signature.len()); */
+	let log_fe = vec_to_array_64(signature);
+
+	let result =
+		subxt_signer::sr25519::verify(&Signature(log_fe), message, &PublicKey(public_key.0));
+
 	if result == false {
 		return Ok(None);
 	};

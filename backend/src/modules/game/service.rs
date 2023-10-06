@@ -9,7 +9,7 @@ use futures_util::TryStreamExt;
 use shared::{
 	constant::EMPTY_STR,
 	models::{self, game::Game},
-	BaseDocument, NFTCollection,
+	BaseDocument,
 };
 
 use mongodb::{
@@ -28,10 +28,7 @@ pub async fn find_game_by_id(
 	let filter = doc! {"game_id":game_id};
 
 	if let Ok(Some(game)) = col.find_one(filter, None).await {
-		let result = get_collections(game.clone(), db.clone()).await;
-		let mut game_detail: GameDTO = game.into();
-		game_detail.collections = Some(result);
-		Ok(Some(game_detail))
+		Ok(Some(game.into()))
 	} else {
 		Ok(None)
 	}
@@ -52,10 +49,7 @@ pub async fn find_games_by_query(
 	let mut list_games: Vec<GameDTO> = Vec::new();
 
 	while let Some(game) = cursor.try_next().await? {
-		let result = get_collections(game.clone(), db.clone()).await;
-		let mut game_detail: GameDTO = game.into();
-		game_detail.collections = Some(result);
-		list_games.push(game_detail);
+		list_games.push(game.into());
 	}
 
 	let total = get_total_page(list_games.len(), params.size).await;

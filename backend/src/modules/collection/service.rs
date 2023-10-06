@@ -33,8 +33,13 @@ pub async fn find_collections_by_query(
 		db.collection(models::nft_collection::NFTCollection::name().as_str());
 
 	let query_find = params.query.to_doc();
-
-	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
+	let limit = params.size();
+	let skip = params.skip();
+	let filter_option = mongodb::options::FindOptions::builder()
+		.sort(params.sort())
+		.limit(limit)
+		.skip(skip.unsigned_abs())
+		.build();
 
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut collections: Vec<NFTCollectionDTO> = Vec::new();

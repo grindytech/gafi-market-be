@@ -66,8 +66,8 @@ pub async fn get_game(
 		{
 			"game_id":null,
 			"owner":null,
-			"category":null,
-			"is_verfied":null,
+			"collection":null,
+			"name":null,
 		}
     })),
     responses(

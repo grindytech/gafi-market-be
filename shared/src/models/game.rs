@@ -19,8 +19,8 @@ pub struct Game {
 	pub metadata: Option<String>,
 	pub attributes: Option<Vec<Property>>,
 
-	pub updated_at: Option<DateTime>,
-	pub created_at: Option<DateTime>,
+	pub updated_at: DateTime,
+	/* pub created_at: Option<DateTime>, */
 	pub collections: Option<Vec<String>>,
 }
 
@@ -59,7 +59,7 @@ impl Into<Document> for Game {
 			"category":self.category,
 			"slug": self.slug,
 			"updated_at": DateTime::now(),
-			"created_at": self.created_at,
+		/* 	"created_at": self.created_at, */
 			"collections": self.collections,
 			"attributes": attributes,
 			"metadata": self.metadata,
