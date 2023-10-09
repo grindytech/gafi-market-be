@@ -11,3 +11,9 @@ pub struct QueryAuth {
 pub struct QueryNonce {
 	pub login_message: String,
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+pub struct TokenDTO {
+	pub access_token: String,
+	pub refresh_token: String,
+}

@@ -1,10 +1,8 @@
-use std::str::FromStr;
-
 use crate::{app_state::AppState, common::ErrorResponse};
 
 use super::TokenPayload;
 use actix_web::{error::ErrorUnauthorized, web::Data};
-use chrono::Utc;
+use chrono::{TimeZone, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use shared::Config;
 use uuid::Uuid;
@@ -41,15 +39,12 @@ pub fn generate_message_sign_in(wallet_address: &String, nonce: &String) -> Stri
 pub fn generate_jwt_token(
 	address: String,
 	config: Config,
+	expire_time: i64,
 ) -> Result<String, jsonwebtoken::errors::Error> {
-	// Define the current timestamp
-	let current_timestamp = Utc::now().timestamp_millis();
-
-	// Define the payload data
 	let payload = TokenPayload {
 		address,
-		iat: current_timestamp,
-		exp: current_timestamp + config.jwt_expire_time, // Token expires in 1 hour
+		iat: jsonwebtoken::get_current_timestamp() as i64,
+		exp: jsonwebtoken::get_current_timestamp() as i64 + expire_time, // Token expires in 1 hour or 1 days
 	};
 
 	let token = encode(
@@ -67,15 +62,14 @@ pub fn verify_jwt_token(
 	token: String,
 	config: Config,
 ) -> Result<TokenPayload, jsonwebtoken::errors::Error> {
-	let claims = match decode::<TokenPayload>(
+	match jsonwebtoken::decode::<TokenPayload>(
 		&token,
 		&DecodingKey::from_secret(config.jwt_secret_key.as_ref()),
 		&Validation::new(Algorithm::HS256),
 	) {
-		Ok(c) => Ok(c.claims),
+		Ok(c) => return Ok(c.claims),
 		Err(e) => {
 			return Err(e);
 		},
 	};
-	claims
 }

@@ -22,10 +22,6 @@ pub async fn update_nonce(
 ) -> Result<String, mongodb::error::Error> {
 	let col: Collection<AccountDTO> = db.collection(models::account::Account::name().as_str());
 
-	/* 	let find_options = FindOneAndUpdateOptions::builder()
-	.return_document(ReturnDocument::After)
-	.upsert(true)
-	.build(); */
 	let filter = doc! {"address":address};
 	let update = doc! {
 		"$set":{"nonce":nonce.clone()}
@@ -66,12 +62,6 @@ pub async fn update_nonce(
 	}
 }
 
-/**
- *
- * Check current nonce from the address
- * compare signature from this
- */
-
 pub async fn get_access_token(
 	params: QueryAuth,
 	app: Data<AppState>,
@@ -82,9 +72,9 @@ pub async fn get_access_token(
 	let address = params.address;
 	let signature = params.signature;
 
-	log::info!("Address : {:?}", &address);
-	log::info!("Signature : {:?}", &signature);
-
+	/* 	log::info!("Address : {:?}", &address);
+	   log::info!("Signature : {:?}", &signature);
+	*/
 	let mut nonce_value: String = "".to_string();
 	let filter = doc! {
 		"$and": [

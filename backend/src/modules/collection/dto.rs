@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::common::DBQuery;
+use crate::{common::DBQuery, modules::game::dto::GameDTO};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -15,11 +15,11 @@ pub struct NFTCollectionDTO {
 	pub slug: Option<String>,
 	pub is_verified: Option<bool>,
 	pub category: Option<String>,
-	/* 	#[schema(format = "date-time",value_type=Option<String> )] */
+
 	pub created_at: i64,
-	#[schema(format = "date-time",value_type=Option<String> )]
+
 	pub updated_at: Option<i64>,
-	pub games: Option<Vec<String>>,
+	pub games: Option<Vec<GameDTO>>,
 	pub name: String,
 
 	pub metadata: Option<String>,
@@ -27,6 +27,7 @@ pub struct NFTCollectionDTO {
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
+		let games = value.games.unwrap_or(vec![]).get(0).expect("NOT FOUND GAMES").to_owned();
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
 			slug: value.slug,
@@ -38,7 +39,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			attributes: Some(shared::utils::vec_property_to_hashmap(
 				value.attributes.unwrap_or(vec![]),
 			)),
-			games: value.games,
+			games: None,
 			id: Some(value.id.unwrap().to_string()),
 			metadata: value.metadata,
 			updated_at: Some(value.updated_at.unwrap_or(value.created_at).timestamp_millis()),

@@ -2,9 +2,13 @@ use crate::{
 	app_state::AppState,
 	common::{
 		utils::{generate_jwt_token, generate_message_sign_in, generate_uuid},
-		ResponseBody,
+		ResponseBody, JWT_ACCESS_TIME, JWT_REFRESH_TIME,
 	},
-	modules::auth::{dto::QueryAuth, dto::QueryNonce, service::update_nonce},
+	modules::auth::{
+		dto::QueryAuth,
+		dto::{QueryNonce, TokenDTO},
+		service::update_nonce,
+	},
 };
 use actix_web::{
 	get,
@@ -63,7 +67,7 @@ pub async fn get_random_nonce(
         })
     ),
     responses(
-        (status=StatusCode::OK,description="Authentication Success",body=String),
+        (status=StatusCode::OK,description="Authentication Success",body=TokenData),
         (status=401,description="Authentication Failed",body=NoData)
     )
 )]
@@ -76,9 +80,27 @@ pub async fn get_verify_token(
 
 	match result {
 		Ok(Some(account)) => {
-			let access_token = generate_jwt_token(req.0.clone().address, app_state.config.clone());
+			let access_token = generate_jwt_token(
+				req.0.clone().address,
+				app_state.config.clone(),
+				JWT_ACCESS_TIME,
+			);
+			log::info!("Access Token {:?} ", access_token);
+			let refresh_token = generate_jwt_token(
+				req.0.clone().address,
+				app_state.config.clone(),
+				JWT_REFRESH_TIME,
+			);
+			log::info!("Refresh Token {:?} ", refresh_token);
 
-			let rsp = ResponseBody::<String>::new("Authorizied", access_token.unwrap(), true); //fix
+			let rsp = ResponseBody::<TokenDTO>::new(
+				"Authorizied",
+				TokenDTO {
+					access_token: access_token.unwrap_or("access token error".to_string()),
+					refresh_token: refresh_token.unwrap_or("refresh token error".to_string()),
+				},
+				true,
+			); //fix
 
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 		},
