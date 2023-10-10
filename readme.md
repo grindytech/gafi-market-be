@@ -81,17 +81,18 @@ The project uses environment variables for configuration. Create a `.env` file i
 
 ## Architecture
 
-<div hidden style="visibility:hidden">
-
+<!--
 ```plantuml
 @startuml
-skinparam linetype ortho
+
+@startuml
+
 package "Blockchain" {
   "New block" - [Events]
 }
 node "Worker" {
   [Event handlers]
-  Events --> "Event handlers" : Process blockchain Events
+  "Event handlers" <-- Events  : Process blockchain Events
   
 }
 
@@ -109,24 +110,19 @@ node "Backend" {
 HTTP ..> APIs : use RESTful APIs
 
 database "MongoDB" {
-	"Event handlers" --> "MongoDB" 
-	"MongoDB" --> "Event handlers"
-	
-	"Backend" --> "MongoDB"
-	"MongoDB" --> "Backend"
+	"Event handlers" <-> "MongoDB"  
+	"Backend" <-> "MongoDB"
 }
 
 @enduml
 ```
-
-</div>
+-->
 
 ![architecture diagram image](img/architecture_diagram.svg)
 
 ## Database schema
 
-<div hidden style="visibility:hidden">
-
+<!--
 ```plantuml
 @startuml
 skinparam linetype ortho
@@ -256,8 +252,7 @@ property }.. nft
 
 @enduml
 ```
-
-</div>
+-->
 
 ![database schema](img/db_schema_diagram.svg)
 
