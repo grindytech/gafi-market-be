@@ -42,7 +42,6 @@ pub async fn create_collection_without_metadata(
 				id: None,
 				is_verified: None,
 				slug: None,
-				name: "".to_string(),
 				category: None,
 				banner_url: None,
 				external_url: None,

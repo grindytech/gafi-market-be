@@ -19,8 +19,7 @@ pub struct NFTCollectionDTO {
 	pub created_at: i64,
 
 	pub updated_at: Option<i64>,
-	pub games: Option<Vec<GameDTO>>,
-	pub name: String,
+	pub games: Option<Vec<String>>,
 
 	pub name: Option<String>,
 	pub logo_url: Option<String>,
@@ -29,7 +28,6 @@ pub struct NFTCollectionDTO {
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
-		let games = value.games.unwrap_or(vec![]).get(0).expect("NOT FOUND GAMES").to_owned();
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
 			slug: value.slug,
@@ -37,12 +35,10 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			is_verified: value.is_verified,
 			category: value.category,
 			owner: value.owner,
-			created_at: Some(value.created_at),
-			games: value.games,
+			created_at: value.created_at.timestamp_millis(),
 			id: Some(value.id.unwrap().to_string()),
-			updated_at: value.updated_at,
-
-			name: value.name,
+			updated_at: Some(value.updated_at.unwrap().timestamp_millis()),
+			games: value.games,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			external_url: value.external_url,

@@ -14,7 +14,7 @@ use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft};
 use utoipa::OpenApi;
 
 use super::{
-	auth::dto::{QueryAuth, QueryNonce},
+	auth::dto::{QueryAuth, QueryNonce, TokenDTO},
 	game::dto::QueryFindGame,
 	pool::dto::{PoolDTO, QueryFindPool},
 	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts,
@@ -70,6 +70,7 @@ use super::{
             QueryPage<()>,
             NoResponse,
             NFTOwnerOfDto,
+            TokenDTO,
         
         )
     ),

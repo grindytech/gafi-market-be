@@ -14,7 +14,6 @@ pub struct NFTCollection {
 	pub created_at: DateTime,
 	pub owner: String,
 	pub games: Option<Vec<String>>,
-	pub name: String,
 
 	pub name: Option<String>,
 	pub logo_url: Option<String>,

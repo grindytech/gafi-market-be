@@ -62,7 +62,7 @@ pub async fn find_games_by_query(
 	}))
 }
 
-pub async fn get_collections(game: Game, db: Database) -> Vec<NFTCollectionDTO> {
+/* pub async fn get_collections(game: Game, db: Database) -> Vec<NFTCollectionDTO> {
 	match game.collections {
 		Some(value) => {
 			let mut criteria: Vec<Document> = vec![];
@@ -82,4 +82,4 @@ pub async fn get_collections(game: Game, db: Database) -> Vec<NFTCollectionDTO> 
 		},
 		None => vec![],
 	}
-}
+} */

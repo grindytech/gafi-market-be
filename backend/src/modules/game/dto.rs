@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::common::DBQuery;
-use mongodb::bson::{doc, DateTime, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::{models::game::Game, SocialInfo};
 use utoipa::ToSchema;
@@ -17,10 +15,7 @@ pub struct GameDTO {
 	pub category: Option<String>,
 	pub slug: Option<String>,
 
-	#[schema(format = "date-time",value_type=Option<String> )]
-	pub created_at: Option<DateTime>,
-	#[schema(format = "date-time",value_type=Option<String> )]
-	pub updated_at: Option<DateTime>,
+	pub updated_at: Option<i64>,
 
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
@@ -41,8 +36,8 @@ impl From<Game> for GameDTO {
 			},
 			category: value.category,
 			slug: value.slug,
-			created_at: value.created_at,
-			updated_at: Some(value.updated_at),
+
+			updated_at: Some(value.updated_at.timestamp_millis()),
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
