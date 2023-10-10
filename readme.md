@@ -48,7 +48,7 @@ To install and set up the project locally, follow these steps:
    cargo run -p worker
    ```
 
-7. (Optional) We use `mongodb-memory-server` to unit test, so if you want to run unit tests, you need to install Node.js and the required dependencies. Run the following commands:
+7. (Optional) We use `mongodb-memory-server` for unit test, so if you want to run unit tests, you need to install Node.js and the required dependencies. Run the following commands:
 
    ```shell
    npm install
