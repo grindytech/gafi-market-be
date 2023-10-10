@@ -41,7 +41,7 @@ To install and set up the project locally, follow these steps:
    cargo run -p backend
    ```
 
-   The server should now be running on `http://localhost:8080`.
+   The server should now be running on `http://localhost:8080`. Swagger UI run at `http://localhost:8080/swagger-ui/`.
 
 7. Start the worker
    ```shell
@@ -59,6 +59,11 @@ To install and set up the project locally, follow these steps:
    ```shell
    cargo test
    ```
+
+## API Documentation
+
+For detailed information about the available API endpoints and how to interact with them, please refer to the [API documentation](https://mp-api.gafi.network/swagger-ui/ "API documentation").
+
 
 ## Project Structure
 
