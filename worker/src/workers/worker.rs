@@ -27,7 +27,6 @@ pub struct WorkerState {
 	api: RpcClient,
 	rpc: String,
 	enabled: bool,
-	running: bool,
 	max_batch: u32,
 }
 
@@ -58,7 +57,6 @@ impl WorkerState {
 			api,
 			rpc,
 			enabled: false,
-			running: false,
 			max_batch,
 		};
 
@@ -132,7 +130,6 @@ impl Worker {
 			.await?
 			.expect(format!("Fail to get block hash of block {}", block_number).as_str());
 		let block_hash_str = hex::encode(block_hash.0.to_vec());
-
 		let events = api.events().at(block_hash).await?;
 		for ev in events.iter() {
 			let ev = ev?;
@@ -174,7 +171,6 @@ impl Worker {
 	/// - Returns a Result indicating whether it was enabled or not.
 	async fn run(&mut self) -> Result<bool> {
 		let state = &mut self.state;
-		state.running = true;
 
 		let end_block = if (i64::from(state.latest_block) - i64::from(state.current_block))
 			> i64::from(state.max_batch)
@@ -208,7 +204,6 @@ impl Worker {
 
 		let latest_block = Self::get_onchain_latest_block(&state.api).await?;
 		state.latest_block = latest_block.height;
-		state.running = false;
 		Ok(state.enabled.clone())
 	}
 
@@ -222,6 +217,7 @@ impl Worker {
 		state.enabled = true;
 		loop {
 			let rs = self.run().await;
+
 			match rs {
 				Ok(enabled) => {
 					if enabled == false {

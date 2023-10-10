@@ -1,17 +1,40 @@
-version: '2.1'
+version: "2.1"
 
 services:
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodata:/etc/mongo
+
   worker:
-    platform: linux/x86_64
-    image: dttr278/dev:gafi-market-worker-latest
-    env_file:
-      - .env
+    build:
+      context: .
+      dockerfile: worker/dockerfile
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+      - START_BLOCK=${START_BLOCK}
+      - RPC=${RPC}
     restart: always
+    depends_on: 
+      - mongo
   backend:
-    platform: linux/x86_64
-    image: dttr278/dev:gafi-market-backend-latest
-    env_file:
-      - .env
+    build:
+      context: .
+      dockerfile: backend/dockerfile
+    environment:
+      - JWT_TOKEN_SECRET=${JWT_TOKEN_SECRET}
+      - KEY_PAIR=${KEY_PAIR}
+      - FRONTEND_APP=${FRONTEND_APP}
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
     ports:
       - 8080:8080
     restart: always
+    depends_on: 
+      - mongo
+
+volumes:
+  mongodata:

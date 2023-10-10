@@ -13,7 +13,7 @@
     "dev-be": "cargo watch -q -c -w backend/src/ -x 'run -p backend'",
     "dev-worker": "cargo watch -q -c -w worker/src/ -x 'run -p worker'",
     "db": "node mongodb-memory.js",
-    "generate:rpc": "subxt metadata -f bytes --url https://rpc-testnet.gafi.network:443/  > worker/metadata.scale   "
+    "generate:rpc": "subxt metadata -f bytes --url wss://ws-testnet.gafi.network:443/  > worker/metadata.scale   "
   },
   "keywords": [
     "gafi",

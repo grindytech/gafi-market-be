@@ -4,9 +4,12 @@ use mongodb::{
 	results::UpdateResult,
 	Database,
 };
-use serde::Deserialize;
 use serde_json::Value;
-use shared::{types::Result, utils::serde_json_to_doc, BaseDocument, NFTOwner, RequestMint, NFT};
+use shared::{
+	types::Result,
+	utils::{serde_json_to_doc, serde_json_to_properties},
+	BaseDocument, NFTOwner, RequestMint, NFT,
+};
 use subxt::utils::AccountId32;
 
 use crate::{gafi, workers::RpcClient};
@@ -122,32 +125,43 @@ pub async fn nft_metadata_set(
 		Ok(data) => {
 			let parsed_obj = serde_json_to_doc(data);
 			match parsed_obj {
-				Ok((doc, obj)) => {
+				Ok((_, obj)) => {
 					let empty_val = Value::String("".to_string());
 					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let animation_url = obj.get("animation_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let description =
+						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let external_url =
 						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let mut attributes_doc: Vec<Document> = vec![];
+					if let Some(attributes) = obj.get("attributes") {
+						if let Ok((attr, _, _)) = serde_json_to_properties(attributes.to_owned()) {
+							attributes_doc = attr;
+						}
+					};
 					update = doc! {
-							"$set": {
-							"img_url": image.to_string(),
-							"name": title.to_string(),
-							"external_url": external_url.to_string(),
+						"$set": {
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
-							"attributes": doc,
+							"name": name.to_string(),
+							"animation_url": animation_url.to_string(),
+							"image": image.to_string(),
+							"description": description.to_string(),
+							"external_url": external_url.to_string(),
+							"attributes": attributes_doc,
 						}
 					};
 				},
 				Err(_) => {
 					update = doc! {
-							"$set": {
-							"img_url": Bson::Null,
-							"name": Bson::Null,
-							"external_url": Bson::Null,
+						"$set": {
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
+							"name": Bson::Null,
+							"image": Bson::Null,
+							"description": Bson::Null,
+							"external_url": Bson::Null,
 							"attributes": Bson::Null,
+							"animation_url": Bson::Null,
 						}
 					};
 				},
@@ -155,13 +169,14 @@ pub async fn nft_metadata_set(
 		},
 		Err(_) => {
 			update = doc! {
-					"$set": {
+				"$set": {
 					"updated_at": DateTime::now(),
-					"metadata": metadata,
-					"img_url": Bson::Null,
 					"name": Bson::Null,
+					"image": Bson::Null,
+					"description": Bson::Null,
 					"external_url": Bson::Null,
 					"attributes": Bson::Null,
+					"animation_url": Bson::Null,
 				}
 			};
 		},
@@ -186,13 +201,14 @@ pub async fn clear_metadata(
 		"collection_id": collection_id.to_string()
 	};
 	let update = doc! {
-			"$set": {
-				"updated_at": DateTime::now(),
-				"metadata": Bson::Null,
-				"img_url": Bson::Null,
-				"name": Bson::Null,
-				"external_url": Bson::Null,
-				"attributes": Bson::Null,
+		"$set": {
+			"updated_at": DateTime::now(),
+			"name": Bson::Null,
+			"image": Bson::Null,
+			"description": Bson::Null,
+			"external_url": Bson::Null,
+			"attributes": Bson::Null,
+			"animation_url": Bson::Null,
 		}
 	};
 	let rs = nft_db.update_one(query, update, None).await?;

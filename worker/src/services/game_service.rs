@@ -160,7 +160,6 @@ pub async fn get_game_by_id(
 		.await?;
 	Ok(game)
 }
-
 pub async fn update_metadata(
 	metadata: String,
 	game: u32,
@@ -172,7 +171,7 @@ pub async fn update_metadata(
 		Ok(data) => {
 			let parsed_obj = serde_json_to_doc(data);
 			match parsed_obj {
-				Ok((doc, obj)) => {
+				Ok((_doc, obj)) => {
 					let empty_val = Value::String("".to_string());
 					let banner_url =
 						obj.get("banner_url").unwrap_or(&empty_val).as_str().unwrap_or("");
@@ -187,8 +186,6 @@ pub async fn update_metadata(
 							"description": description.to_string(),
 							"name": name.to_string(),
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
-							"attributes": doc,
 						}
 					};
 				},
@@ -200,8 +197,6 @@ pub async fn update_metadata(
 							"description": Bson::Null,
 							"name":  Bson::Null,
 							"updated_at": DateTime::now(),
-							"metadata": metadata.clone(),
-							"attributes": Bson::Null,
 						}
 					};
 				},
@@ -210,12 +205,10 @@ pub async fn update_metadata(
 		Err(_) => {
 			update = doc! {"$set": {
 				"updated_at": DateTime::now(),
-				"metadata": metadata.clone(),
 				"banner_url": Bson::Null,
 				"logo_url": Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
-				"attributes": Bson::Null,
 			}};
 		},
 	}
@@ -235,12 +228,10 @@ pub async fn clear_metadata(
 	let update = doc! {
 			"$set": {
 				"updated_at": DateTime::now(),
-				"metadata": Bson::Null,
 				"banner_url": Bson::Null,
 				"logo_url": Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
-				"attributes": Bson::Null,
 		}
 	};
 	let rs = game_db.update_one(query, update, None).await?;

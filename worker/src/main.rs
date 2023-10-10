@@ -5,11 +5,12 @@ use shared::{db, types::Result, Config};
 use workers::Worker;
 
 // Generate an interface that we can use from the node's metadata.
-#[subxt::subxt(runtime_metadata_path = "./metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "./chain-metadata/v14-114.scale")]
 pub mod gafi {}
 
 mod event_handler;
 mod services;
+#[cfg(test)]
 mod tests;
 mod workers;
 mod types;

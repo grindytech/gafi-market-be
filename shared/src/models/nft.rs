@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use mongodb::bson::{doc, oid::ObjectId, DateTime};
+use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -11,8 +9,26 @@ pub struct Property {
 	pub key: String,
 	pub value: String,
 }
+impl From<Document> for Property {
+	fn from(doc: Document) -> Self {
+		let key = doc.get_str("key").unwrap_or("");
+		let value = doc.get_str("value").unwrap_or("");
+		Self {
+			key: key.to_string(),
+			value: value.to_string(),
+		}
+	}
+}
+impl Into<Document> for Property {
+	fn into(self) -> Document {
+		let mut doc = Document::new();
+		doc.insert("key", self.key);
+		doc.insert("value", self.value);
+		doc
+	}
+}
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFT {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -20,26 +36,23 @@ pub struct NFT {
 	pub collection_id: String,
 
 	pub is_burn: Option<bool>,
-
-	pub name: Option<String>,
-	pub description: Option<String>,
 	pub status: Option<String>,
-
-	pub external_url: Option<String>,
-	pub weight: Option<String>,
-	pub img_url: Option<String>,
 
 	pub visitor_count: Option<i32>,
 	pub favorite_count: Option<i32>,
 
-	pub properties: Option<Vec<Property>>,
 	pub created_at: DateTime,
 	pub updated_at: Option<DateTime>,
 	pub supply: Option<u32>,
 
 	pub created_by: String,
-	pub metadata: Option<String>,
-	pub attributes: Option<HashMap<String, String>>,
+
+	pub attributes: Option<Vec<Property>>,
+	pub name: Option<String>,
+	pub description: Option<String>,
+	pub external_url: Option<String>,
+	pub image: Option<String>,
+	pub animation_url: Option<String>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

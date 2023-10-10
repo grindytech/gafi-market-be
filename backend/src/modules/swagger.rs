@@ -5,6 +5,7 @@ use crate::{
 		collection::dto::NFTCollectionDTO,
 		game::dto::GameDTO,
 		nft::dto::NFTDTO,
+        nft::dto::NFTOwnerOfDto,
 	},
 };
 
@@ -64,6 +65,7 @@ use super::{
             QueryFindCollections,
             QueryPage<()>,
             NoResponse,
+            NFTOwnerOfDto,
         
         )
     ),
