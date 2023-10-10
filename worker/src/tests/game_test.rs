@@ -67,18 +67,10 @@ pub async fn set_and_clear_metadata() {
 		.unwrap()
 		.unwrap();
 
-	let attributes = game_entity.attributes.unwrap();
-
-	assert_eq!(metadata, game_entity.metadata.unwrap());
-	assert_eq!(attributes.get(0).unwrap().key, "name");
-	assert_eq!(attributes.get(0).unwrap().value, "\"chess\"");
-	assert_eq!(attributes.get(1).unwrap().key, "banner_url");
-	assert_eq!(attributes.get(1).unwrap().value, "\"/chess.svg\"");
-	assert_eq!(attributes.get(2).unwrap().key, "logo_url");
-	assert_eq!(attributes.get(2).unwrap().value, "\"/chess.svg\"");
-	assert_eq!(attributes.get(3).unwrap().key, "description");
-	assert_eq!(attributes.get(3).unwrap().value, "\"description data\"");
-
+	assert_eq!(Some("chess".to_string()), game_entity.name);
+	assert_eq!(Some("/chess.svg".to_string()), game_entity.banner_url);
+	assert_eq!(Some("/chess.svg".to_string()), game_entity.logo_url);
+	assert_eq!(Some("description data".to_string()), game_entity.description);
 
 	// clear metadata
 	services::game_service::clear_metadata(&game.to_string(), &db).await.unwrap();
@@ -86,8 +78,10 @@ pub async fn set_and_clear_metadata() {
 		.await
 		.unwrap()
 		.unwrap();
-	assert_eq!(None, game_entity.metadata);
-	assert_eq!(None, game_entity.attributes);
+	assert_eq!(None, game_entity.name);
+	assert_eq!(None, game_entity.banner_url);
+	assert_eq!(None, game_entity.logo_url);
+	assert_eq!(None, game_entity.description);
 
 	let _ = db_process.kill();
 }

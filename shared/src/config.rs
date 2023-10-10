@@ -17,7 +17,7 @@ impl Config {
 		let start_block: u32 = var("START_BLOCK").unwrap_or("0".to_string()).parse().unwrap();
 		let mongodb_uri = var("MONGODB_URI").expect("MONGODB_URI must be set");
 		let mongodb_db_name = var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
-		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("18".to_string()).parse().unwrap();
+		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("12".to_string()).parse().unwrap();
 		let jwt_access_key = var("JWT_ACCESS_SECRET").expect("JWT_ACCESS_SECRET must be set");
 		let jwt_refresh_key = var("JWT_REFRESH_SECRET").expect("JWT_REFRESH_SECRET must be set");
 

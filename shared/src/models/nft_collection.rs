@@ -1,7 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
-use crate::{BaseDocument, Property};
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct NFTCollection {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -16,8 +16,10 @@ pub struct NFTCollection {
 	pub games: Option<Vec<String>>,
 	pub name: String,
 
-	pub metadata: Option<String>,
-	pub attributes: Option<Vec<Property>>,
+	pub name: Option<String>,
+	pub logo_url: Option<String>,
+	pub banner_url: Option<String>,
+	pub external_url: Option<String>,
 }
 
 impl BaseDocument for NFTCollection {
@@ -28,17 +30,6 @@ impl BaseDocument for NFTCollection {
 
 impl Into<Document> for NFTCollection {
 	fn into(self) -> Document {
-		let attributes = match self.attributes {
-			Some(attr) => {
-				let mut doc_vec: Vec<Document> = vec![];
-				attr.into_iter().for_each(|property| {
-					let doc = property.into();
-					doc_vec.push(doc);
-				});
-				Some(doc_vec)
-			},
-			None => None,
-		};
 		doc! {
 			"id": self.id,
 			"collection_id": self.collection_id,
@@ -49,7 +40,11 @@ impl Into<Document> for NFTCollection {
 			"created_at": self.created_at,
 			"owner":self.owner,
 			"games": self.games,
-			"attributes": attributes,
+
+			"name": self.name,
+			"logo_url": self.logo_url,
+			"banner_url": self.banner_url,
+			"external_url": self.external_url,
 		}
 	}
 }

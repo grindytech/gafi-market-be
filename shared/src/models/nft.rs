@@ -46,8 +46,13 @@ pub struct NFT {
 	pub supply: Option<u32>,
 
 	pub created_by: String,
-	pub metadata: Option<String>,
+
 	pub attributes: Option<Vec<Property>>,
+	pub name: Option<String>,
+	pub description: Option<String>,
+	pub external_url: Option<String>,
+	pub image: Option<String>,
+	pub animation_url: Option<String>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

@@ -1,7 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
-use crate::{BaseDocument, Property};
+use crate::BaseDocument;
 
 use super::account::SocialInfo;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -16,8 +16,10 @@ pub struct Game {
 	pub category: Option<String>,
 	pub slug: Option<String>,
 
-	pub metadata: Option<String>,
-	pub attributes: Option<Vec<Property>>,
+	pub description: Option<String>,
+	pub logo_url: Option<String>,
+	pub banner_url: Option<String>,
+	pub name: Option<String>,
 
 	pub updated_at: DateTime,
 	/* pub created_at: Option<DateTime>, */
@@ -39,17 +41,6 @@ impl Into<Document> for Game {
 			},
 			None => None,
 		};
-		let attributes = match self.attributes {
-			Some(attr) => {
-				let mut doc_vec: Vec<Document> = vec![];
-				attr.into_iter().for_each(|property| {
-					let doc = property.into();
-					doc_vec.push(doc);
-				});
-				Some(doc_vec)
-			},
-			None => None,
-		};
 		doc! {
 			"id":self.id,
 			"game_id":self.game_id,
@@ -61,8 +52,10 @@ impl Into<Document> for Game {
 			"updated_at": DateTime::now(),
 		/* 	"created_at": self.created_at, */
 			"collections": self.collections,
-			"attributes": attributes,
-			"metadata": self.metadata,
+			"description": self.description,
+			"logo_url": self.logo_url,
+			"banner_url": self.banner_url,
+			"name": self.name,
 		}
 	}
 }

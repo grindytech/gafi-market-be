@@ -10,46 +10,39 @@ use shared::{
 	},
 	history_tx, models, BaseDocument, Trade,
 };
-use subxt::utils::AccountId32;
 
 use crate::{
-	gafi::{
-		self,
-		runtime_types::{
-			bounded_collections, gafi_support::game::types::Package,
-			pallet_game::types::TradeConfig,
-		},
-	},
+	gafi::{self, runtime_types::gafi_support::game::types::Package},
 	types::{AuctionClaimParams, AuctionSetParams, ItemBoughtParams, SetPriceParams},
 	workers::RpcClient,
 };
 
 use super::history_service;
 
-pub async fn get_trade_config(
-	trade_id: u32,
-	api: &RpcClient,
-) -> Result<
-	TradeConfig<
-		AccountId32,
-		u128,
-		bounded_collections::bounded_vec::BoundedVec<Package<u32, u32>>,
-		u32,
-	>,
-	(),
-> {
-	let query_address = gafi::storage().game().trade_config_of(trade_id);
-	let trade_config = api
-		.storage()
-		.at_latest()
-		.await
-		.expect("Fail to get blockchain storage")
-		.fetch(&query_address)
-		.await
-		.expect("Fail to get trade_config")
-		.expect("Fail to get trade_config");
-	Ok(trade_config)
-}
+// pub async fn get_trade_config(
+// 	trade_id: u32,
+// 	api: &RpcClient,
+// ) -> Result<
+// 	TradeConfig<
+// 		AccountId32,
+// 		u128,
+// 		bounded_collections::bounded_vec::BoundedVec<Package<u32, u32>>,
+// 		u32,
+// 	>,
+// 	(),
+// > {
+// 	let query_address = gafi::storage().game().trade_config_of(trade_id);
+// 	let trade_config = api
+// 		.storage()
+// 		.at_latest()
+// 		.await
+// 		.expect("Fail to get blockchain storage")
+// 		.fetch(&query_address)
+// 		.await
+// 		.expect("Fail to get trade_config")
+// 		.expect("Fail to get trade_config");
+// 	Ok(trade_config)
+// }
 
 pub async fn get_by_trade_id(
 	db: &Database,

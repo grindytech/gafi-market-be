@@ -10,9 +10,7 @@ resolver = "2"
 authors = ["Grindy"]
 description = "Gafi marketplace"
 edition = "2021"
-name = "gafi-market"
 version = "0.1.0"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
 actix-cors = "0.6.4"
@@ -38,3 +36,6 @@ subxt-signer = "0.31.0"
 utoipa = {version = "3.5.0", features = ["actix_extras", "non_strict_integers"]}
 utoipa-swagger-ui = {version = "3.0.2", features = ["actix-web"]}
 uuid = {version = "1.4.1", features = ["v4"]}
+subxt-codegen = "0.32.1"
+subxt-metadata = "0.32.0"
+tokio = {version = "1.33.0", features = ["full"]}
