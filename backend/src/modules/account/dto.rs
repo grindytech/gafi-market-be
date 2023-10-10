@@ -26,6 +26,8 @@ pub struct AccountDTO {
 	pub created_at: i64,
 
 	pub nonce: Option<String>,
+	pub refresh_token: Option<String>,
+
 	pub social: SocialInfo,
 	pub favorites: Option<Vec<Favorites>>,
 }
@@ -45,6 +47,7 @@ impl From<Account> for AccountDTO {
 			social: value.social.into(),
 			favorites: value.favorites,
 			nonce: value.nonce,
+			refresh_token: value.refresh_token,
 		}
 	}
 }

@@ -58,6 +58,7 @@ pub struct Account {
 	pub favorites: Option<Vec<Favorites>>,
 
 	pub nonce: Option<String>,
+	pub refresh_token: Option<String>,
 	pub updated_at: i64,
 	pub created_at: i64,
 }

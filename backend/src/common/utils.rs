@@ -50,7 +50,7 @@ pub fn generate_jwt_token(
 	let token = encode(
 		&Header::new(Algorithm::HS256),
 		&payload,
-		&EncodingKey::from_secret(config.jwt_secret_key.as_ref()),
+		&EncodingKey::from_secret(config.jwt_access_key.as_ref()),
 	);
 	match token {
 		Ok(token) => Ok(token),
@@ -58,13 +58,28 @@ pub fn generate_jwt_token(
 	}
 }
 
-pub fn verify_jwt_token(
+pub fn verify_access_token(
 	token: String,
 	config: Config,
 ) -> Result<TokenPayload, jsonwebtoken::errors::Error> {
 	match jsonwebtoken::decode::<TokenPayload>(
 		&token,
-		&DecodingKey::from_secret(config.jwt_secret_key.as_ref()),
+		&DecodingKey::from_secret(config.jwt_access_key.as_ref()),
+		&Validation::new(Algorithm::HS256),
+	) {
+		Ok(c) => return Ok(c.claims),
+		Err(e) => {
+			return Err(e);
+		},
+	};
+}
+pub fn verify_refresh_token(
+	token: String,
+	config: Config,
+) -> Result<TokenPayload, jsonwebtoken::errors::Error> {
+	match jsonwebtoken::decode::<TokenPayload>(
+		&token,
+		&DecodingKey::from_secret(config.jwt_refresh_key.as_ref()),
 		&Validation::new(Algorithm::HS256),
 	) {
 		Ok(c) => return Ok(c.claims),

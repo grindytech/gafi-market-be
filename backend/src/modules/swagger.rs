@@ -38,6 +38,8 @@ use super::{
         crate::modules::transaction::controller::search_history_tx,
         crate::modules::auth::controller::get_random_nonce,
         crate::modules::auth::controller::get_verify_token,
+        crate::modules::auth::controller::refresh_token,
+        crate::modules::auth::controller::logout,
         crate::modules::pool::controller::search_list_pools,
     ),
    /*  tags(

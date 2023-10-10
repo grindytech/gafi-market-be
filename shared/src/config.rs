@@ -6,7 +6,8 @@ pub struct Config {
 	pub rpc: String,
 	pub start_block: u32,
 	pub chain_decimal: u32,
-	pub jwt_secret_key: String,
+	pub jwt_access_key: String,
+	pub jwt_refresh_key: String,
 	pub frontend_link: String,
 }
 
@@ -17,7 +18,8 @@ impl Config {
 		let mongodb_uri = var("MONGODB_URI").expect("MONGODB_URI must be set");
 		let mongodb_db_name = var("MONGODB_DB_NAME").expect("MONGODB_DB_NAME must be set");
 		let chain_decimal = var("CHAIN_DECIMAL").unwrap_or("18".to_string()).parse().unwrap();
-		let jwt_secret_key = var("JWT_TOKEN_SECRET").expect("JWT_TOKEN_SECRET must be set");
+		let jwt_access_key = var("JWT_ACCESS_SECRET").expect("JWT_ACCESS_SECRET must be set");
+		let jwt_refresh_key = var("JWT_REFRESH_SECRET").expect("JWT_REFRESH_SECRET must be set");
 
 		let frontend_link = var("FRONTEND_APP").expect("Frontend link Must to set");
 		Config {
@@ -26,8 +28,8 @@ impl Config {
 			rpc,
 			start_block,
 			chain_decimal,
-			jwt_secret_key,
-
+			jwt_access_key,
+			jwt_refresh_key,
 			frontend_link,
 		}
 	}

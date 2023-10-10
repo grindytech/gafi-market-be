@@ -2,12 +2,15 @@ use std::str::FromStr;
 
 use crate::{
 	app_state::AppState,
-	common::utils::{generate_message_sign_in, generate_uuid},
+	common::{
+		utils::{generate_jwt_token, generate_message_sign_in, generate_uuid},
+		JWT_REFRESH_TIME,
+	},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 use actix_web::web::Data;
 use chrono::Utc;
-use mongodb::{bson::doc, Collection, Database};
+use mongodb::{bson::doc, options::FindOneAndUpdateOptions, Collection, Database};
 
 use shared::{models, utils::vec_to_array_64, Account, BaseDocument, SocialInfo};
 
@@ -50,6 +53,7 @@ pub async fn update_nonce(
 				},
 				favorites: None,
 				nonce: Some(nonce),
+				refresh_token: None,
 			},
 			db.clone(),
 		)
@@ -62,7 +66,8 @@ pub async fn update_nonce(
 	}
 }
 
-pub async fn get_access_token(
+// Verify Signature => Return New Refresh Token
+pub async fn verify_signature(
 	params: QueryAuth,
 	app: Data<AppState>,
 ) -> Result<Option<Account>, mongodb::error::Error> {
@@ -72,9 +77,6 @@ pub async fn get_access_token(
 	let address = params.address;
 	let signature = params.signature;
 
-	/* 	log::info!("Address : {:?}", &address);
-	   log::info!("Signature : {:?}", &signature);
-	*/
 	let mut nonce_value: String = "".to_string();
 	let filter = doc! {
 		"$and": [
@@ -111,13 +113,61 @@ pub async fn get_access_token(
 	};
 	let new_nonce = generate_uuid();
 
+	let refresh_token = generate_jwt_token(address, app.config.clone(), JWT_REFRESH_TIME);
 	let update = doc! {
-		"$set":{"nonce":new_nonce}
+		"$set":{
+			"nonce":new_nonce,"refresh_token":refresh_token.unwrap_or("refresh token error".to_string()),
+		}
 	};
-
-	if let Ok(Some(account_detail)) = collection.find_one_and_update(filter, update, None).await {
+	let update_option = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+	if let Ok(Some(account_detail)) =
+		collection.find_one_and_update(filter, update, update_option).await
+	{
 		Ok(Some(account_detail))
 	} else {
 		Ok(None)
 	}
+}
+
+pub async fn refresh_access_token(
+	address: String,
+	app: Data<AppState>,
+) -> Result<Option<Account>, mongodb::error::Error> {
+	let collection: Collection<Account> =
+		app.db.clone().collection(models::Account::name().as_str());
+
+	let filter = doc! {
+		"$and": [
+			{"address": &address},
+		],
+
+	};
+	let account = collection.find_one(filter.clone(), None).await;
+
+	account
+}
+
+pub async fn delete_refresh_token(
+	address: String,
+	app: Data<AppState>,
+) -> Result<Option<Account>, mongodb::error::Error> {
+	let collection: Collection<Account> =
+		app.db.clone().collection(models::Account::name().as_str());
+
+	let filter = doc! {
+		"$and": [
+			{"address": &address},
+		],
+
+	};
+	let update = doc! {
+		"$set":{
+			"refresh_token":mongodb::bson::Bson::Null
+		}
+
+	};
+	let account = collection.find_one_and_update(filter.clone(), update, None).await;
+	account
 }

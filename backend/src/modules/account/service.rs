@@ -52,6 +52,7 @@ pub async fn create_account(
 		created_at: account.created_at,
 		favorites: None,
 		nonce: None,
+		refresh_token: None,
 	};
 	let rs = col.insert_one(entity.clone(), None).await;
 	match rs {
