@@ -11,7 +11,7 @@ pub use shared::{
 use crate::{
 	gafi::{self},
 	services,
-	workers::{HandleParams, EventHandle},
+	workers::{EventHandle, HandleParams},
 };
 
 async fn on_trade_cancelled(params: HandleParams<'_>) -> Result<()> {
@@ -49,7 +49,7 @@ async fn on_trade_cancelled(params: HandleParams<'_>) -> Result<()> {
 			pool: None,
 			price: None,
 			to: None,
-			tx_hash: None,
+
 			value: None,
 			source: None,
 			trade_type: Some(trade.trade_type),

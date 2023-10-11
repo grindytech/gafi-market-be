@@ -47,7 +47,6 @@ pub async fn create_collection_without_metadata(
 				external_url: None,
 				logo_url: None,
 				name: None,
-				nfts: None,
 			},
 			option,
 		)

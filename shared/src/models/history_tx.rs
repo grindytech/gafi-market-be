@@ -15,7 +15,6 @@ pub type Nft = crate::models::trade::Nft;
 pub struct HistoryTx {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
-	pub tx_hash: Option<String>,
 
 	pub extrinsic_index: i32,
 	pub event_index: u32,
@@ -61,8 +60,6 @@ impl Into<Document> for HistoryTx {
 			None => None,
 		};
 		doc! {
-			"tx_hash": self.tx_hash,
-
 			"extrinsic_index": self.extrinsic_index,
 			"event_index": self.event_index,
 			"block_height": self.block_height,

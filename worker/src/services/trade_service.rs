@@ -131,7 +131,7 @@ pub async fn auction_set(params: AuctionSetParams, db: &Database) -> shared::Res
 		trade_type: Some(TRADE_SET_AUCTION.to_string()),
 		to: None,
 		pool: None,
-		tx_hash: None,
+
 		value: None,
 		nfts: None,
 	};
@@ -187,7 +187,6 @@ pub async fn auction_claim(params: AuctionClaimParams, db: &Database) -> shared:
 		trade_id: Some(params.trade_id),
 		trade_type: Some(params.trade_type),
 
-		tx_hash: None,
 		nfts: None,
 		pool: None,
 	};
@@ -231,7 +230,7 @@ pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<
 
 		pool: None,
 		to: None,
-		tx_hash: None,
+
 		value: None,
 		source: None,
 		trade_type: None,
@@ -280,7 +279,7 @@ pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()
 
 		pool: None,
 		to: None,
-		tx_hash: None,
+
 		value: None,
 		source: None,
 		trade_type: None,
@@ -324,7 +323,7 @@ pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Res
 		trade_id: Some(trade.trade_id.clone()),
 		id: None,
 		pool: None,
-		tx_hash: None,
+
 		source: None,
 		trade_type: None,
 	};

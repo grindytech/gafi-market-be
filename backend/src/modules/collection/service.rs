@@ -3,7 +3,7 @@ use mongodb::{bson::doc, Collection, Database};
 
 use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
 
-use crate::common::{DBQuery, Page, QueryPage};
+use crate::common::{utils::get_total_page, DBQuery, Page, QueryPage};
 
 use super::dto::{NFTCollectionDTO, QueryFindCollections};
 use shared::constant::EMPTY_STR;
@@ -41,7 +41,35 @@ pub async fn find_collection_by_id(
 	}
 }
 
-pub async fn find_collections_by_query(
+pub async fn find_collections(
+	params: QueryPage<QueryFindCollections>,
+	db: Database,
+) -> Result<Option<Page<NFTCollectionDTO>>, mongodb::error::Error> {
+	let col: Collection<NFTCollection> =
+		db.collection(models::nft_collection::NFTCollection::name().as_str());
+
+	let query_find = params.query.to_doc();
+
+	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
+
+	let mut cursor = col.find(query_find, filter_option).await?;
+	let mut list_collections: Vec<NFTCollectionDTO> = Vec::new();
+
+	while let Some(nft_collect) = cursor.try_next().await? {
+		list_collections.push(nft_collect.into());
+	}
+
+	let total = get_total_page(list_collections.len(), params.size).await;
+	Ok(Some(Page::<NFTCollectionDTO> {
+		data: list_collections,
+		message: EMPTY_STR.to_string(),
+		page: params.page,
+		size: params.size,
+		total,
+	}))
+}
+
+/* pub async fn find_owner_nfts_collections(
 	params: QueryPage<QueryFindCollections>,
 	db: Database,
 ) -> shared::Result<Option<Page<NFTCollectionDTO>>> {
@@ -95,3 +123,4 @@ pub async fn find_collections_by_query(
 		total: count as u64,
 	}))
 }
+ */

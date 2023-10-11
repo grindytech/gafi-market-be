@@ -23,7 +23,7 @@ use shared::constant::EMPTY_STR;
     ,path="/nft/{token_id}"
     ,params(
         ("token_id",Path,description="Token ID NFT",
-        example="0xd774557b647330c91bf44cfeab205095f7e6c367"))
+        example="1"))
     ,responses(
         (status=200,description="Find NFT Success",body=NFTDTO),
         (status=NOT_FOUND,description="Cannot found this nft")
@@ -68,7 +68,7 @@ pub async fn get_nft(
 		{
 			"collection_id":null,
 			"token_id":"0",
-			"address":"ec84321d9751c066fb923035073a73d467d44642c457915e7496c52f45db1f65",
+			"address":null,
 			
 		}
     })),
@@ -80,8 +80,8 @@ pub async fn get_nft(
     )
 )]
 //Get List NFT Follow Address of Account
-#[post("/list")]
-pub async fn get_list_nft(
+#[post("/owner")]
+pub async fn get_owner_nfts(
 	app_state: Data<AppState>,
 	req: web::Json<QueryNFT>,
 ) -> Result<HttpResponse, AWError> {
@@ -158,5 +158,5 @@ pub async fn search_list_nfts(
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_nft).service(get_list_nft).service(search_list_nfts)
+	scope.service(get_nft).service(get_owner_nfts).service(search_list_nfts)
 }

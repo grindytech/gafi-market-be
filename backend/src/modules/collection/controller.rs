@@ -10,7 +10,7 @@ use shared::constant::EMPTY_STR;
 use crate::{
 	app_state::AppState,
 	common::{ResponseBody, QueryCollection},
-	modules::collection::{dto::NFTCollectionDTO, service::{find_collection_by_id, find_collections_by_query}},
+	modules::collection::{dto::NFTCollectionDTO, service::{find_collection_by_id,find_collections}},
 };
 
 
@@ -72,7 +72,7 @@ pub async fn get_collection(
 			"name":null,
 			"owner":null,
 			"collection_id":null,
-			"game_id":null,
+			"game_id":["2"],
 		}
     })),
     responses(
@@ -82,7 +82,7 @@ pub async fn get_collection(
 )]
 #[post("/search")]
 pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<QueryCollection>)->Result<HttpResponse,AWError>{
-	let list_collections=find_collections_by_query(req.0, app_state.db.clone()).await;
+	let list_collections=find_collections(req.0, app_state.db.clone()).await;
 	/* log::info!("Error {:?}",list_collections); */
 	match list_collections {
 		Ok(Some(collections)) => {
@@ -101,6 +101,10 @@ pub async fn search_list_collections(app_state: Data<AppState>,req:web::Json<Que
 		},
 	}
 }
+
+
+
+
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
 	scope.service(get_collection).service(search_list_collections)
 }

@@ -114,3 +114,4 @@ impl FromRequest for JWTMiddleWare {
 		Self::from_request(req, &mut actix_web::dev::Payload::None)
 	}
 }
+// !todo Refactor from request check

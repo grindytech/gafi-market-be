@@ -19,8 +19,6 @@ pub struct NFTCollection {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub external_url: Option<String>,
-
-	pub nfts: Option<Vec<NFT>>,
 }
 
 impl BaseDocument for NFTCollection {

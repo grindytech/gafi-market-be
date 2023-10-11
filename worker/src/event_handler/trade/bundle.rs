@@ -16,7 +16,7 @@ pub use shared::{
 
 use crate::{
 	gafi, services,
-	workers::{HandleParams, EventHandle},
+	workers::{EventHandle, HandleParams},
 };
 
 async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
@@ -47,7 +47,6 @@ async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
 			source: None,
 			trade_id: Some(trade.trade_id),
 			trade_type: Some(trade.trade_type),
-			tx_hash: None,
 			value: Some(
 				shared::utils::string_decimal_to_number(
 					&ev.bid_price.to_string(),
@@ -118,7 +117,6 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 			trade_id: ev.trade.to_string(),
 			trade_type: TRADE_SET_BUNDLE.to_string(),
 
-			
 			status: TRADE_STATUS_FOR_SALE.to_string(),
 		}
 		.into();

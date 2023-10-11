@@ -99,7 +99,6 @@ pub async fn search_games_by_query(
 	}
 }
 
-/* pub async fn get_games(app_state: Data<AppState>) -> Result<HttpResponse, AWError> {} */
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
 	scope.service(search_games_by_query).service(get_game)
 }

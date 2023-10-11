@@ -126,7 +126,13 @@ impl DBQuery for QueryFindNFts {
 			criteria.insert("address", address);
 		}
 		if let Some(name) = &self.name {
-			criteria.insert("name", name);
+			criteria.insert(
+				"name",
+				mongodb::bson::Regex {
+					pattern: name.to_string(),
+					options: "i".to_string(),
+				},
+			);
 		}
 		if let Some(token_id) = &self.token_id {
 			criteria.insert("token_id", token_id);

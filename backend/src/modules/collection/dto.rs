@@ -23,12 +23,12 @@ pub struct NFTCollectionDTO {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub external_url: Option<String>,
-	pub nfts: Option<Vec<NFTDTO>>,
+	/* pub nfts: Option<Vec<NFTDTO>>, */
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
-		let nfts: Option<Vec<NFTDTO>> =
-			value.nfts.map(|nfts| nfts.iter().map(|nft| nft.clone().into()).collect());
+		/* 	let nfts: Option<Vec<NFTDTO>> =
+		value.nfts.map(|nfts| nfts.iter().map(|nft| nft.clone().into()).collect()); */
 
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
@@ -44,7 +44,6 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			external_url: value.external_url,
-			nfts,
 		}
 	}
 }
@@ -54,7 +53,7 @@ pub struct QueryFindCollections {
 	pub name: Option<String>,
 	pub collection_id: Option<String>,
 	pub owner: Option<String>,
-	pub game_id: Option<String>,
+	pub game_id: Option<Vec<String>>,
 }
 impl DBQuery for QueryFindCollections {
 	fn to_doc(&self) -> Document {
@@ -74,10 +73,8 @@ impl DBQuery for QueryFindCollections {
 		if let Some(name) = &self.name {
 			criteria.push(doc! {
 				"name":{
-					 "$regex": bson::Regex {
-						pattern: name.to_string(),
-						options: "i".to_string(),
-					},
+					 "$regex": name.to_string(),
+					 "$options":"i"
 				}
 
 			});
