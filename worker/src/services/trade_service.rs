@@ -98,7 +98,7 @@ pub async fn upsert_trade(
 /// - create history
 pub async fn auction_set(params: AuctionSetParams, db: &Database) -> shared::Result<()> {
 	let trade = Trade {
-		maybe_price: Some(params.maybe_price),
+		price: Some(params.maybe_price),
 		start_block: params.start_block,
 		duration: Some(params.duration),
 		trade_id: params.trade_id.clone(),
@@ -112,9 +112,8 @@ pub async fn auction_set(params: AuctionSetParams, db: &Database) -> shared::Res
 		maybe_required: None,
 		bundle: None,
 		wish_list: None,
-		unit_price: None,
-		price: None,
 		end_block: None,
+		highest_bid: None,
 	};
 	upsert_trade(trade, db).await?;
 	let history = history_tx::HistoryTx {
@@ -203,7 +202,7 @@ pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<
 		nft: Some(params.nft.clone()),
 		trade_id: params.trade_id.clone(),
 		owner: params.who.clone(),
-		unit_price: Some(params.unit_price),
+		price: Some(params.unit_price),
 		trade_type: TRADE_SET_PRICE.to_string(),
 		status: TRADE_STATUS_FOR_SALE.to_string(),
 		start_block: params.start_block,
@@ -214,9 +213,8 @@ pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<
 		bundle: None,
 		wish_list: None,
 		duration: None,
-		maybe_price: None,
-		price: None,
 		id: None,
+		highest_bid: None,
 	};
 	let history = history_tx::HistoryTx {
 		amount: None,
@@ -250,7 +248,7 @@ pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<
 pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()> {
 	let trade = Trade {
 		nft: Some(params.nft.clone()),
-		unit_price: Some(params.unit_price),
+		price: Some(params.unit_price),
 		owner: params.who.clone(),
 		start_block: params.start_block,
 		end_block: params.end_block,
@@ -264,8 +262,7 @@ pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()
 		source: None,
 		bundle: None,
 		wish_list: None,
-		maybe_price: None,
-		price: None,
+		highest_bid: None,
 	};
 	let history = history_tx::HistoryTx {
 		amount: None,
@@ -300,7 +297,7 @@ pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Res
 	let trade = get_by_trade_id(db, &params.trade_id).await?.ok_or("trade not found")?;
 	let config = shared::config::Config::init();
 	let total_value: u128 = trade
-		.unit_price
+		.price
 		.ok_or("unit price parse u128 fail")?
 		.to_string()
 		.parse::<u128>()?

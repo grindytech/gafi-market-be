@@ -17,7 +17,7 @@ pub use shared::{
 use crate::{
 	gafi,
 	services::{self},
-	workers::{HandleParams, EventHandle},
+	workers::{EventHandle, HandleParams},
 };
 
 async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
@@ -147,9 +147,7 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 			bundle: None,
 			wish_list: None,
 
-			maybe_price: Some(maybe_price_decimal),
-			unit_price: None,
-			price: None,
+			price: Some(maybe_price_decimal),
 
 			owner: hex::encode(ev.who.0),
 
@@ -160,8 +158,8 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 			trade_id: ev.trade.to_string(),
 			trade_type: TRADE_SET_SWAP.to_string(),
 
-			
 			status: TRADE_STATUS_FOR_SALE.to_string(),
+			highest_bid: None,
 		}
 		.into();
 

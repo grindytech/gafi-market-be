@@ -39,18 +39,17 @@ pub struct Trade {
 
 	pub start_block: Option<u32>,
 	pub end_block: Option<u32>,
-	pub duration: Option<u32>,//auction
+	pub duration: Option<u32>, //auction
 
-	pub unit_price: Option<Decimal128>,//set buy, set price
-	pub maybe_price: Option<Decimal128>,//auction, swap
-	pub price: Option<Decimal128>,//bundle
+	pub price: Option<Decimal128>,
 
-	pub nft: Option<Nft>,//set buy, set price
-	pub source: Option<Vec<Nft>>,//swap, auction
-	pub maybe_required: Option<Vec<Nft>>,//swap
-	pub bundle: Option<Vec<Nft>>,//bundle
+	pub nft: Option<Nft>,                 //set buy, set price
+	pub source: Option<Vec<Nft>>,         //swap, auction
+	pub maybe_required: Option<Vec<Nft>>, //swap
+	pub bundle: Option<Vec<Nft>>,         //bundle
 	pub wish_list: Option<Vec<Nft>>,
-	pub status: String,//ForSale, Sold, Canceled, Expired
+	pub status: String,                  //ForSale, Sold, Canceled, Expired
+	pub highest_bid: Option<Decimal128>, //auction
 }
 
 impl Into<Document> for Trade {
@@ -111,8 +110,6 @@ impl Into<Document> for Trade {
 			"end_block": self.end_block,
 			"duration": self.duration,
 
-			"unit_price": self.unit_price,
-			"maybe_price": self.maybe_price,
 			"price": self.price,
 
 			"nft": nft,
