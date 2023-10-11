@@ -105,8 +105,6 @@ async fn on_wishlist_set(params: HandleParams<'_>) -> Result<()> {
 			bundle: None,
 			wish_list: Some(wish_list),
 
-			maybe_price: None,
-			unit_price: None,
 			price: Some(price_decimal),
 
 			owner: hex::encode(ev.who.0),
@@ -119,6 +117,7 @@ async fn on_wishlist_set(params: HandleParams<'_>) -> Result<()> {
 			trade_type: TRADE_SET_WIST_LIST.to_string(),
 
 			status: TRADE_STATUS_FOR_SALE.to_string(),
+			highest_bid: None,
 		}
 		.into();
 

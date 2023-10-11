@@ -41,6 +41,7 @@ pub const EVENT_COLLECTION_METADATA_CLEARED: &str = "Nfts:CollectionMetadataClea
 pub const EVENT_REQUEST_MINT: &str = "Game:RequestMint";
 
 pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
+pub const EVENT_BID: &str = "Game:Bid";
 
 pub const EVENT_SWAP_CLAIMED: &str = "Game:SwapClaimed";
 

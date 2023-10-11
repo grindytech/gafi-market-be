@@ -1,8 +1,6 @@
 use mongodb::bson::Decimal128;
 use shared::{
-	constant::{
-		EVENT_AUCTION_CLAIMED, EVENT_SET_AUCTION,
-	},
+	constant::{EVENT_AUCTION_CLAIMED, EVENT_SET_AUCTION, EVENT_BID},
 	models,
 };
 pub use shared::{
@@ -12,11 +10,9 @@ pub use shared::{
 
 use crate::{
 	gafi,
-	services::{
-		self,
-		trade_service,
-	},
-	workers::{EventHandle, HandleParams}, types::{AuctionSetParams, AuctionClaimParams},
+	services::{self, trade_service},
+	types::{AuctionClaimParams, AuctionSetParams},
+	workers::{EventHandle, HandleParams},
 };
 
 async fn on_auction_claimed(params: HandleParams<'_>) -> Result<()> {
@@ -142,7 +138,11 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 	Ok(())
 }
 
-//ask price
+async fn on_auction_bid(params: HandleParams<'_>) -> Result<()> {
+	let event_parse = params.ev.as_event::<gafi::game::events::Bid>()?;
+	if let Some(ev) = event_parse {}
+	todo!()
+}
 
 pub fn tasks() -> Vec<EventHandle> {
 	vec![
@@ -152,5 +152,6 @@ pub fn tasks() -> Vec<EventHandle> {
 		EventHandle::new(EVENT_AUCTION_CLAIMED, move |params| {
 			Box::pin(on_auction_claimed(params))
 		}),
+		EventHandle::new(EVENT_BID, move |params| Box::pin(on_auction_bid(params))),
 	]
 }

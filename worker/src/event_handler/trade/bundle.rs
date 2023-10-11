@@ -104,8 +104,6 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 			bundle: Some(bundle.clone()),
 			wish_list: None,
 
-			maybe_price: None,
-			unit_price: None,
 			price: Some(price_decimal),
 
 			owner: hex::encode(ev.who.0),
@@ -118,6 +116,7 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 			trade_type: TRADE_SET_BUNDLE.to_string(),
 
 			status: TRADE_STATUS_FOR_SALE.to_string(),
+			highest_bid: None,
 		}
 		.into();
 

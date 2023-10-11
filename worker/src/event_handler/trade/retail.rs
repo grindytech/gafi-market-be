@@ -107,9 +107,8 @@ async fn on_set_price(params: HandleParams<'_>) -> Result<()> {
 			trade_id: ev.trade.to_string(),
 			unit_price: unit_price_decimal,
 			who: hex::encode(ev.who.0),
-			//TODO start block - end block
-			end_block: None,
-			start_block: None,
+			end_block: ev.start_block,
+			start_block: ev.end_block,
 		};
 		trade_service::set_price(set_price_params, params.db).await?;
 		services::nft_service::refresh_balance(
