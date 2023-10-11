@@ -47,3 +47,12 @@ pub struct ItemBoughtParams {
 	pub amount: u32,
 	pub is_sold: bool,
 }
+
+pub struct AuctionBidParams {
+	pub trade_id: String,
+	pub block_height: u32,
+	pub event_index: u32,
+	pub extrinsic_index: i32,
+	pub who: String,
+	pub bid: Decimal128,
+}

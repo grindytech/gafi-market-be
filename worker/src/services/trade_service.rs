@@ -1,19 +1,23 @@
 use mongodb::{
 	bson::{doc, Decimal128, Document},
 	options::UpdateOptions,
+	results::UpdateResult,
 	Database,
 };
 use shared::{
 	constant::{
-		EVENT_AUCTION_CLAIMED, EVENT_BOUGHT_ITEM, EVENT_SET_AUCTION, TRADE_SET_AUCTION,
-		TRADE_SET_BUY, TRADE_SET_PRICE, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
+		EVENT_AUCTION_CLAIMED, EVENT_BID, EVENT_BOUGHT_ITEM, EVENT_SET_AUCTION, TRADE_BID_AUCTION,
+		TRADE_SET_AUCTION, TRADE_SET_BUY, TRADE_SET_PRICE, TRADE_STATUS_FOR_SALE,
+		TRADE_STATUS_SOLD,
 	},
-	history_tx, models, BaseDocument, Trade,
+	history_tx, models, BaseDocument, HistoryTx, Trade,
 };
 
 use crate::{
 	gafi::{self, runtime_types::gafi_support::game::types::Package},
-	types::{AuctionClaimParams, AuctionSetParams, ItemBoughtParams, SetPriceParams},
+	types::{
+		AuctionBidParams, AuctionClaimParams, AuctionSetParams, ItemBoughtParams, SetPriceParams,
+	},
 	workers::RpcClient,
 };
 
@@ -296,12 +300,9 @@ pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()
 pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Result<()> {
 	let trade = get_by_trade_id(db, &params.trade_id).await?.ok_or("trade not found")?;
 	let config = shared::config::Config::init();
-	let total_value: u128 = trade
-		.price
-		.ok_or("unit price parse u128 fail")?
-		.to_string()
-		.parse::<u128>()?
-		* u128::from(params.amount);
+	let total_value: u128 =
+		trade.price.ok_or("unit price parse u128 fail")?.to_string().parse::<u128>()?
+			* u128::from(params.amount);
 	let total_value_decimal: Decimal128 = shared::utils::string_decimal_to_number(
 		&total_value.to_string(),
 		config.chain_decimal as i32,
@@ -329,5 +330,50 @@ pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Res
 	if params.is_sold {
 		update_trade_status(&trade.trade_id, TRADE_STATUS_SOLD, db).await?;
 	}
+	Ok(())
+}
+
+pub async fn refresh_highest_bid(
+	trade_id: String,
+	bid: Decimal128,
+	db: &Database,
+) -> Result<UpdateResult, mongodb::error::Error> {
+	let trade_db = db.collection::<Trade>(&Trade::name());
+	let query = doc! {
+		"highest_bid": {
+			"$lt": bid,
+		},
+		"trade_id": trade_id,
+	};
+	let update = doc! {
+		"$set":{
+			"highest_bid": bid,
+		}
+	};
+	let rs = trade_db.update_one(query, update, None).await?;
+	Ok(rs)
+}
+
+pub async fn create_auction_bid(params: AuctionBidParams, db: &Database) -> shared::Result<()> {
+	let history = HistoryTx {
+		block_height: params.block_height,
+		event: EVENT_BID.to_string(),
+		event_index: params.event_index,
+		extrinsic_index: params.extrinsic_index,
+		from: params.who,
+		trade_id: Some(params.trade_id.clone()),
+		price: Some(params.bid),
+		trade_type: Some(TRADE_BID_AUCTION.to_string()),
+		value: None,
+		id: None,
+		nfts: None,
+		pool: None,
+		source: None,
+		to: None,
+		tx_hash: None,
+		amount: None,
+	};
+	history_service::upsert(history, db).await?;
+	refresh_highest_bid(params.trade_id, params.bid, db).await?;
 	Ok(())
 }

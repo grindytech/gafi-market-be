@@ -1,7 +1,8 @@
 use mongodb::bson::Decimal128;
 use shared::{
-	constant::{EVENT_AUCTION_CLAIMED, EVENT_SET_AUCTION, EVENT_BID},
+	constant::{EVENT_AUCTION_CLAIMED, EVENT_BID, EVENT_SET_AUCTION},
 	models,
+	utils::string_decimal_to_number,
 };
 pub use shared::{
 	constant::{TRADE_SET_AUCTION, TRADE_SET_WIST_LIST},
@@ -11,7 +12,7 @@ pub use shared::{
 use crate::{
 	gafi,
 	services::{self, trade_service},
-	types::{AuctionClaimParams, AuctionSetParams},
+	types::{AuctionBidParams, AuctionClaimParams, AuctionSetParams},
 	workers::{EventHandle, HandleParams},
 };
 
@@ -140,8 +141,24 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 
 async fn on_auction_bid(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::Bid>()?;
-	if let Some(ev) = event_parse {}
-	todo!()
+	if let Some(ev) = event_parse {
+		let config = shared::config::Config::init();
+		let bid_price = string_decimal_to_number(&ev.bid.to_string(), config.chain_decimal as i32);
+		let bid_price_decimal128: Decimal128 = bid_price.parse()?;
+		trade_service::create_auction_bid(
+			AuctionBidParams {
+				bid: bid_price_decimal128,
+				block_height: params.block.height,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				trade_id: ev.trade.to_string(),
+				who: hex::encode(ev.who.0).to_string(),
+			},
+			params.db,
+		)
+		.await?;
+	}
+	Ok(())
 }
 
 pub fn tasks() -> Vec<EventHandle> {
