@@ -1,13 +1,11 @@
-use std::collections::HashMap;
-
 use mongodb::bson::{self, doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::{common::DBQuery, modules::game::dto::GameDTO};
+use crate::{common::DBQuery, modules::nft::dto::NFTDTO};
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
 	pub id: Option<String>,
 	pub collection_id: String,
@@ -25,9 +23,13 @@ pub struct NFTCollectionDTO {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub external_url: Option<String>,
+	pub nfts: Option<Vec<NFTDTO>>,
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
+		let nfts: Option<Vec<NFTDTO>> =
+			value.nfts.map(|nfts| nfts.iter().map(|nft| nft.clone().into()).collect());
+
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
 			slug: value.slug,
@@ -42,6 +44,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			external_url: value.external_url,
+			nfts,
 		}
 	}
 }

@@ -1,8 +1,5 @@
 use super::dto::{GameDTO, QueryFindGame};
-use crate::{
-	common::{utils::get_total_page, Page, QueryPage},
-	modules::collection::{dto::NFTCollectionDTO, service::get_list_collections},
-};
+use crate::common::{utils::get_total_page, Page, QueryPage};
 use actix_web::Result;
 use futures_util::TryStreamExt;
 
@@ -12,10 +9,7 @@ use shared::{
 	BaseDocument,
 };
 
-use mongodb::{
-	bson::{doc, Document},
-	Collection, Database,
-};
+use mongodb::{bson::doc, Collection, Database};
 
 use crate::common::DBQuery;
 
@@ -61,25 +55,3 @@ pub async fn find_games_by_query(
 		total,
 	}))
 }
-
-/* pub async fn get_collections(game: Game, db: Database) -> Vec<NFTCollectionDTO> {
-	match game.collections {
-		Some(value) => {
-			let mut criteria: Vec<Document> = vec![];
-			for collection_value in value {
-				criteria.push(doc! {
-					"collection_id":collection_value
-				})
-			}
-			let filter = doc! {
-				"$or":criteria
-			};
-			let result = get_list_collections(filter, db.clone()).await;
-			match result {
-				Ok(value) => value,
-				Err(_) => vec![],
-			}
-		},
-		None => vec![],
-	}
-} */
