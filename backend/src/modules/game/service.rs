@@ -1,8 +1,5 @@
 use super::dto::{GameDTO, QueryFindGame};
-use crate::common::{
-	utils::{get_filter_option, get_total_page},
-	Page, QueryPage,
-};
+use crate::common::{utils::get_total_page, Page, QueryPage};
 use actix_web::Result;
 use futures_util::TryStreamExt;
 
@@ -24,8 +21,8 @@ pub async fn find_game_by_id(
 	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 	let filter = doc! {"game_id":game_id};
 
-	if let Ok(Some(game_detail)) = col.find_one(filter, None).await {
-		Ok(Some(game_detail.into()))
+	if let Ok(Some(game)) = col.find_one(filter, None).await {
+		Ok(Some(game.into()))
 	} else {
 		Ok(None)
 	}
@@ -40,12 +37,13 @@ pub async fn find_games_by_query(
 
 	let query_find = params.query.to_doc();
 
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
+	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
 
 	let mut cursor = col.find(query_find, filter_option).await?;
 	let mut list_games: Vec<GameDTO> = Vec::new();
+
 	while let Some(game) = cursor.try_next().await? {
-		list_games.push(game.into())
+		list_games.push(game.into());
 	}
 
 	let total = get_total_page(list_games.len(), params.size).await;

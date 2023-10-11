@@ -38,6 +38,13 @@ pub fn vec_to_array(vec: Vec<u8>) -> [u8; 32] {
 	}
 	arr_u8
 }
+pub fn vec_to_array_64(vec: Vec<u8>) -> [u8; 64] {
+	let mut arr_u8: [u8; 64] = [0; 64];
+	for i in 0..64 {
+		arr_u8[i] = *vec.get(i).unwrap_or(&0u8);
+	}
+	arr_u8
+}
 
 pub fn serde_json_to_doc(data: Value) -> types::Result<(Document, Map<String, Value>)> {
 	let obj: Map<String, Value> = data.as_object().ok_or("Not an object")?.clone();

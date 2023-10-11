@@ -12,8 +12,8 @@ mod event_handler;
 mod services;
 #[cfg(test)]
 mod tests;
-mod workers;
 mod types;
+mod workers;
 
 async fn get_db() -> Database {
 	let configuration = Config::init();

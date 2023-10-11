@@ -1,77 +1,58 @@
-use std::str::FromStr;
+use subxt_signer::{bip39::Mnemonic, sr25519};
 
-use crate::common::utils::{generate_jwt_token, verify_jwt_token};
-use crate::{app_state::AppState, common::utils::verify_signature};
-use actix_web::web::Data;
-use dotenv::dotenv;
-use shared::Config;
-use subxt_signer::sr25519::{self, Signature};
-use subxt_signer::{sr25519::Keypair, SecretUri};
+use std::env;
 
-fn signature_to_hex_string(signature: &Signature) -> String {
-	let hex_string: String = signature.0.iter().map(|byte| format!("{:02X}", byte)).collect();
-	hex_string
-}
-fn hex_string_to_signature(hex_string: &str) -> Result<Signature, &'static str> {
-	// Check if the hex string has an even number of characters (2 characters per byte)
-	if hex_string.len() % 2 != 0 {
-		return Err("Invalid hex string length");
-	}
-
-	// Create a vector to hold the bytes
-	let mut bytes = Vec::new();
-
-	// Iterate over pairs of characters in the hex string and parse them as bytes
-	for i in 0..hex_string.len() / 2 {
-		let byte_str = &hex_string[i * 2..(i * 2) + 2];
-		if let Ok(byte) = u8::from_str_radix(byte_str, 16) {
-			bytes.push(byte);
-		} else {
-			return Err("Invalid hex string format");
-		}
-	}
-
-	// Check if the parsed bytes form a valid signature
-	if bytes.len() != 0 {
-		return Err("Invalid signature length");
-	}
-
-	Ok(Signature(bytes.try_into().unwrap()))
-}
-
-async fn sign_test_message(message: String, config: Config) -> Signature {
-	let uri = SecretUri::from_str(&config.key_pair_hash).expect("Error get Scret Key");
-	let keypair = Keypair::from_uri(&uri).expect("Error get keypair");
-	//get the hash keypair
-	// convert message check to message check signature
-	let signature_test = keypair.sign(&message.as_bytes().to_vec());
-	signature_test
-}
-
-fn verify_test_signature(message: String, signature: Signature, config: Config) {
-	let result = verify_signature(signature, &message, config);
-	print!("Verify Signature {:?}", result)
-}
-
+use hex::ToHex;
 #[actix_web::test]
 async fn test() {
-	dotenv().ok();
-	let configuration = Config::init();
-	let test_message="Welcome to Gafi Market!\n\nClick to sign in and accept the GafiMarket Terms of Service (https://apps.gafi.network/) and Privacy Policy (https://apps.gafi.network/).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nYour authentication status will reset after 24 hours.\n\nWallet address:\n0sxbdfc529688922fb5036d9439a7cd61d61114f600\n\nNonce:\ndbb29a2f-4405-4e7d-8317-424d7978d4fe".to_string();
-	let signature = sign_test_message(test_message.clone(), configuration.clone()).await;
+	let keypair = sr25519::dev::alice();
+	let message = b"Hello!";
 
-	let test = signature_to_hex_string(&signature);
+	let signature = keypair.sign(message);
+	let public_key = keypair.public_key();
 
-	println!("Signature {:?}", test);
+	println!("Signature type {:?}", hex::encode(signature.as_ref()));
+	assert!(sr25519::verify(&signature, message, &public_key));
 
-	verify_test_signature(test_message, signature, configuration.clone());
+	let mut message = String::from("Hello world!");
 
-	//Test Generate JWT and Decode JWT:
-	let jwt_token = generate_jwt_token(
-		"5HC2BvrZTXc3DCxDVm6en2tn7iE8bzZnHA4gPEeM3sDL1TkW".to_string(),
-		configuration.clone(),
+	let args: Vec<String> = env::args().collect();
+	if args.len() > 1 {
+		message = args[1].clone();
+	}
+
+	println!("Message: {}", message);
+
+	let msg = message.as_bytes();
+
+	/* let rng = rand::SystemRandom::new();
+
+	let pkcs8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
+
+	let key_pair = signature::Ed25519KeyPair::from_pkcs8(pkcs8_bytes.as_ref()).unwrap();
+
+	let peer_public_key_bytes = key_pair.public_key().as_ref();
+
+	println!("\nPkcs8: {:?}", pkcs8_bytes.as_ref().encode_hex::<String>());
+	println!(
+		"\nPublic key: {:?}",
+		peer_public_key_bytes.encode_hex::<String>()
 	);
-	println!("Current JWT TOken {:?} \n", jwt_token);
-	let result_token = verify_jwt_token(jwt_token.unwrap(), configuration);
-	println!("Result Verify JWT {:?} \n", result_token);
+
+	let sig = key_pair.sign(msg);
+
+	let sig_bytes = sig.as_ref();
+
+	println!("\nSignature: {:?}", sig_bytes.encode_hex::<String>());
+
+	let peer_public_key =
+		signature::UnparsedPublicKey::new(&signature::ED25519, peer_public_key_bytes);
+
+	let rtn = peer_public_key.verify(msg, sig.as_ref()).is_ok();
+
+	if rtn == true {
+		println!("\nMessage signature correct");
+	} else {
+		println!("\nMessage signature incorrect");
+	} */
 }

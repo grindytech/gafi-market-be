@@ -14,7 +14,7 @@ use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft};
 use utoipa::OpenApi;
 
 use super::{
-	auth::dto::{QueryAuth, QueryNonce},
+	auth::dto::{QueryAuth, QueryNonce, TokenDTO},
 	game::dto::QueryFindGame,
 	pool::dto::{PoolDTO, QueryFindPool},
 	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts,
@@ -26,6 +26,8 @@ use super::{
         crate::modules::account::controller::get_account,
         crate::modules::account::controller::update_favorite,
         crate::modules::game::controller::search_games_by_query,
+        crate::modules::categories::controller::create_new_category,
+        crate::modules::categories::controller::get_list_categories,
         crate::modules::game::controller::get_game,
         crate::modules::nft::controller::get_nft,
         crate::modules::nft::controller::get_list_nft,
@@ -36,6 +38,8 @@ use super::{
         crate::modules::transaction::controller::search_history_tx,
         crate::modules::auth::controller::get_random_nonce,
         crate::modules::auth::controller::get_verify_token,
+        crate::modules::auth::controller::refresh_token,
+        crate::modules::auth::controller::logout,
         crate::modules::pool::controller::search_list_pools,
     ),
    /*  tags(
@@ -66,6 +70,7 @@ use super::{
             QueryPage<()>,
             NoResponse,
             NFTOwnerOfDto,
+            TokenDTO,
         
         )
     ),

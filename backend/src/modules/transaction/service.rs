@@ -2,10 +2,7 @@ use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
 use shared::{constant::EMPTY_STR, history_tx::HistoryTx, models, BaseDocument};
 
-use crate::common::{
-	utils::{get_filter_option, get_total_page},
-	DBQuery, Page, QueryPage,
-};
+use crate::common::{utils::get_total_page, DBQuery, Page, QueryPage};
 
 use super::dto::{HistoryTxDTO, QueryFindTX};
 
@@ -28,7 +25,7 @@ pub async fn find_tx_by_query(
 	let col: Collection<HistoryTx> = db.collection(models::history_tx::HistoryTx::name().as_str());
 
 	let query_find = params.query.to_doc();
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
+	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
 	let mut cursor = col.find(query_find, filter_option).await?;
 
 	let mut list_transactions: Vec<HistoryTxDTO> = Vec::new();
