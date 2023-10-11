@@ -124,8 +124,7 @@ pub struct TokenPayload {
 	pub iat: i64,
 	pub exp: i64,
 }
-pub const JWT_ACCESS_TIME:i64=3600;
-pub const JWT_REFRESH_TIME:i64=86400;
+
 
 
 mod types;

@@ -2,10 +2,7 @@ use std::str::FromStr;
 
 use crate::{
 	app_state::AppState,
-	common::{
-		utils::{generate_jwt_token, generate_message_sign_in, generate_uuid},
-		JWT_REFRESH_TIME,
-	},
+	common::utils::{generate_jwt_token, generate_message_sign_in, generate_uuid},
 	modules::account::{dto::AccountDTO, service::create_account},
 };
 use actix_web::web::Data;
@@ -113,7 +110,8 @@ pub async fn verify_signature(
 	};
 	let new_nonce = generate_uuid();
 
-	let refresh_token = generate_jwt_token(address, app.config.clone(), JWT_REFRESH_TIME);
+	let refresh_token =
+		generate_jwt_token(address, app.config.clone(), app.config.jwt_refresh_time);
 	let update = doc! {
 		"$set":{
 			"nonce":new_nonce,"refresh_token":refresh_token.unwrap_or("refresh token error".to_string()),

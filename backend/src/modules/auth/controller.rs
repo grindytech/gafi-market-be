@@ -4,7 +4,7 @@ use crate::{
 		utils::{
 			generate_jwt_token, generate_message_sign_in, generate_uuid, 
 		},
-		ResponseBody, JWT_ACCESS_TIME,
+		ResponseBody,
 	},
 	middleware,
 	modules::auth::{
@@ -91,7 +91,7 @@ pub async fn get_verify_token(
 			let access_token = generate_jwt_token(
 				req.0.clone().address,
 				app_state.config.clone(),
-				JWT_ACCESS_TIME,
+				app_state.config.jwt_access_time,
 			);
 			log::info!("Access Token {:?} ", access_token);
 			let rsp = ResponseBody::<TokenDTO>::new(
@@ -138,7 +138,7 @@ pub async fn refresh_token(
 	let access_token = generate_jwt_token(
 				auth.address,
 				app_state.config.clone(),
-				JWT_ACCESS_TIME,
+				app_state.config.jwt_access_time,
 			);
 	match access_token {
 		Ok(value) => {
