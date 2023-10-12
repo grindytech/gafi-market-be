@@ -1,12 +1,7 @@
-use mongodb::{
-	bson::{doc, Decimal128, Document},
-	options::UpdateOptions,
-};
+use mongodb::bson::{Decimal128};
 use shared::{
-	constant::{
-		EVENT_SET_WISH_LIST, EVENT_WIST_LIST_FILLED, TRADE_STATUS_FOR_SALE, TRADE_STATUS_SOLD,
-	},
-	history_tx, models, BaseDocument, Trade,
+	constant::{EVENT_SET_WISH_LIST, EVENT_WIST_LIST_FILLED},
+	models,
 };
 pub use shared::{
 	constant::{TRADE_SET_AUCTION, TRADE_SET_WIST_LIST},
@@ -14,48 +9,29 @@ pub use shared::{
 };
 
 use crate::{
-	gafi, services,
+	gafi,
+	services::{self, trade_service},
+	types::{WishlistFilledParams, WishlistSetParams},
 	workers::{EventHandle, HandleParams},
 };
 
 async fn on_wishlist_filled(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::WishlistFilled>()?;
 	if let Some(ev) = event_parse {
-		let trade_db = params.db.collection::<Trade>(Trade::name().as_str());
-		let query = doc! {
-		  "trade_id": ev.trade,
-		};
-		let trade = trade_db.find_one(query.clone(), None).await?.unwrap();
-		let update = doc! {
-		  "status": TRADE_STATUS_SOLD,
-		};
-		let config = shared::config::Config::init();
-		trade_db.update_one(query.clone(), update, None).await?;
-		let history = history_tx::HistoryTx {
-			id: None,
-			amount: None,
-			price: trade.price,
-			block_height: params.block.height,
-			event: EVENT_WIST_LIST_FILLED.to_string(),
-			event_index: params.ev.index(),
-			extrinsic_index: params.extrinsic_index.unwrap(),
-			from: trade.owner.clone(),
-			to: Some(hex::encode(ev.who.0)),
-			nfts: trade.wish_list.clone(),
-			pool: None,
-			source: None,
-			trade_id: Some(trade.trade_id),
-			trade_type: Some(trade.trade_type),
-			tx_hash: None,
-			value: Some(
-				shared::utils::string_decimal_to_number(
-					&ev.ask_price.to_string(),
-					config.chain_decimal as i32,
-				)
-				.parse()?,
-			),
-		};
-		services::history_service::upsert(history, params.db).await?;
+		let trade = trade_service::get_by_trade_id(params.db, &ev.trade.to_string())
+			.await?
+			.ok_or("trade not found")?;
+		trade_service::wishlist_filled(
+			WishlistFilledParams {
+				block_height: params.block.height,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				trade: trade.clone(),
+				who: hex::encode(ev.who.0),
+			},
+			params.db,
+		)
+		.await?;
 		for nft in trade.wish_list.unwrap() {
 			services::nft_service::refresh_balance(
 				ev.who.clone(),
@@ -97,40 +73,21 @@ async fn on_wishlist_set(params: HandleParams<'_>) -> Result<()> {
 			config.chain_decimal as i32,
 		);
 		let price_decimal: Decimal128 = price.parse()?;
-		let trade: Document = Trade {
-			id: None,
-			nft: None,
-			maybe_required: None,
-			source: None,
-			bundle: None,
-			wish_list: Some(wish_list),
-
-			price: Some(price_decimal),
-
-			owner: hex::encode(ev.who.0),
-
-			start_block: ev.start_block,
-			end_block: ev.end_block,
-			duration: None,
-
-			trade_id: ev.trade.to_string(),
-			trade_type: TRADE_SET_WIST_LIST.to_string(),
-
-			status: TRADE_STATUS_FOR_SALE.to_string(),
-			highest_bid: None,
-		}
-		.into();
-
-		//create sale
-		let trade_db = params.db.collection::<Trade>(&Trade::name());
-		let options = UpdateOptions::builder().upsert(true).build();
-		let query = doc! {
-		  "trade_id": ev.trade.to_string(),
-		};
-		let upsert = doc! {
-		  "$set": trade,
-		};
-		trade_db.update_one(query, upsert, options).await?;
+		trade_service::set_wishlist(
+			WishlistSetParams {
+				block_height: params.block.height,
+				end_block: ev.end_block,
+				start_block: ev.start_block,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				price: Some(price_decimal),
+				trade_id: ev.trade.to_string(),
+				who: hex::encode(ev.who.0),
+				wish_list: wish_list.clone(),
+			},
+			params.db,
+		)
+		.await?;
 	};
 	Ok(())
 }

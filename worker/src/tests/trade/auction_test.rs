@@ -1,13 +1,13 @@
 use mongodb::{bson::Decimal128, Database};
 use shared::{
-	constant::{EVENT_AUCTION_CLAIMED, TRADE_STATUS_SOLD},
+	constant::{EVENT_AUCTION_CLAIMED, EVENT_BID, TRADE_SET_AUCTION, TRADE_STATUS_SOLD},
 	models, tests, HistoryTx, Trade,
 };
 
-use crate::{services::{
-	history_service,
-	trade_service,
-}, types::{AuctionSetParams, AuctionClaimParams}};
+use crate::{
+	services::{history_service, trade_service},
+	types::{AuctionBidParams, AuctionClaimParams, AuctionSetParams},
+};
 
 async fn do_auction(db: &Database) {
 	let (_, public_key) = tests::utils::mock_account_id32();
@@ -143,4 +143,51 @@ async fn claim_auction_test() {
 	let _ = db_process.kill();
 }
 
+#[tokio::test]
+async fn bid() {
+	let (mut db_process, db) = tests::utils::get_test_db(10000).await;
+	do_auction(&db).await;
+	let trade = trade_service::get_by_trade_id(&db, "0").await.unwrap().unwrap();
+	// let (_, public_key) = tests::utils::mock_account_id32();
 
+	let price_decimal: Decimal128 = "10".parse().unwrap();
+
+	let who_bid = "0";
+	trade_service::create_auction_bid(
+		AuctionBidParams {
+			bid: price_decimal,
+			block_height: 0,
+			event_index: 0,
+			extrinsic_index: 0,
+			trade: trade.clone(),
+			who: who_bid.to_string(),
+		},
+		&db,
+	)
+	.await
+	.unwrap();
+
+	let trade = trade_service::get_by_trade_id(&db, &&trade.trade_id.clone())
+		.await
+		.unwrap()
+		.unwrap();
+
+	assert_eq!(trade.highest_bid, Some(price_decimal));
+
+	let histories = history_service::get_history_by_trade_id(&trade.trade_id.clone(), None, &db)
+		.await
+		.unwrap();
+
+	let history = histories.iter().find(|h| h.event == EVENT_BID).unwrap();
+	assert_eq!(history.trade_id, Some(trade.trade_id.clone()));
+	assert_eq!(history.block_height, 0);
+	assert_eq!(history.event_index, 0);
+	assert_eq!(history.extrinsic_index, 0);
+	assert_eq!(history.source, trade.source);
+	assert_eq!(history.price, Some(price_decimal));
+	assert_eq!(history.event, EVENT_BID);
+	assert_eq!(history.trade_type, Some(TRADE_SET_AUCTION.to_string()));
+	assert_eq!(history.from, who_bid);
+
+	let _ = db_process.kill();
+}
