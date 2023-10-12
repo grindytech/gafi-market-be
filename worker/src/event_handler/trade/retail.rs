@@ -38,6 +38,7 @@ async fn on_item_bought(params: HandleParams<'_>) -> Result<()> {
 			trade_id: ev.trade.to_string(),
 			who: hex::encode(ev.who.0),
 		};
+
 		services::trade_service::bought_item(bought_params, params.db).await?;
 		services::nft_service::refresh_balance(
 			ev.who,

@@ -7,6 +7,7 @@ pub const TRADE_SET_BUY: &str = "SetBuy";
 pub const TRADE_SET_SWAP: &str = "SetSwap";
 pub const TRADE_SET_BUNDLE: &str = "SetBundle";
 pub const TRADE_SET_AUCTION: &str = "SetAuction";
+pub const TRADE_BID_AUCTION: &str = "BidAuction";
 pub const TRADE_SET_WIST_LIST: &str = "SetWishlist";
 
 pub const TRADE_STATUS_FOR_SALE: &str = "ForSale";
