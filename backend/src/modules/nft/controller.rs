@@ -16,43 +16,6 @@ use actix_web::{
 
 use shared::constant::EMPTY_STR;
 
-#[utoipa::path(
-    get,
-	operation_id="dsad",
-    tag="NftEndpoints"
-    ,path="/nft/{token_id}"
-    ,params(
-        ("token_id",Path,description="Token ID NFT",
-        example="1"))
-    ,responses(
-        (status=200,description="Find NFT Success",body=NFTDTO),
-        (status=NOT_FOUND,description="Cannot found this nft")
-    )
-)]
-#[get("/{token_id}")]
-pub async fn get_nft(
-	app_state: Data<AppState>,
-	path: web::Path<String>,
-) -> Result<HttpResponse, AWError> {
-	let token_id = path.into_inner();
-	let nft_detail = find_nft_by_token(&token_id, app_state.db.clone()).await;
-	match nft_detail {
-		Ok(Some(nft)) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new(EMPTY_STR, Some(nft), true);
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
-		},
-		Ok(None) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new("Not found", None, false);
-			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
-				.content_type("application/json")
-				.json(rsp))
-		},
-		Err(e) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
-			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
-		},
-	}
-}
 
 #[utoipa::path(
     post,
@@ -162,5 +125,5 @@ pub async fn search_list_nfts(
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_nft).service(get_owner_nfts).service(search_list_nfts)
+	scope.service(get_owner_nfts).service(search_list_nfts)
 }

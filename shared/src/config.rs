@@ -10,7 +10,6 @@ pub struct Config {
 	pub jwt_access_time: i64,
 	pub jwt_refresh_key: String,
 	pub jwt_refresh_time: i64,
-	pub frontend_link: String,
 }
 
 impl Config {
@@ -27,7 +26,6 @@ impl Config {
 		let jwt_refresh_time =
 			var("JWT_REFRESH_TIME").unwrap_or("86400".to_string()).parse().unwrap();
 
-		let frontend_link = var("FRONTEND_APP").expect("Frontend link Must to set");
 		Config {
 			mongodb_uri,
 			mongodb_db_name,
@@ -38,7 +36,6 @@ impl Config {
 			jwt_access_time,
 			jwt_refresh_key,
 			jwt_refresh_time,
-			frontend_link,
 		}
 	}
 }

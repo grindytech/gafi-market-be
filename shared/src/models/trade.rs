@@ -3,15 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::BaseDocument;
 
-/* pub enum TradeType {
-	SetPrice,
-	Swap,
-	SetBuy,
-	Wishlist,
-	Bundle,
-	Auction,
-} */
-
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Nft {
 	pub collection: u32,

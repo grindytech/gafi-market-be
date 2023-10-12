@@ -113,7 +113,6 @@ pub async fn auction_set(params: AuctionSetParams, db: &Database) -> shared::Res
 		trade_type: Some(TRADE_SET_AUCTION.to_string()),
 		to: None,
 		pool: None,
-
 		value: None,
 		nfts: None,
 	};
@@ -168,7 +167,6 @@ pub async fn auction_claim(params: AuctionClaimParams, db: &Database) -> shared:
 		value: params.ask_price,
 		trade_id: Some(params.trade_id),
 		trade_type: Some(params.trade_type),
-
 		nfts: None,
 		pool: None,
 	};
@@ -211,7 +209,6 @@ pub async fn set_price(params: SetPriceParams, db: &Database) -> shared::Result<
 
 		pool: None,
 		to: None,
-
 		value: None,
 		source: None,
 		trade_type: Some(TRADE_SET_PRICE.to_string()),
@@ -259,7 +256,6 @@ pub async fn set_buy(params: SetPriceParams, db: &Database) -> shared::Result<()
 
 		pool: None,
 		to: None,
-
 		value: None,
 		source: None,
 		trade_type: Some(TRADE_SET_BUY.to_string()),
@@ -303,7 +299,6 @@ pub async fn bought_item(params: ItemBoughtParams, db: &Database) -> shared::Res
 		trade_id: Some(trade.trade_id.clone()),
 		id: None,
 		pool: None,
-
 		source: None,
 		trade_type: Some(trade.trade_type),
 	};
@@ -356,7 +351,6 @@ pub async fn create_auction_bid(params: AuctionBidParams, db: &Database) -> shar
 		pool: None,
 		source: trade.source,
 		to: None,
-		tx_hash: None,
 		amount: None,
 	};
 	history_service::upsert(history, db).await?;
@@ -394,7 +388,6 @@ pub async fn cancel_trade(params: CancelTradeParams, db: &Database) -> shared::R
 		pool: None,
 		price: None,
 		to: None,
-		tx_hash: None,
 		value: None,
 		source: None,
 		trade_type: Some(trade.trade_type),
@@ -440,7 +433,6 @@ pub async fn set_swap(params: SwapSetParams, db: &Database) -> shared::Result<()
 		pool: None,
 		price: params.price,
 		to: None,
-		tx_hash: None,
 		value: None,
 		source: Some(params.source),
 		trade_type: Some(TRADE_SET_SWAP.to_string()),
@@ -467,7 +459,6 @@ pub async fn claim_swap(params: SwapClaimedParams, db: &Database) -> shared::Res
 		price: trade.price,
 		trade_id: Some(trade.trade_id),
 		trade_type: Some(trade.trade_type),
-		tx_hash: None,
 		value: None,
 	};
 	history_service::upsert(history, db).await?;
@@ -508,7 +499,6 @@ pub async fn set_wishlist(params: WishlistSetParams, db: &Database) -> shared::R
 		price: trade.price,
 		trade_id: Some(params.trade_id),
 		trade_type: Some(trade.trade_type),
-		tx_hash: None,
 		value: None,
 	};
 	history_service::upsert(history, db).await?;
@@ -533,7 +523,6 @@ pub async fn wishlist_filled(params: WishlistFilledParams, db: &Database) -> sha
 		source: None,
 		trade_id: Some(trade.trade_id),
 		trade_type: Some(trade.trade_type),
-		tx_hash: None,
 		value: None,
 	};
 	history_service::upsert(history, db).await?;
@@ -574,7 +563,6 @@ pub async fn set_bundle(params: BundleSetParams, db: &Database) -> shared::Resul
 		to: None,
 		trade_id: Some(params.trade_id),
 		trade_type: Some(TRADE_SET_BUNDLE.to_string()),
-		tx_hash: None,
 		value: None,
 	};
 	history_service::upsert(history, db).await?;
@@ -599,7 +587,6 @@ pub async fn bundle_bought(params: BundleBoughtParams, db: &Database) -> shared:
 		source: None,
 		trade_id: Some(trade.trade_id),
 		trade_type: Some(trade.trade_type),
-		tx_hash: None,
 		value: None,
 	};
 	history_service::upsert(history, db).await?;
