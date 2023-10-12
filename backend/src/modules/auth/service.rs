@@ -15,20 +15,19 @@ use subxt_signer::sr25519::{PublicKey, Signature};
 
 use super::dto::QueryAuth;
 
-pub async fn update_nonce(
-	address: &String,
-	nonce: String,
-	db: Database,
-) -> Result<String, mongodb::error::Error> {
+pub async fn update_nonce(address: &String, db: Database) -> Result<String, mongodb::error::Error> {
 	let col: Collection<AccountDTO> = db.collection(models::account::Account::name().as_str());
+	let nonce = generate_uuid();
 
 	let filter = doc! {"address":address};
 	let update = doc! {
-		"$set":{"nonce":nonce.clone()}
+		"$set":{"nonce":&nonce.clone()}
 	};
-
-	if let Ok(Some(account)) = col.find_one_and_update(filter, update, None).await {
-		Ok(account.address)
+	let options = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+	if let Ok(Some(account)) = col.find_one_and_update(filter, update, options).await {
+		Ok(account.nonce.unwrap_or("Error Nonce".to_string()))
 	} else {
 		let new_account = create_account(
 			AccountDTO {
@@ -49,7 +48,7 @@ pub async fn update_nonce(
 					web: None,
 				},
 				favorites: None,
-				nonce: Some(nonce),
+				nonce: Some(nonce.clone()),
 				refresh_token: None,
 			},
 			db.clone(),
@@ -57,7 +56,7 @@ pub async fn update_nonce(
 		.await;
 
 		match new_account {
-			Ok(account) => Ok(account),
+			Ok(account) => Ok(nonce),
 			Err(e) => Err(e),
 		}
 	}

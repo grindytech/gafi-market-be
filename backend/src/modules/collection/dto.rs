@@ -1,9 +1,9 @@
-use mongodb::bson::{self, doc, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::{common::DBQuery, modules::nft::dto::NFTDTO};
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {

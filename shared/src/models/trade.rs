@@ -3,14 +3,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::BaseDocument;
 
-pub enum TradeType {
+/* pub enum TradeType {
 	SetPrice,
 	Swap,
 	SetBuy,
 	Wishlist,
 	Bundle,
 	Auction,
-}
+} */
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Nft {
