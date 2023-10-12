@@ -59,6 +59,7 @@ pub struct QueryFindTX {
 	pub trade_type: Option<String>,
 	pub event: Option<String>,
 	pub pool_id: Option<String>,
+	pub address: Option<String>,
 }
 impl DBQuery for QueryFindTX {
 	fn to_doc(&self) -> Document {
@@ -82,6 +83,15 @@ impl DBQuery for QueryFindTX {
 		if let Some(event) = &self.event {
 			criteria.push(doc! {
 				"event": event
+			});
+		}
+		if let Some(address) = &self.address {
+			criteria.push(doc! {
+				"$or":[
+					{"from": address},
+					{"to":address}
+				]
+
 			});
 		}
 		if let Some(token_id) = &self.token_id {

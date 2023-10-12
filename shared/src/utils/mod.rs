@@ -92,3 +92,28 @@ pub fn hashmap_to_vec_property(map: HashMap<String, String>) -> Vec<Property> {
 	});
 	vec_property
 }
+
+pub fn decimal_to_string(input: &str, decimal: i32) -> String {
+	if let Ok(number) = input.parse::<f64>() {
+		// Input can be parsed as a floating-point number
+		number.to_string()
+	} else {
+		// Input is not a valid number, so we treat it as a string
+		let left_len = (input.chars().count() as i32) - decimal;
+		let left: String;
+		let right: String;
+
+		if left_len == 0 {
+			left = "0".to_string();
+			right = input.to_string();
+		} else if left_len > 0 {
+			left = input.chars().take(left_len as usize).collect();
+			right = input.chars().skip(left_len as usize).collect();
+		} else {
+			let right_zeros = (left_len..0).map(|_| "0").collect::<String>();
+			right = right_zeros + input;
+			left = "0".to_string();
+		}
+		format!("{}.{}", left, right)
+	}
+}

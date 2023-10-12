@@ -130,4 +130,4 @@ pub async fn find_nfts_by_query(
 		total,
 	}))
 }
-/* db.game.aggregate([{$match: {game_id: "1"}},{$unwind: "$collections"}, {$lookup:{from: "nft_collection", localField: "collections", foreignField: "collection_id", as: "collection_detail"}},{$group: {_id: "$_id", collections: {$push: {$first: "$collection_detail"}}}}]) */
+

@@ -1,8 +1,6 @@
-use crate::{app_state::AppState, common::ErrorResponse};
-
 use super::TokenPayload;
 use actix_web::{error::ErrorUnauthorized, web::Data};
-use chrono::{TimeZone, Utc};
+
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use shared::Config;
 use uuid::Uuid;

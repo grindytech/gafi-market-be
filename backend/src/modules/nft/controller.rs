@@ -69,6 +69,7 @@ pub async fn get_nft(
 			"collection_id":null,
 			"token_id":"0",
 			"address":null,
+
 			
 		}
     })),
@@ -122,7 +123,8 @@ pub async fn get_owner_nfts(
 		{
 			"name":null,
 			"token_id":null,
-			"collection_id":null
+			"collection_id":null,
+			"attributes":[{"key":"tier","value":"\"King\""},{"key":"elo","value":"2700"}]
 		}
     })),
     responses(
@@ -152,6 +154,7 @@ pub async fn search_list_nfts(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
+			log::info!("Error {:?}",e.to_string());
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}

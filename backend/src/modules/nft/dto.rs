@@ -4,7 +4,7 @@ use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use shared::models::nft::NFT;
+use shared::{models::nft::NFT, Property};
 
 use crate::common::DBQuery;
 
@@ -44,6 +44,7 @@ impl Into<NFT> for NFTDTO {
 			collection_id: self.collection_id,
 			is_burn: self.is_burn,
 			status: self.status,
+			price: None,
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
 			created_at: DateTime::from_millis(self.created_at),
@@ -118,6 +119,7 @@ pub struct QueryFindNFts {
 	pub name: Option<String>,
 	pub token_id: Option<String>,
 	pub collection_id: Option<String>,
+	pub attributes: Option<Vec<Property>>,
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
@@ -136,6 +138,22 @@ impl DBQuery for QueryFindNFts {
 		}
 		if let Some(token_id) = &self.token_id {
 			criteria.insert("token_id", token_id);
+		}
+		if let Some(attributes) = &self.attributes {
+			let attr_value: Vec<Document> = attributes
+				.into_iter()
+				.map(|doc_v| {
+					doc! {
+						"attributes.key":{
+							"$regex":doc_v.key.clone(),"$options":"i"
+						},
+					"attributes.value":
+						{
+							"$regex":doc_v.value.clone(),"$options":"i"
+					}}
+				})
+				.collect();
+			criteria.insert("$and", attr_value);
 		}
 		if let Some(collection_id) = &self.collection_id {
 			criteria.insert("collection_id", collection_id);
