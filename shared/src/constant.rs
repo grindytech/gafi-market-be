@@ -7,6 +7,7 @@ pub const TRADE_SET_BUY: &str = "SetBuy";
 pub const TRADE_SET_SWAP: &str = "SetSwap";
 pub const TRADE_SET_BUNDLE: &str = "SetBundle";
 pub const TRADE_SET_AUCTION: &str = "SetAuction";
+pub const TRADE_BID_AUCTION: &str = "BidAuction";
 pub const TRADE_SET_WIST_LIST: &str = "SetWishlist";
 
 pub const TRADE_STATUS_FOR_SALE: &str = "ForSale";
@@ -41,6 +42,7 @@ pub const EVENT_COLLECTION_METADATA_CLEARED: &str = "Nfts:CollectionMetadataClea
 pub const EVENT_REQUEST_MINT: &str = "Game:RequestMint";
 
 pub const EVENT_AUCTION_CLAIMED: &str = "Game:AuctionClaimed";
+pub const EVENT_BID: &str = "Game:Bid";
 
 pub const EVENT_SWAP_CLAIMED: &str = "Game:SwapClaimed";
 

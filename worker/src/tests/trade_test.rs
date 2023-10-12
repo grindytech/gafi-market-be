@@ -44,11 +44,9 @@ async fn create_auction_test() {
     "start_block": 0,
     "end_block": null,
     "duration": 1000,
-    "unit_price": null,
-    "maybe_price": {
+    "price": {
       "$numberDecimal": "1000"
     },
-    "price": null,
     "nft": null,
     "source": [
       {
@@ -61,7 +59,8 @@ async fn create_auction_test() {
     "bundle": null,
     "wish_list": null,
     "sold": null,
-    "status": "ForSale"
+    "status": "ForSale",
+		"highest_bid": null
   }"#;
 	let set_auction_history_json = r#"{
     "_id": null,
@@ -122,12 +121,12 @@ async fn claim_auction_test() {
 		trade_type: trade.trade_type,
 		from: trade.owner,
 		to: Some(public_key),
-		price: trade.maybe_price,
+		price: trade.price,
 		block_height: 1,
 		event_index: 0,
 		extrinsic_index: 0,
 		nfts: trade.source,
-		ask_price: trade.maybe_price,
+		ask_price: trade.price,
 	};
 
 	trade_service::auction_claim(params, &db).await.unwrap();

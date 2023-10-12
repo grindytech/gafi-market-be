@@ -13,7 +13,7 @@ use crate::modules::{
 	account::dto::{AccountDTO, QueryFindAccount},
 	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::{QueryFindGame, GameDTO},
-	nft::dto::{QueryFindNFts, NFTDTO,NFTOwnerOfDto}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO},
+	nft::dto::{QueryFindNFts, NFTDTO,NFTOwnerOfDto}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO}, auth::dto::TokenDTO,
 };
 
 #[derive(Debug, Serialize)]
@@ -27,7 +27,7 @@ impl fmt::Display for ErrorResponse {
     }
 }
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-#[aliases( NoData = ResponseBody<NoResponse>,AccountData = ResponseBody<AccountDTO>)]
+#[aliases( NoData = ResponseBody<NoResponse>,AccountData = ResponseBody<AccountDTO>,TokenData=ResponseBody<TokenDTO>)]
 pub struct ResponseBody<T> {
 	pub success: bool,
 	pub message: String,
@@ -124,6 +124,8 @@ pub struct TokenPayload {
 	pub iat: i64,
 	pub exp: i64,
 }
+
+
 
 mod types;
 pub use types::*;

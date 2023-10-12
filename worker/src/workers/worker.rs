@@ -162,11 +162,6 @@ impl Worker {
 		})
 	}
 
-	// pub async fn stop(&mut self) -> Result<()> {
-	// 	let state = &mut self.state;
-	// 	state.enabled = false;
-	// 	Ok(())
-	// }
 	/// - Runs a process to handle blocks.
 	/// - Returns a Result indicating whether it was enabled or not.
 	async fn run(&mut self) -> Result<bool> {

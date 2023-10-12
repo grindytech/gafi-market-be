@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::common::DBQuery;
-use mongodb::bson::{doc, DateTime, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::{models::game::Game, SocialInfo};
 use utoipa::ToSchema;
@@ -17,16 +15,14 @@ pub struct GameDTO {
 	pub category: Option<String>,
 	pub slug: Option<String>,
 
-	#[schema(format = "date-time",value_type=Option<String> )]
-	pub created_at: Option<DateTime>,
-	#[schema(format = "date-time",value_type=Option<String> )]
-	pub updated_at: Option<DateTime>,
+	pub updated_at: Option<i64>,
 
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub name: Option<String>,
 }
+
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
 		GameDTO {
@@ -40,13 +36,12 @@ impl From<Game> for GameDTO {
 			},
 			category: value.category,
 			slug: value.slug,
-			created_at: value.created_at,
-			updated_at: value.updated_at,
 
+			updated_at: Some(value.updated_at.timestamp_millis()),
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
-			name: value.name
+			name: value.name,
 		}
 	}
 }
@@ -55,8 +50,8 @@ impl From<Game> for GameDTO {
 pub struct QueryFindGame {
 	pub game_id: Option<String>,
 	pub owner: Option<String>,
-	pub category: Option<String>,
-	pub is_verified: Option<bool>,
+	pub name: Option<String>,
+	pub collection: Option<String>,
 }
 
 impl DBQuery for QueryFindGame {
@@ -72,14 +67,14 @@ impl DBQuery for QueryFindGame {
 				"owner": owner
 			});
 		}
-		if let Some(category) = &self.category {
+		if let Some(name) = &self.name {
 			criteria.push(doc! {
-				"category": category
+				"name": name
 			});
 		}
-		if let Some(is_verified) = &self.is_verified {
+		if let Some(collection_id) = &self.collection {
 			criteria.push(doc! {
-				"is_verified": is_verified
+				"collection_id": collection_id
 			});
 		}
 		if criteria.len() == 0 {
@@ -91,12 +86,3 @@ impl DBQuery for QueryFindGame {
 		}
 	}
 }
-
-/* #[derive(Deserialize, IntoParams)]
-pub struct GameParams {
-	pub search: String,
-	pub page: u64,
-	pub size: u64,
-	pub order_by: String,
-	pub desc: bool,
-} */

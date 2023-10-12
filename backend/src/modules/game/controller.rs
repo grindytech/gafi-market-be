@@ -19,7 +19,7 @@ use shared::constant::EMPTY_STR;
     tag = "GameEndpoints",
     context_path = "/game",
     params((
-		"game_id"=String,Path,description="ID of Game",example="7"
+		"game_id"=String,Path,description="ID of Game",example="0"
 	)),
     responses(
         (status=200,description="Find Game Detail Success",body=GameDTO),
@@ -66,8 +66,8 @@ pub async fn get_game(
 		{
 			"game_id":null,
 			"owner":null,
-			"category":null,
-			"is_verfied":null,
+			"collection":null,
+			"name":null,
 		}
     })),
     responses(
@@ -93,6 +93,7 @@ pub async fn search_games_by_query(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}

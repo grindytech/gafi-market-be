@@ -215,9 +215,7 @@ trade : start_block: Option<u32>
 trade : end_block: Option<u32>
 trade : duration: Option<u32> #auction
 
-trade : unit_price: Option<Decimal128> #set buy, set price
-trade : maybe_price: Option<Decimal128> #auction, swap
-trade : price: Option<Decimal128> #bundle
+trade : price: Option<Decimal128>
 
 trade : nft: Option<Nft> #set buy, set price
 trade : source: Option<Vec<Nft>> #swap, auction
@@ -225,6 +223,7 @@ trade : maybe_required: Option<Vec<Nft>> #swap
 trade : bundle: Option<Vec<Nft>> #bundle
 trade : wish_list: Option<Vec<Nft>>,
 trade : status: String #ForSale, Sold, Canceled, Expired
+trade : highest_bid: Option<Decimal128>
 
 object history
 history : extrinsic_index: i32

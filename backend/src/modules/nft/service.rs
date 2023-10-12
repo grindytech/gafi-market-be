@@ -1,17 +1,10 @@
 use actix_web::Result;
 
-use futures_util::{StreamExt, TryStreamExt};
-use mongodb::{
-	bson::{doc, Bson, Document},
-	options::{AggregateOptions, FindOptions},
-	Collection, Database,
-};
+use futures_util::TryStreamExt;
+use mongodb::{bson::doc, Collection, Database};
 
 use crate::{
-	common::{
-		utils::{get_filter_option, get_total_page},
-		DBQuery, Page, QueryPage,
-	},
+	common::{utils::get_total_page, DBQuery, Page, QueryPage},
 	shared::constant::EMPTY_STR,
 };
 
@@ -119,7 +112,7 @@ pub async fn find_nfts_by_query(
 	let col: Collection<NFT> = db.collection(models::nft::NFT::name().as_str());
 	let query_find = params.query.to_doc();
 
-	let filter_option = get_filter_option(params.order_by, params.desc).await;
+	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
 
 	let mut cursor = col.find(query_find, filter_option).await?;
 
@@ -137,3 +130,4 @@ pub async fn find_nfts_by_query(
 		total,
 	}))
 }
+/* db.game.aggregate([{$match: {game_id: "1"}},{$unwind: "$collections"}, {$lookup:{from: "nft_collection", localField: "collections", foreignField: "collection_id", as: "collection_detail"}},{$group: {_id: "$_id", collections: {$push: {$first: "$collection_detail"}}}}]) */

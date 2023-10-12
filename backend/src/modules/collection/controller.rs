@@ -19,7 +19,7 @@ use crate::{
     context_path="/collection",
 	
     params((
-		"collection_id"=String,Path,description="Collection ID",example="12"
+		"collection_id"=String,Path,description="Collection ID",example="1"
 	)),
     responses(
         (status= StatusCode::OK , description="Find Collection Detail Success",body= NFTCollectionDTO),
@@ -70,6 +70,7 @@ pub async fn get_collection(
         "query":
 		{
 			"name":null,
+			"owner":null,
 			"collection_id":null,
 			"game_id":null,
 		}
