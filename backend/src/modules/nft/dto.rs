@@ -115,17 +115,19 @@ impl From<shared::models::NFTOwner> for NFTOwnerOfDto {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindNFts {
-	pub address: Option<String>,
+	pub created_by: Option<String>,
 	pub name: Option<String>,
 	pub token_id: Option<String>,
 	pub collection_id: Option<String>,
 	pub attributes: Option<Vec<Property>>,
+	pub price: Option<String>,
+	pub onsale: Option<bool>,
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
 		let mut criteria = Document::new();
-		if let Some(address) = &self.address {
-			criteria.insert("address", address);
+		if let Some(created_by) = &self.created_by {
+			criteria.insert("created_by", created_by);
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(

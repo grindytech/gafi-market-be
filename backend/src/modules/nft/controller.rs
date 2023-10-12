@@ -124,6 +124,7 @@ pub async fn get_owner_nfts(
 			"name":null,
 			"token_id":null,
 			"collection_id":null,
+			"created_by":null,
 			"attributes":[{"key":"tier","value":"\"King\""},{"key":"elo","value":"2700"}]
 		}
     })),
