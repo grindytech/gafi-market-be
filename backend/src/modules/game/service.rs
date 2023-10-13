@@ -1,6 +1,5 @@
-use super::dto::{GameDTO, QueryFindGame};
-use crate::common::{utils::get_total_page, Page, QueryPage};
-use actix_web::Result;
+use super::dto::GameDTO;
+use crate::common::{GamePage, Page, QueryGame};
 use futures_util::TryStreamExt;
 
 use shared::{
@@ -15,9 +14,9 @@ use crate::common::DBQuery;
 
 //Find List Game By Address Account
 pub async fn find_games_by_query(
-	params: QueryPage<QueryFindGame>,
+	params: QueryGame,
 	db: Database,
-) -> shared::Result<Option<Page<GameDTO>>> {
+) -> shared::Result<Option<GamePage>> {
 	let col: Collection<Game> = db.collection(models::game::Game::name().as_str());
 
 	let query_find = params.query.to_doc();
@@ -53,7 +52,7 @@ pub async fn find_games_by_query(
 		},
 		Err(_) => {},
 	}
-	Ok(Some(Page::<GameDTO> {
+	Ok(Some(GamePage {
 		data: list_games,
 		message: EMPTY_STR.to_string(),
 		page: params.page,

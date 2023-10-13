@@ -9,14 +9,11 @@ use shared::constant::EMPTY_STR;
 
 use crate::{
 	app_state::AppState,
-	common::{QueryPage, ResponseBody},
+	common::{ ResponseBody, QueryTx},
 	modules::transaction::service::find_tx_by_query,
 };
 
-use super::{
-	dto::{QueryFindTX, HistoryTxDTO},
-
-};
+use super::dto:: HistoryTxDTO;
 
 #[utoipa::path(
 	post,
@@ -51,7 +48,7 @@ use super::{
 #[post("/search")]
 pub async fn search_history_tx(
 	app_state: Data<AppState>,
-	req: web::Json<QueryPage<QueryFindTX>>,
+	req: web::Json<QueryTx>,
 ) -> Result<HttpResponse, AWError> {
 	let transactions = find_tx_by_query(req.0, app_state.db.clone()).await;
 	match transactions {

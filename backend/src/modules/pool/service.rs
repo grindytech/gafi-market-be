@@ -2,12 +2,12 @@ use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
 use shared::{constant::EMPTY_STR, models, BaseDocument, Pool};
 
-use crate::common::{DBQuery, Page, QueryPage};
+use crate::common::{DBQuery, Page, QueryPool};
 
-use super::dto::{PoolDTO, QueryFindPool};
+use super::dto::PoolDTO;
 
 pub async fn find_pool_by_query(
-	params: QueryPage<QueryFindPool>,
+	params: QueryPool,
 	db: Database,
 ) -> shared::Result<Option<Page<PoolDTO>>> {
 	let col: Collection<Pool> = db.collection(models::pool::Pool::name().as_str());
@@ -30,8 +30,8 @@ pub async fn find_pool_by_query(
 	let document = cursor.try_next().await?.ok_or("cursor try_next failed")?;
 	let paginated_result = document.get_array("paginatedResults")?;
 	paginated_result.into_iter().for_each(|rs| {
-		let pool_str = serde_json::to_string(&rs).expect("Failed Parse game to String");
-		let pool: Pool = serde_json::from_str(&pool_str).expect("Failed to Parse to NFT game");
+		let pool_str = serde_json::to_string(&rs).expect("Failed Parse Game to String");
+		let pool: Pool = serde_json::from_str(&pool_str).expect("Failed to Parse to Game");
 		list_pools.push(pool.into());
 	});
 	let count_arr = document.get_array("totalCount")?;

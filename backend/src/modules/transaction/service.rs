@@ -2,9 +2,9 @@ use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
 use shared::{constant::EMPTY_STR, history_tx::HistoryTx, models, BaseDocument};
 
-use crate::common::{utils::get_total_page, DBQuery, Page, QueryPage};
+use crate::common::{utils::get_total_page, DBQuery, Page, QueryTx};
 
-use super::dto::{HistoryTxDTO, QueryFindTX};
+use super::dto::HistoryTxDTO;
 
 pub async fn find_tx_by_hash(
 	tx_hash: &String,
@@ -19,7 +19,7 @@ pub async fn find_tx_by_hash(
 	}
 }
 pub async fn find_tx_by_query(
-	params: QueryPage<QueryFindTX>,
+	params: QueryTx,
 	db: Database,
 ) -> Result<Option<Page<HistoryTxDTO>>, mongodb::error::Error> {
 	let col: Collection<HistoryTx> = db.collection(models::history_tx::HistoryTx::name().as_str());

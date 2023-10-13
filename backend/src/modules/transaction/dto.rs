@@ -5,7 +5,6 @@ use utoipa::ToSchema;
 
 use crate::common::DBQuery;
 
-//TODO need update
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, ToSchema)]
 pub struct HistoryTxDTO {
 	pub id: Option<String>,

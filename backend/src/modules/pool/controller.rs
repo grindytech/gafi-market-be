@@ -7,11 +7,11 @@ use actix_web::{
 
 use crate::{
 	app_state::AppState,
-	common::{QueryPage, ResponseBody},
+	common::{QueryPool, ResponseBody},
 	modules::pool::service::find_pool_by_query,
 };
 
-use super::dto::{PoolDTO, QueryFindPool};
+use super::dto::PoolDTO;
 
 #[utoipa::path(
     post,
@@ -42,7 +42,7 @@ use super::dto::{PoolDTO, QueryFindPool};
 #[post("/search")]
 pub async fn search_list_pools(
 	app_state: Data<AppState>,
-	req: web::Json<QueryPage<QueryFindPool>>,
+	req: web::Json<QueryPool>,
 ) -> Result<HttpResponse, AWError> {
 	let list_pool = find_pool_by_query(req.0, app_state.db.clone()).await;
 

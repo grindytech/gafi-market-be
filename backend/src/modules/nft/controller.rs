@@ -3,11 +3,11 @@ use crate::{
 	common::{QueryPage, ResponseBody, QueryNFT},
 	modules::nft::{
 			dto::{QueryFindNFts, NFTDTO},
-			service::{find_nft_by_token, find_nfts_by_query, find_nfts_with_owner},
+			service::{ find_nfts_by_query, find_nfts_with_owner},
 		},
 };
 use actix_web::{
-	get,
+	
 	http::StatusCode,
 	post,
 	web::{self, Data},

@@ -4,7 +4,7 @@ use futures_util::TryStreamExt;
 use mongodb::{bson::doc, Collection, Database};
 
 use crate::{
-	common::{utils::get_total_page, DBQuery, Page, QueryPage},
+	common::{utils::get_total_page, DBQuery, NFTPage, Page, QueryNFT, QueryPage},
 	shared::constant::EMPTY_STR,
 };
 
@@ -14,22 +14,8 @@ use shared::{
 	BaseDocument,
 };
 
-pub async fn find_nft_by_token(
-	token_id: &String,
-	db: Database,
-) -> Result<Option<NFTDTO>, mongodb::error::Error> {
-	let col: Collection<NFT> = db.collection(models::nft::NFT::name().as_str());
-	let filter = doc! {"token_id": token_id};
-	if let Ok(Some(nft_detail)) = col.find_one(filter, None).await {
-		/* log::info!("NFT Detail {:?}", nft_detail); */
-		Ok(Some(nft_detail.into()))
-	} else {
-		Ok(None)
-	}
-}
-
 pub async fn find_nfts_with_owner(
-	params: QueryPage<QueryFindNFts>,
+	params: QueryNFT,
 	db: Database,
 ) -> shared::Result<Option<Page<NFTOwnerOfDto>>> {
 	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NFTOwner::name().as_str());
@@ -108,7 +94,7 @@ pub async fn find_nfts_with_owner(
 pub async fn find_nfts_by_query(
 	params: QueryPage<QueryFindNFts>,
 	db: Database,
-) -> Result<Option<Page<NFTDTO>>, mongodb::error::Error> {
+) -> Result<Option<NFTPage>, mongodb::error::Error> {
 	let col: Collection<NFT> = db.collection(models::nft::NFT::name().as_str());
 	let query_find = params.query.to_doc();
 
@@ -122,7 +108,7 @@ pub async fn find_nfts_by_query(
 	}
 
 	let total = get_total_page(list_nfts.len(), params.size).await;
-	Ok(Some(Page::<NFTDTO> {
+	Ok(Some(NFTPage {
 		data: list_nfts,
 		message: EMPTY_STR.to_string(),
 		page: params.page,
@@ -130,4 +116,3 @@ pub async fn find_nfts_by_query(
 		total,
 	}))
 }
-

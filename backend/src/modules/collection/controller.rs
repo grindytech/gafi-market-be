@@ -19,7 +19,7 @@ use crate::{
     request_body(
 		content=QueryCollection,description="Find Collection by"
 		,example=json!({
-        "search":"",
+		"search":"",
         "page": 1,
         "size": 10,
         "order_by": "created_at",

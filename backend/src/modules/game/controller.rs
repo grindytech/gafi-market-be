@@ -1,5 +1,4 @@
 use actix_web::{
-	get,
 	http::StatusCode,
 	post,
 	web::{self, Data},
@@ -25,7 +24,7 @@ use shared::constant::EMPTY_STR;
         "search":"",
         "page": 1,
         "size": 10,
-        "order_by": "created_at",
+        "order_by": "updated_at",
         "desc": true,
         "query":
 		{

@@ -1,9 +1,10 @@
 use mongodb::bson::{doc, oid::ObjectId, Decimal128, Document};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::BaseDocument;
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct Nft {
 	pub collection: u32,
 	pub item: u32,

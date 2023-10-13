@@ -3,9 +3,9 @@ use mongodb::{bson::doc, Collection, Database};
 
 use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
 
-use crate::common::{DBQuery, Page, QueryPage};
+use crate::common::{DBQuery, Page, QueryCollection};
 
-use super::dto::{NFTCollectionDTO, QueryFindCollections};
+use super::dto::NFTCollectionDTO;
 use shared::constant::EMPTY_STR;
 
 //Find Collection Detail By ID
@@ -42,7 +42,7 @@ use shared::constant::EMPTY_STR;
 }
  */
 pub async fn find_collections(
-	params: QueryPage<QueryFindCollections>,
+	params: QueryCollection,
 	db: Database,
 ) -> shared::Result<Option<Page<NFTCollectionDTO>>> {
 	let col: Collection<NFTCollection> =

@@ -3,7 +3,6 @@ use super::dto::CategoriesDTO;
 use futures_util::TryStreamExt;
 use mongodb::{
 	bson::{doc, DateTime},
-	error::ErrorKind,
 	Collection, Database,
 };
 

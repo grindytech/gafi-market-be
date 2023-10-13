@@ -1,10 +1,12 @@
 use mongodb::bson::Document;
+use serde::{Deserialize, Serialize};
+use shared::{history_tx::Nft, Trade};
+use utoipa::ToSchema;
 
 use crate::common::DBQuery;
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 
 pub struct TradeDTO {
-	pub id: Option<String>,
-
 	pub trade_id: String,
 	pub trade_type: String,
 	pub owner: String,
@@ -15,15 +17,47 @@ pub struct TradeDTO {
 
 	pub price: Option<String>,
 
-	pub nft: Option<shared::history_tx::Nft>, //set buy, set price
-	pub source: Option<Vec<shared::history_tx::Nft>>, //swap, auction
-	pub maybe_required: Option<Vec<shared::history_tx::Nft>>, //swap
-	pub bundle: Option<Vec<shared::history_tx::Nft>>, //bundle
-	pub wish_list: Option<Vec<shared::history_tx::Nft>>,
+	pub nft: Option<Nft>,                 //set buy, set price
+	pub source: Option<Vec<Nft>>,         //swap, auction
+	pub maybe_required: Option<Vec<Nft>>, //swap
+	pub bundle: Option<Vec<Nft>>,         //bundle
+	pub wish_list: Option<Vec<Nft>>,
 	pub status: String,
 	pub highest_bid: Option<String>,
 }
+impl From<Trade> for TradeDTO {
+	fn from(value: Trade) -> Self {
+		let config = shared::config::Config::init();
+		let price: Option<String> = match value.price {
+			Some(v) => Some(shared::utils::decimal128_to_string(
+				&v.to_string(),
+				config.chain_decimal as i32,
+			)),
+			None => None,
+		};
+		TradeDTO {
+			trade_id: value.trade_id,
+			trade_type: value.trade_type,
+			owner: value.owner,
+			start_block: value.start_block,
+			end_block: value.end_block,
+			duration: value.duration,
+			price,
+			nft: value.nft,
+			source: value.source,
+			maybe_required: value.maybe_required,
+			bundle: value.bundle,
+			wish_list: value.wish_list,
+			status: value.status,
+			highest_bid: match value.highest_bid {
+				Some(v) => Some(v.to_string()),
+				None => None,
+			},
+		}
+	}
+}
 
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindTrade {
 	pub trade_id: Option<String>,
 	pub trade_type: Option<String>,
@@ -32,6 +66,7 @@ pub struct QueryFindTrade {
 	pub bundle: Option<String>, // Search Bundle
 	pub status: Option<String>,
 	pub highest_bid: Option<String>,
+	pub token_id: Option<String>,
 }
 
 impl DBQuery for QueryFindTrade {

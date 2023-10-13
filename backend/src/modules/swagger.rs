@@ -10,14 +10,14 @@ use crate::{
 };
 
 
-use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft};
+use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft, history_tx::Nft};
 use utoipa::OpenApi;
 
 use super::{
 	auth::dto::{QueryAuth, QueryNonce, TokenDTO},
 	game::dto::QueryFindGame,
 	pool::dto::{PoolDTO, QueryFindPool},
-	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts,
+	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts, trade::dto::{QueryFindTrade, TradeDTO},
 };
 
 #[derive(OpenApi)]
@@ -45,6 +45,8 @@ use super::{
         crate::modules::auth::controller::logout,
 
         crate::modules::pool::controller::search_list_pools,
+
+        crate::modules::trade::controller::search_list_trades
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -55,10 +57,12 @@ use super::{
             AccountDTO,
             GameDTO,
             PoolDTO,
+            TradeDTO,
             SocialInfo,
             Property,
             LootTable,
             LootTableNft,
+            Nft, // history nft
             NFTDTO,
             NFTCollectionDTO,
             ResponseBody<()>,
@@ -69,6 +73,7 @@ use super::{
             QueryFindGame,
             QueryFindTX,
             QueryFindNFts,
+            QueryFindTrade,
             QueryFindPool,
             QueryFindCollections,
             QueryPage<()>,
