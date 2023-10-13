@@ -1,9 +1,6 @@
-use mongodb::bson::{doc, Decimal128, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::{
-	utils::{decimal_to_string, string_decimal_to_number},
-	LootTable, Pool,
-};
+use shared::{utils::string_decimal_to_number, LootTable, Pool};
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
@@ -33,15 +30,16 @@ pub struct PoolDTO {
 impl From<Pool> for PoolDTO {
 	fn from(value: Pool) -> Self {
 		let config = shared::config::Config::init();
+		let minting_fee: String = shared::utils::decimal128_to_string(
+			&value.minting_fee.to_string(),
+			config.chain_decimal as i32,
+		);
+
 		PoolDTO {
 			pool_id: value.pool_id,
 			owner: value.owner,
 			type_pool: value.type_pool,
 			admin: value.admin,
-			minting_fee: decimal_to_string(
-				&value.minting_fee.to_string(),
-				config.chain_decimal as i32,
-			),
 
 			begin_at: value.begin_at,
 			end_at: value.end_at,
@@ -49,6 +47,7 @@ impl From<Pool> for PoolDTO {
 			updated_at: value.updated_at,
 			created_at: value.created_at,
 			loot_table: value.loot_table,
+			minting_fee,
 		}
 	}
 }
@@ -63,38 +62,22 @@ pub struct QueryFindPool {
 }
 impl DBQuery for QueryFindPool {
 	fn to_doc(&self) -> mongodb::bson::Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
 		if let Some(pool_id) = &self.pool_id {
-			criteria.push(doc! {
-				"pool_id": pool_id
-			});
+			criteria.insert("pool_id", pool_id);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.push(doc! {
-				"owner": owner
-			});
+			criteria.insert("owner", owner);
 		}
 		if let Some(type_pool) = &self.type_pool {
-			criteria.push(doc! {
-				"type_pool": type_pool
-			});
+			criteria.insert("type_pool", type_pool);
 		}
 		if let Some(admin) = &self.admin {
-			criteria.push(doc! {
-				"admin": admin
-			});
+			criteria.insert("admin", admin);
 		}
 		if let Some(owner_deposit) = &self.owner_deposit {
-			criteria.push(doc! {
-				"owner_deposit": owner_deposit
-			});
+			criteria.insert("owner_deposit", owner_deposit);
 		}
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }

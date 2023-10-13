@@ -1,10 +1,14 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
-use mongodb::bson::{doc, DateTime, Document};
+use mongodb::bson::{doc, DateTime, Decimal128, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use shared::{models::nft::NFT, Property};
+use shared::{
+	models::nft::NFT,
+	utils::{decimal128_to_string, string_decimal_to_number},
+	Property,
+};
 
 use crate::common::DBQuery;
 
@@ -35,9 +39,12 @@ pub struct NFTDTO {
 	pub external_url: Option<String>,
 	pub image: Option<String>,
 	pub animation_url: Option<String>,
+
+	pub price: Option<String>,
 }
 impl Into<NFT> for NFTDTO {
 	fn into(self) -> NFT {
+		let config = shared::config::Config::init();
 		NFT {
 			token_id: self.token_id,
 			id: None,
@@ -66,6 +73,16 @@ impl Into<NFT> for NFTDTO {
 }
 impl From<NFT> for NFTDTO {
 	fn from(value: NFT) -> Self {
+		let config = shared::config::Config::init();
+
+		let price: Option<String> = match value.price {
+			Some(v) => Some(decimal128_to_string(
+				&v.to_string(),
+				config.chain_decimal as i32,
+			)),
+			None => None,
+		};
+
 		NFTDTO {
 			id: Some(value.id.unwrap().to_string()),
 			token_id: value.token_id,
@@ -86,6 +103,7 @@ impl From<NFT> for NFTDTO {
 			external_url: value.external_url,
 			image: value.image,
 			animation_url: value.animation_url,
+			price,
 		}
 	}
 }
@@ -140,6 +158,28 @@ impl DBQuery for QueryFindNFts {
 		}
 		if let Some(token_id) = &self.token_id {
 			criteria.insert("token_id", token_id);
+		}
+		if let Some(price) = &self.price {
+			let config = shared::config::Config::init();
+			let min_price = string_decimal_to_number(&price, config.chain_decimal as i32);
+			let min_decimal: mongodb::bson::Decimal128 = min_price.parse().unwrap();
+
+			criteria.insert(
+				"price",
+				doc! {
+					"$gte":min_decimal
+				},
+			);
+		}
+
+		if let Some(onsale) = &self.onsale {
+			criteria.insert(
+				"price",
+				doc! {
+					"$exists":onsale
+
+				},
+			);
 		}
 		if let Some(attributes) = &self.attributes {
 			let attr_value: Vec<Document> = attributes

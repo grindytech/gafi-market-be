@@ -23,12 +23,25 @@ pub fn string_decimal_to_number(str: &str, decimal: i32) -> String {
 	}
 	format!("{}.{}", left, right)
 }
+pub fn decimal128_to_string(decimal_value: &str, chain_decimal: i32) -> String {
+	if let Ok(parsed_number) = decimal_value.parse::<f64>() {
+		// Convert the scientific notation to the desired number
+		let converted_number = parsed_number * 10_f64.powi(chain_decimal); // 10^9 for E-9
+
+		converted_number.to_string()
+	} else {
+		"failed".to_string()
+	}
+}
 
 #[test]
 fn test() {
 	assert_eq!(string_decimal_to_number("123456789", 3), "123456.789");
 	assert_eq!(string_decimal_to_number("123456789", 9), "0.123456789");
 	assert_eq!(string_decimal_to_number("123456789", 12), "0.000123456789");
+	assert_eq!("123456789", decimal128_to_string("123456.789", 3));
+	assert_eq!(decimal128_to_string("0.123456789", 9), "123456789");
+	assert_eq!(decimal128_to_string("0.000123456789", 12), "123456789");
 }
 
 pub fn vec_to_array(vec: Vec<u8>) -> [u8; 32] {
@@ -91,29 +104,4 @@ pub fn hashmap_to_vec_property(map: HashMap<String, String>) -> Vec<Property> {
 		vec_property.push(Property { key: k, value: v });
 	});
 	vec_property
-}
-
-pub fn decimal_to_string(input: &str, decimal: i32) -> String {
-	if let Ok(number) = input.parse::<f64>() {
-		// Input can be parsed as a floating-point number
-		number.to_string()
-	} else {
-		// Input is not a valid number, so we treat it as a string
-		let left_len = (input.chars().count() as i32) - decimal;
-		let left: String;
-		let right: String;
-
-		if left_len == 0 {
-			left = "0".to_string();
-			right = input.to_string();
-		} else if left_len > 0 {
-			left = input.chars().take(left_len as usize).collect();
-			right = input.chars().skip(left_len as usize).collect();
-		} else {
-			let right_zeros = (left_len..0).map(|_| "0").collect::<String>();
-			right = right_zeros + input;
-			left = "0".to_string();
-		}
-		format!("{}.{}", left, right)
-	}
 }

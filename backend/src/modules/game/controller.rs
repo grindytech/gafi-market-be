@@ -11,7 +11,7 @@ use super::dto::GameDTO;
 use crate::{
 	app_state::AppState,
 	common::{QueryGame, ResponseBody},
-	modules::game::service::{find_game_by_id, find_games_by_query},
+	modules::game::service::find_games_by_query,
 };
 use shared::constant::EMPTY_STR;
 
@@ -51,13 +51,14 @@ pub async fn search_games_by_query(
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games))
 		},
 		Ok(None) => {
-			let rsp = ResponseBody::<Option<GameDTO>>::new("Game Not found", None, false);
+			let rsp = ResponseBody::<Option<GameDTO>>::new("Not found", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
 				.content_type("application/json")
 				.json(rsp))
 		},
 		Err(e) => {
-			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			log::info!("Error Game Server {:?}", e.to_string());
+			let rsp = ResponseBody::<Option<()>>::new(EMPTY_STR, None, false);
 
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},

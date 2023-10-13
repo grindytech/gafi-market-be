@@ -1,5 +1,4 @@
 use actix_web::{
-	get,
 	http::StatusCode,
 	post,
 	web::{self, Data},
@@ -10,10 +9,7 @@ use shared::constant::EMPTY_STR;
 use crate::{
 	app_state::AppState,
 	common::{QueryCollection, ResponseBody},
-	modules::collection::{
-		dto::NFTCollectionDTO,
-		service::{find_collection_by_id, find_collections},
-	},
+	modules::collection::service::find_collections,
 };
 
 #[utoipa::path(
@@ -60,7 +56,8 @@ pub async fn search_list_collections(
 				.json(rsp))
 		},
 		Err(e) => {
-			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
+			log::info!("Error Collection Server {:?}", e.to_string());
+			let rsp = ResponseBody::<Option<()>>::new(EMPTY_STR, None, false);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
