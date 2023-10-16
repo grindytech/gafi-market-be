@@ -13,7 +13,6 @@ pub async fn find_trade_by_query(
 	let col: Collection<Trade> = db.collection(models::trade::Trade::name().as_str());
 
 	let query_find = params.query.to_doc();
-	log::info!("After query");
 	let filter_match = doc! {
 		"$match":query_find,
 	};

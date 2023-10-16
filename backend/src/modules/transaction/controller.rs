@@ -21,7 +21,7 @@ use super::dto:: HistoryTxDTO;
 	context_path="/tx",
 	request_body
 	(
-		content=QueryTransaction,
+		content=QueryTx,
 		description="Find Transactions By Search Query Data",
 		content_type="application/json",
 		example=json!({

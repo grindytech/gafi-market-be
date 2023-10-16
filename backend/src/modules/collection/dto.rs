@@ -96,3 +96,50 @@ impl DBQuery for QueryFindCollections {
 		}
 	}
 }
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+
+pub struct NFTCollectionSupplyData {
+	pub total_supply: i32, //total supply data of collection
+	pub owner: i32,        // Number owner of collection
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct NFTCollectionVolumeDTO {
+	pub min_price: Option<String>,
+	pub max_price: Option<String>,
+	pub volume: Option<String>,
+	pub sold: Option<String>,
+}
+impl NFTCollectionVolumeDTO {
+	pub fn convert_document_to_dto(
+		document: Document,
+	) -> Result<NFTCollectionVolumeDTO, mongodb::error::Error> {
+		let min_price = document.get("min_price").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let max_price = document.get("max_price").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let volume = document.get("volume").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let sold = document.get("sold").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(i) => Some(i.to_string()),
+			_ => None,
+		});
+
+		Ok(NFTCollectionVolumeDTO {
+			min_price,
+			max_price,
+			volume,
+			sold,
+		})
+	}
+}

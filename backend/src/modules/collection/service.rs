@@ -1,11 +1,14 @@
-use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Collection, Database};
+use futures_util::{StreamExt, TryStreamExt};
+use mongodb::{
+	bson::{doc, Document},
+	Collection, Database,
+};
 
-use shared::{models, models::nft_collection::NFTCollection, BaseDocument};
+use shared::{models, models::nft_collection::NFTCollection, BaseDocument, HistoryTx, NFTOwner};
 
 use crate::common::{DBQuery, Page, QueryCollection};
 
-use super::dto::NFTCollectionDTO;
+use super::dto::{NFTCollectionDTO, NFTCollectionSupplyData, NFTCollectionVolumeDTO};
 use shared::constant::EMPTY_STR;
 
 //Find Collection Detail By ID
@@ -88,4 +91,88 @@ pub async fn find_collections(
 		size: params.size,
 		total: count as u64,
 	}))
+}
+
+pub async fn find_collection_by_id(
+	collection_id: String,
+	db: Database,
+) -> Result<Option<NFTCollection>, mongodb::error::Error> {
+	let col: Collection<NFTCollection> =
+		db.collection(models::nft_collection::NFTCollection::name().as_str());
+	col.find_one(doc! {"collection_id":collection_id}, None).await
+}
+pub async fn find_collection_volume_data(
+	collection_id: String,
+	db: Database,
+) -> shared::Result<Option<NFTCollectionVolumeDTO>> {
+	let col: Collection<HistoryTx> = db.collection(models::history_tx::HistoryTx::name().as_str());
+
+	let filter = doc! {
+		"$match":{
+			"nfts.collection":collection_id.parse::<i32>()?,
+		}
+	};
+	let group = doc! {
+		"$group": {
+			"_id": "$nfts.collection",
+			"min_price": {
+				"$min": "$price"
+			},
+			"max_price": {
+				"$max": "$price"
+			},
+			"volume":{
+				"$sum":"$value"
+			},
+			"sold": {
+				"$sum": "$amount"
+			},
+		}
+	};
+	let options = mongodb::options::AggregateOptions::builder().allow_disk_use(true).build();
+	let mut cursor = col.aggregate(vec![filter, group], options).await?;
+
+	if let Some(doc) = cursor.try_next().await? {
+		let collection_analysis = NFTCollectionVolumeDTO::convert_document_to_dto(doc)?;
+		return Ok(Some(collection_analysis));
+	}
+
+	return Ok(None);
+}
+
+pub async fn find_collection_supply_data(
+	collection_id: String,
+	db: Database,
+) -> shared::Result<NFTCollectionSupplyData> {
+	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NFTOwner::name().as_str());
+
+	let filter = doc! {
+		"$match":{
+			"collection_id":collection_id.parse::<i32>()?,
+		}
+	};
+	let group = doc! {
+		"$group": {
+			"_id": "$collection_id",
+			"owner":{"$size":"$owners"},
+			"total_supply":{"$sum":"$owners.amount"}
+		}
+	};
+
+	let options = mongodb::options::AggregateOptions::builder().allow_disk_use(true).build();
+	let mut colelction_analysis = NFTCollectionSupplyData {
+		total_supply: 0,
+		owner: 0,
+	};
+	let mut cursor = col.aggregate(vec![filter, group], options).await?;
+
+	if let Some(doc) = cursor.try_next().await? {
+		log::info!("What doc {:?}", doc);
+		let collection_str = serde_json::to_string(&doc).expect("fail to parse string");
+
+		let colelction_analysis: NFTCollectionSupplyData =
+			serde_json::from_str(&collection_str).expect("Failed to parse Colelciton Analysis");
+		return Ok(colelction_analysis);
+	}
+	Ok(colelction_analysis)
 }

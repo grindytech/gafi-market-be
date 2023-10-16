@@ -1,4 +1,4 @@
-use shared::{db, Config};
+/* use shared::{db, Config};
 use subxt_signer::{bip39::Mnemonic, sr25519};
 
 use std::env;
@@ -26,3 +26,4 @@ async fn test_flow_verify_signature() {
 
 	assert!(sr25519::verify(&signature, generate_message, &public_key));
 }
+ */

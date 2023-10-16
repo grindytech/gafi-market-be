@@ -36,6 +36,8 @@ use super::{
         crate::modules::nft::controller::search_list_nfts,
 
         crate::modules::collection::controller::search_list_collections,
+        crate::modules::collection::controller::get_collection_analysis,
+        
        
         crate::modules::transaction::controller::search_history_tx,
 
