@@ -8,7 +8,7 @@ use shared::{models, models::nft_collection::NFTCollection, BaseDocument, Histor
 
 use crate::common::{DBQuery, Page, QueryCollection};
 
-use super::dto::{NFTCollectionDTO, NFTCollectionSupplyData, NFTCollectionVolumeDTO};
+use super::dto::{NFTCollectionDTO, NFTCollectionSupplyDTO, NFTCollectionVolumeDTO};
 use shared::constant::EMPTY_STR;
 
 //Find Collection Detail By ID
@@ -143,36 +143,27 @@ pub async fn find_collection_volume_data(
 pub async fn find_collection_supply_data(
 	collection_id: String,
 	db: Database,
-) -> shared::Result<NFTCollectionSupplyData> {
+) -> shared::Result<Option<NFTCollectionSupplyDTO>> {
 	let col: Collection<NFTOwner> = db.collection(models::nft_owner::NFTOwner::name().as_str());
 
 	let filter = doc! {
 		"$match":{
-			"collection_id":collection_id.parse::<i32>()?,
+			"collection_id":collection_id,
 		}
 	};
 	let group = doc! {
 		"$group": {
 			"_id": "$collection_id",
-			"owner":{"$size":"$owners"},
-			"total_supply":{"$sum":"$owners.amount"}
+			"owner": { "$sum": 1 },
+			"total_supply": { "$sum": "$amount" }
 		}
 	};
 
-	let options = mongodb::options::AggregateOptions::builder().allow_disk_use(true).build();
-	let mut colelction_analysis = NFTCollectionSupplyData {
-		total_supply: 0,
-		owner: 0,
-	};
-	let mut cursor = col.aggregate(vec![filter, group], options).await?;
+	let mut cursor = col.aggregate(vec![filter, group], None).await?;
 
 	if let Some(doc) = cursor.try_next().await? {
-		log::info!("What doc {:?}", doc);
-		let collection_str = serde_json::to_string(&doc).expect("fail to parse string");
-
-		let colelction_analysis: NFTCollectionSupplyData =
-			serde_json::from_str(&collection_str).expect("Failed to parse Colelciton Analysis");
-		return Ok(colelction_analysis);
-	}
-	Ok(colelction_analysis)
+		let col_analysis = NFTCollectionSupplyDTO::convert_document_to_dto(doc)?;
+		return Ok(Some(col_analysis));
+	};
+	Ok(None)
 }

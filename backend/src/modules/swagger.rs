@@ -17,7 +17,7 @@ use super::{
 	auth::dto::{QueryAuth, QueryNonce, TokenDTO},
 	game::dto::QueryFindGame,
 	pool::dto::{PoolDTO, QueryFindPool},
-	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts, trade::dto::{QueryFindTrade, TradeDTO},
+	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::{QueryFindCollections, NFTCollectionSupplyDTO, NFTCollectionVolumeDTO}, nft::dto::QueryFindNFts, trade::dto::{QueryFindTrade, TradeDTO},
 };
 
 #[derive(OpenApi)]
@@ -36,7 +36,8 @@ use super::{
         crate::modules::nft::controller::search_list_nfts,
 
         crate::modules::collection::controller::search_list_collections,
-        crate::modules::collection::controller::get_collection_analysis,
+        crate::modules::collection::controller::get_collection_volume_data,
+        crate::modules::collection::controller::get_collection_supply_data,
         
        
         crate::modules::transaction::controller::search_history_tx,
@@ -67,6 +68,8 @@ use super::{
             Nft, // history nft
             NFTDTO,
             NFTCollectionDTO,
+            NFTCollectionVolumeDTO,
+            NFTCollectionSupplyDTO,
             ResponseBody<()>,
             Page<()>,
             QueryNonce,

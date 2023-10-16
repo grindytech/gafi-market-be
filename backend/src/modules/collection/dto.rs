@@ -99,9 +99,27 @@ impl DBQuery for QueryFindCollections {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 
-pub struct NFTCollectionSupplyData {
+pub struct NFTCollectionSupplyDTO {
 	pub total_supply: i32, //total supply data of collection
 	pub owner: i32,        // Number owner of collection
+}
+impl NFTCollectionSupplyDTO {
+	pub fn convert_document_to_dto(
+		document: Document,
+	) -> Result<NFTCollectionSupplyDTO, mongodb::error::Error> {
+		let total_supply = document.get("total_supply").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(value) => Some(*value),
+			_ => None,
+		});
+		let owner = document.get("owner").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(value) => Some(*value),
+			_ => None,
+		});
+		Ok(NFTCollectionSupplyDTO {
+			total_supply: total_supply.unwrap_or(0),
+			owner: owner.unwrap_or(0),
+		})
+	}
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
