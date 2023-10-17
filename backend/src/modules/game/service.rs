@@ -1,5 +1,5 @@
 use super::dto::GameDTO;
-use crate::common::{GamePage, Page, QueryGame};
+use crate::common::{GamePage, QueryGame};
 use futures_util::TryStreamExt;
 
 use shared::{
@@ -24,15 +24,16 @@ pub async fn find_games_by_query(
 	let filter_match = doc! {
 		"$match":query_find,
 	};
+	let sort = doc! {
+		"$sort":params.sort()
+	};
 	let paging = doc! {
 	  "$facet":{
 			"paginatedResults": [ { "$skip": params.skip() }, { "$limit": params.size() } ],
 		  "totalCount": [ { "$count": "count" } ],
 		},
 	};
-	let sort = doc! {
-		"$sort":params.sort()
-	};
+
 	let mut cursor = col.aggregate(vec![filter_match, sort, paging], None).await?;
 	let mut list_games: Vec<GameDTO> = Vec::new();
 	let document = cursor.try_next().await?.ok_or("cursor try_next failed")?;
@@ -40,7 +41,7 @@ pub async fn find_games_by_query(
 
 	paginated_result.into_iter().for_each(|rs| {
 		let game_str = serde_json::to_string(&rs).expect("Failed Parse game to String");
-		let game: Game = serde_json::from_str(&game_str).expect("Failed to Parse to NFT game");
+		let game: Game = serde_json::from_str(&game_str).expect("Failed to Parse to Game");
 		list_games.push(game.into());
 	});
 	let count_arr = document.get_array("totalCount")?;

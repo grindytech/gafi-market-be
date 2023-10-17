@@ -1,11 +1,10 @@
 use actix_web::{
-	get,
 	http::StatusCode,
 	post,
 	web::{self, Data},
 	Error as AWError, HttpResponse,
 };
-use shared::constant::EMPTY_STR;
+
 
 use crate::{
 	app_state::AppState,

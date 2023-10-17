@@ -1,6 +1,6 @@
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::{utils::string_decimal_to_number, LootTable, Pool};
+use shared::{LootTable, Pool};
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;

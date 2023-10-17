@@ -14,7 +14,6 @@ use actix_web::{
 	Error as AWError, HttpResponse, Result,
 };
 
-use shared::constant::EMPTY_STR;
 
 
 #[utoipa::path(

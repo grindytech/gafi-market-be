@@ -141,9 +141,25 @@ pub async fn refresh_access_token(
 		],
 
 	};
-	let account = collection.find_one(filter.clone(), None).await;
+	let refresh_token =
+		generate_jwt_token(address, app.config.clone(), app.config.jwt_refresh_time);
+	let update = doc! {
+		"$set":{
+			"refresh_token":refresh_token.unwrap_or("refresh token error".to_string())
+		}
+	};
 
-	account
+	let update_option = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+
+	if let Ok(Some(account_detail)) =
+		collection.find_one_and_update(filter, update, update_option).await
+	{
+		Ok(Some(account_detail))
+	} else {
+		Ok(None)
+	}
 }
 
 pub async fn delete_refresh_token(

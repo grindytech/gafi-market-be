@@ -126,7 +126,7 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 				to: Some(hex::encode(ev.target.0)),
 				value: Some(value_in_decimal),
 				id: None,
-
+				tx_hash: None,
 				pool: Some(ev.pool.to_string()),
 				nfts: Some(nfts),
 				price: Some(price_decimal),
@@ -161,7 +161,7 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 				to: Some(hex::encode(ev.dest.0)),
 				value: None,
 				id: None,
-
+				tx_hash: None,
 				pool: None,
 				nfts: Some(vec![nft]),
 				amount: Some(1),

@@ -1,8 +1,5 @@
-use futures_util::{StreamExt, TryStreamExt};
-use mongodb::{
-	bson::{doc, Document},
-	Collection, Database,
-};
+use futures_util::TryStreamExt;
+use mongodb::{bson::doc, Collection, Database};
 
 use shared::{models, models::nft_collection::NFTCollection, BaseDocument, HistoryTx, NFTOwner};
 
@@ -11,39 +8,6 @@ use crate::common::{DBQuery, Page, QueryCollection};
 use super::dto::{NFTCollectionDTO, NFTCollectionSupplyDTO, NFTCollectionVolumeDTO};
 use shared::constant::EMPTY_STR;
 
-//Find Collection Detail By ID
-/* pub async fn find_collection_by_id(
-	collection_id: &String,
-	db: Database,
-) -> shared::Result<Option<NFTCollectionDTO>> {
-	let col: Collection<NFTCollection> = db.collection(models::NFTCollection::name().as_str());
-	let filter = doc! {
-		"$match":{
-			"collection_id":collection_id
-		}
-	};
-	let filter_lookup = doc! {
-	"$lookup":{
-		"from":"nft",
-		"localField":"collection_id", "foreignField":"collection_id",
-		"as": "nfts"
-		}
-	};
-	let mut cursor = col.aggregate(vec![filter, filter_lookup], None).await?;
-
-	if let Some(doc) = cursor.try_next().await? {
-		let collection_str = serde_json::to_string(&doc).expect("fail to parse string");
-
-		let collection_detail: NFTCollection =
-			serde_json::from_str(&collection_str).expect("fail to parse NFT Collection");
-
-		Ok(Some(collection_detail.into()))
-	} else {
-		// No matching document found, return None
-		Ok(None)
-	}
-}
- */
 pub async fn find_collections(
 	params: QueryCollection,
 	db: Database,
@@ -110,6 +74,7 @@ pub async fn find_collection_volume_data(
 	let filter = doc! {
 		"$match":{
 			"nfts.collection":collection_id.parse::<i32>()?,
+			"event":shared::constant::EVENT_MINTED
 		}
 	};
 	let group = doc! {

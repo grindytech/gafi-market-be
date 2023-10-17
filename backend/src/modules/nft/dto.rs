@@ -1,6 +1,6 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
-use mongodb::bson::{doc, DateTime, Decimal128, Document};
+use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
