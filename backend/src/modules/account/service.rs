@@ -75,9 +75,7 @@ pub async fn update_favorites_account(
 ) -> Result<Option<AccountDTO>, Error> {
 	let collection: Collection<Account> = db.collection(models::Account::name().as_str());
 	let filter = doc! {"address":params.query.address};
-	/* 	let update = doc! {
-		"$set":{"favorites":bson::to_bson(&params.query.favorites).unwrap_or(Bson::Null)}
-	}; */
+
 	let update = doc! {
 		"$set":{"favorites":&params.query.favorites}
 	};
@@ -85,7 +83,6 @@ pub async fn update_favorites_account(
 		.return_document(mongodb::options::ReturnDocument::After)
 		.build();
 	if let Ok(Some(result)) = collection.find_one_and_update(filter, update, options).await {
-		/* log::info!("Data {:?}", result.favorites); */
 		Ok(Some(result.into()))
 	} else {
 		Ok(None)

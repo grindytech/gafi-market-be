@@ -1,8 +1,8 @@
 use crate::{
-	app_state::{self, AppState},
+	app_state:: AppState,
 	common::{
 		utils::{
-			generate_jwt_token, generate_message_sign_in, generate_uuid, 
+			generate_jwt_token, generate_message_sign_in
 		},
 		ResponseBody,
 	},
@@ -10,7 +10,7 @@ use crate::{
 	modules::auth::{
 		dto::QueryAuth,
 		dto::{GetNonce, QueryNonce, TokenDTO},
-		service::{delete_refresh_token, update_nonce, verify_signature},
+		service::{delete_refresh_token, update_nonce, verify_signature, refresh_access_token},
 	},
 };
 use actix_web::{
@@ -44,11 +44,11 @@ pub async fn get_random_nonce(
 		);
 	}
 
-	let nonce = generate_uuid();
+	
 	let address = query.0.address;
-	let result = update_nonce(&address, nonce.clone(), app_state.db.clone()).await;
-
-	let data = generate_message_sign_in(&address, &nonce);
+	let result = update_nonce(&address, app_state.db.clone()).await;
+	
+	let data = generate_message_sign_in(&address, &result.unwrap());
 
 	let rsp = ResponseBody::<QueryNonce>::new(
 		"Signature Request",
@@ -136,14 +136,29 @@ pub async fn refresh_token(
 
 ) -> Result<HttpResponse, AWError> {
 	let access_token = generate_jwt_token(
-				auth.address,
+				auth.address.clone(),
 				app_state.config.clone(),
 				app_state.config.jwt_access_time,
 			);
-	match access_token {
-		Ok(value) => {
-			
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(value))
+	let account=refresh_access_token(auth.address, app_state).await;
+	match account {
+		Ok(Some(value)) => {
+		let rsp = ResponseBody::<TokenDTO>::new(
+				"Authorizied",
+				TokenDTO {
+					access_token: access_token.unwrap_or("access token error".to_string()),
+					refresh_token: value.refresh_token.unwrap(),
+				},
+				true,
+			);
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
+		},
+		Ok(None)=>{
+		let rsp: ResponseBody<Option<_>> =
+				ResponseBody::<Option<()>>::new("Unauthenticated", None, false);
+			Ok(HttpResponse::build(StatusCode::UNAUTHORIZED)
+				.content_type("application/json")
+				.json(rsp))
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);

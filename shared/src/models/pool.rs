@@ -2,11 +2,7 @@ use mongodb::bson::{doc, oid::ObjectId, Decimal128, Document};
 use serde::{Deserialize, Serialize};
 
 use crate::{BaseDocument, LootTable};
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub enum TypePool {
-	DynamicPool(String),
-	StablePool(String),
-}
+
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct Pool {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]

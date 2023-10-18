@@ -23,12 +23,25 @@ pub fn string_decimal_to_number(str: &str, decimal: i32) -> String {
 	}
 	format!("{}.{}", left, right)
 }
+pub fn decimal128_to_string(decimal_value: &str, chain_decimal: i32) -> String {
+	if let Ok(parsed_number) = decimal_value.parse::<f64>() {
+		// Convert the scientific notation to the desired number
+		let converted_number = parsed_number * 10_f64.powi(chain_decimal); // 10^9 for E-9
+
+		converted_number.to_string()
+	} else {
+		"failed".to_string()
+	}
+}
 
 #[test]
 fn test() {
 	assert_eq!(string_decimal_to_number("123456789", 3), "123456.789");
 	assert_eq!(string_decimal_to_number("123456789", 9), "0.123456789");
 	assert_eq!(string_decimal_to_number("123456789", 12), "0.000123456789");
+	assert_eq!("123456789", decimal128_to_string("123456.789", 3));
+	assert_eq!(decimal128_to_string("0.123456789", 9), "123456789");
+	assert_eq!(decimal128_to_string("0.000123456789", 12), "123456789");
 }
 
 pub fn vec_to_array(vec: Vec<u8>) -> [u8; 32] {

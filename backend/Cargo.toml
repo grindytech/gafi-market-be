@@ -28,4 +28,5 @@ uuid={workspace=true}
 subxt = {workspace=true}
 subxt-signer={workspace=true}
 hex={workspace=true}
+tokio={workspace=true}
 slug = "0.1.4"

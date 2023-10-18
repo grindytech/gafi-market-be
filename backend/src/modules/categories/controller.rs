@@ -1,5 +1,5 @@
 use crate::{
-	app_state::{self, AppState},
+	app_state::AppState,
 	common::ResponseBody,
 	modules::categories::{
 		dto::{CategoriesDTO, QueryCategory},
@@ -33,14 +33,13 @@ pub async fn get_list_categories(app_state: Data<AppState>) -> Result<HttpRespon
 			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
 		},
 		Ok(None) => {
-			let rsp = ResponseBody::<Option<CategoriesDTO>>::new("Not found", None, false);
+			let rsp = ResponseBody::<Option<CategoriesDTO>>::new("None", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
 				.content_type("application/json")
 				.json(rsp))
 		},
 		Err(e) => {
-			let rsp =
-				ResponseBody::<Option<CategoriesDTO>>::new(e.to_string().as_str(), None, false);
+			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
@@ -77,7 +76,7 @@ pub async fn create_new_category(
 		},
 		Ok(None) => {
 			let rsp = ResponseBody::<Option<()>>::new("Category Already Exist", None, false);
-			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
+			Ok(HttpResponse::build(StatusCode::BAD_REQUEST).json(rsp))
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<()>>::new(e.to_string().as_str(), None, false);

@@ -3,56 +3,18 @@ use crate::{
 	common::{QueryPage, ResponseBody, QueryNFT},
 	modules::nft::{
 			dto::{QueryFindNFts, NFTDTO},
-			service::{find_nft_by_token, find_nfts_by_query, find_nfts_with_owner},
+			service::{ find_nfts_by_query, find_nfts_with_owner},
 		},
 };
 use actix_web::{
-	get,
+	
 	http::StatusCode,
 	post,
 	web::{self, Data},
 	Error as AWError, HttpResponse, Result,
 };
 
-use shared::constant::EMPTY_STR;
 
-#[utoipa::path(
-    get,
-	operation_id="dsad",
-    tag="NftEndpoints"
-    ,path="/nft/{token_id}"
-    ,params(
-        ("token_id",Path,description="Token ID NFT",
-        example="0xd774557b647330c91bf44cfeab205095f7e6c367"))
-    ,responses(
-        (status=200,description="Find NFT Success",body=NFTDTO),
-        (status=NOT_FOUND,description="Cannot found this nft")
-    )
-)]
-#[get("/{token_id}")]
-pub async fn get_nft(
-	app_state: Data<AppState>,
-	path: web::Path<String>,
-) -> Result<HttpResponse, AWError> {
-	let token_id = path.into_inner();
-	let nft_detail = find_nft_by_token(&token_id, app_state.db.clone()).await;
-	match nft_detail {
-		Ok(Some(nft)) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new(EMPTY_STR, Some(nft), true);
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(rsp))
-		},
-		Ok(None) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new("Not found", None, false);
-			Ok(HttpResponse::build(StatusCode::NOT_FOUND)
-				.content_type("application/json")
-				.json(rsp))
-		},
-		Err(e) => {
-			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
-			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
-		},
-	}
-}
 
 #[utoipa::path(
     post,
@@ -68,7 +30,8 @@ pub async fn get_nft(
 		{
 			"collection_id":null,
 			"token_id":"0",
-			"address":"ec84321d9751c066fb923035073a73d467d44642c457915e7496c52f45db1f65",
+			"address":null,
+
 			
 		}
     })),
@@ -80,8 +43,8 @@ pub async fn get_nft(
     )
 )]
 //Get List NFT Follow Address of Account
-#[post("/list")]
-pub async fn get_list_nft(
+#[post("/owner")]
+pub async fn get_owner_nfts(
 	app_state: Data<AppState>,
 	req: web::Json<QueryNFT>,
 ) -> Result<HttpResponse, AWError> {
@@ -122,7 +85,10 @@ pub async fn get_list_nft(
 		{
 			"name":null,
 			"token_id":null,
-			"collection_id":null
+			"collection_id":null,
+			"created_by":null,
+			"price":null,
+			"attributes":[{"key":"tier","value":"\"King\""},{"key":"elo","value":"2700"}]
 		}
     })),
     responses(
@@ -152,11 +118,12 @@ pub async fn search_list_nfts(
 		},
 		Err(e) => {
 			let rsp = ResponseBody::<Option<NFTDTO>>::new(e.to_string().as_str(), None, false);
+			log::info!("Error {:?}",e.to_string());
 			Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).json(rsp))
 		},
 	}
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-	scope.service(get_nft).service(get_list_nft).service(search_list_nfts)
+	scope.service(get_owner_nfts).service(search_list_nfts)
 }

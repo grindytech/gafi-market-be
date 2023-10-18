@@ -565,6 +565,7 @@ dependencies = [
  "slug",
  "subxt",
  "subxt-signer",
+ "tokio",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid",

@@ -1,4 +1,4 @@
-use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
+use mongodb::bson::{doc, oid::ObjectId, DateTime, Decimal128, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -28,7 +28,7 @@ impl Into<Document> for Property {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFT {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
@@ -53,6 +53,8 @@ pub struct NFT {
 	pub external_url: Option<String>,
 	pub image: Option<String>,
 	pub animation_url: Option<String>,
+	// Min Price of NFT
+	pub price: Option<Decimal128>,
 }
 impl BaseDocument for NFT {
 	fn name() -> String {

@@ -13,7 +13,7 @@ use crate::modules::{
 	account::dto::{AccountDTO, QueryFindAccount},
 	collection::dto::{QueryFindCollections, NFTCollectionDTO},
 	game::dto::{QueryFindGame, GameDTO},
-	nft::dto::{QueryFindNFts, NFTDTO,NFTOwnerOfDto}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO}, auth::dto::TokenDTO,
+	nft::dto::{QueryFindNFts, NFTDTO,NFTOwnerOfDto}, transaction::dto::{QueryFindTX, HistoryTxDTO}, pool::dto::{QueryFindPool, PoolDTO}, auth::dto::TokenDTO, trade::dto::{QueryFindTrade, TradeDTO},
 };
 
 #[derive(Debug, Serialize)]
@@ -55,6 +55,7 @@ impl<T> ResponseBody<T> {
 	TxPage = Page<HistoryTxDTO>,
 	CollectionPage = Page<NFTCollectionDTO>,
 	PoolPage = Page<PoolDTO>,
+	TradePage=Page<TradeDTO>,
 )]
 pub struct Page<T> {
 	pub message: String,
@@ -81,8 +82,9 @@ impl<T> Page<T> {
 	QueryNFT = QueryPage<QueryFindNFts>, 
 	QueryCollection = QueryPage<QueryFindCollections> ,
 	QueryGame=QueryPage<QueryFindGame>,
-	QueryTransaction=QueryPage<QueryFindTX>,
+	QueryTx=QueryPage<QueryFindTX>,
 	QueryPool=QueryPage<QueryFindPool>,
+	QueryTrade=QueryPage<QueryFindTrade>,
 	QueryAccount=QueryPage<QueryFindAccount>
 )]
 

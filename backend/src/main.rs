@@ -55,7 +55,7 @@ async fn main() -> std::io::Result<()> {
 			}))
 			.configure(route_config)
 	})
-	.bind(("0.0.0.0", 8080))?
+	.bind(("0.0.0.0", 8000))?
 	.run()
 	.await
 }

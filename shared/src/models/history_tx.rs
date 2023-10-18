@@ -1,13 +1,6 @@
 use mongodb::bson::{doc, oid::ObjectId, Bson, Decimal128, Document};
 use serde::{Deserialize, Serialize};
-/* #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub enum TypeEventTx {
-	Mint,
-	Transfer,
-	Sale,
-	Burn,
-}
- */
+
 use crate::BaseDocument;
 
 pub type Nft = crate::models::trade::Nft;
@@ -89,5 +82,3 @@ impl BaseDocument for HistoryTx {
 		"history_tx".to_string()
 	}
 }
-
-//TODO separate history of nft, collection, game, pool

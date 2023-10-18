@@ -1,9 +1,9 @@
-use mongodb::bson::{self, doc, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::{common::DBQuery, modules::nft::dto::NFTDTO};
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -23,12 +23,12 @@ pub struct NFTCollectionDTO {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub external_url: Option<String>,
-	pub nfts: Option<Vec<NFTDTO>>,
+	/* pub nfts: Option<Vec<NFTDTO>>, */
 }
 impl From<NFTCollection> for NFTCollectionDTO {
 	fn from(value: NFTCollection) -> Self {
-		let nfts: Option<Vec<NFTDTO>> =
-			value.nfts.map(|nfts| nfts.iter().map(|nft| nft.clone().into()).collect());
+		/* 	let nfts: Option<Vec<NFTDTO>> =
+		value.nfts.map(|nfts| nfts.iter().map(|nft| nft.clone().into()).collect()); */
 
 		NFTCollectionDTO {
 			collection_id: value.collection_id,
@@ -44,7 +44,6 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			external_url: value.external_url,
-			nfts,
 		}
 	}
 }
@@ -54,7 +53,7 @@ pub struct QueryFindCollections {
 	pub name: Option<String>,
 	pub collection_id: Option<String>,
 	pub owner: Option<String>,
-	pub game_id: Option<String>,
+	pub game_id: Option<Vec<String>>,
 }
 impl DBQuery for QueryFindCollections {
 	fn to_doc(&self) -> Document {
@@ -74,10 +73,8 @@ impl DBQuery for QueryFindCollections {
 		if let Some(name) = &self.name {
 			criteria.push(doc! {
 				"name":{
-					 "$regex": bson::Regex {
-						pattern: name.to_string(),
-						options: "i".to_string(),
-					},
+					 "$regex": name.to_string(),
+					 "$options":"i"
 				}
 
 			});
@@ -97,5 +94,70 @@ impl DBQuery for QueryFindCollections {
 				"$and": criteria
 			}
 		}
+	}
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+
+pub struct NFTCollectionSupplyDTO {
+	pub total_supply: i32, //total supply data of collection
+	pub owner: i32,        // Number owner of collection
+}
+impl NFTCollectionSupplyDTO {
+	pub fn convert_document_to_dto(
+		document: Document,
+	) -> Result<NFTCollectionSupplyDTO, mongodb::error::Error> {
+		let total_supply = document.get("total_supply").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(value) => Some(*value),
+			_ => None,
+		});
+		let owner = document.get("owner").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(value) => Some(*value),
+			_ => None,
+		});
+		Ok(NFTCollectionSupplyDTO {
+			total_supply: total_supply.unwrap_or(0),
+			owner: owner.unwrap_or(0),
+		})
+	}
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct NFTCollectionVolumeDTO {
+	pub min_price: Option<String>,
+	pub max_price: Option<String>,
+	pub volume: Option<String>,
+	pub sold: Option<String>,
+}
+impl NFTCollectionVolumeDTO {
+	pub fn convert_document_to_dto(
+		document: Document,
+	) -> Result<NFTCollectionVolumeDTO, mongodb::error::Error> {
+		let min_price = document.get("min_price").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let max_price = document.get("max_price").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let volume = document.get("volume").and_then(|value| match value {
+			mongodb::bson::Bson::Decimal128(decimal) => Some(decimal.to_string()),
+			_ => None,
+		});
+
+		let sold = document.get("sold").and_then(|value| match value {
+			mongodb::bson::Bson::Int32(i) => Some(i.to_string()),
+			_ => None,
+		});
+
+		Ok(NFTCollectionVolumeDTO {
+			min_price,
+			max_price,
+			volume,
+			sold,
+		})
 	}
 }

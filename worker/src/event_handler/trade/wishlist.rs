@@ -1,4 +1,4 @@
-use mongodb::bson::{Decimal128};
+use mongodb::bson::Decimal128;
 use shared::{
 	constant::{EVENT_SET_WISH_LIST, EVENT_WIST_LIST_FILLED},
 	models,

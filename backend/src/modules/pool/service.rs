@@ -1,32 +1,53 @@
 use futures_util::TryStreamExt;
-use mongodb::{Collection, Database};
+use mongodb::{bson::doc, Collection, Database};
 use shared::{constant::EMPTY_STR, models, BaseDocument, Pool};
 
-use crate::common::{utils::get_total_page, DBQuery, Page, QueryPage};
+use crate::common::{DBQuery, Page, QueryPool};
 
-use super::dto::{PoolDTO, QueryFindPool};
+use super::dto::PoolDTO;
 
 pub async fn find_pool_by_query(
-	params: QueryPage<QueryFindPool>,
+	params: QueryPool,
 	db: Database,
-) -> Result<Option<Page<PoolDTO>>, mongodb::error::Error> {
+) -> shared::Result<Option<Page<PoolDTO>>> {
 	let col: Collection<Pool> = db.collection(models::pool::Pool::name().as_str());
-	let filter = params.query.to_doc();
+	let query_find = params.query.to_doc();
 
-	let filter_option = mongodb::options::FindOptions::builder().sort(params.sort()).build();
-
-	let mut cursor = col.find(filter, filter_option).await?;
-
-	let mut list_pool: Vec<PoolDTO> = Vec::new();
-	while let Some(pool) = cursor.try_next().await? {
-		list_pool.push(pool.into())
+	let filter_match = doc! {
+		"$match":query_find,
+	};
+	let paging = doc! {
+	  "$facet":{
+			"paginatedResults": [ { "$skip": params.skip() }, { "$limit": params.size() } ],
+		  "totalCount": [ { "$count": "count" } ],
+		},
+	};
+	let sort = doc! {
+		"$sort":params.sort()
+	};
+	let mut cursor = col.aggregate(vec![filter_match, sort, paging], None).await?;
+	let mut list_pools: Vec<PoolDTO> = Vec::new();
+	let document = cursor.try_next().await?.ok_or("cursor try_next failed")?;
+	let paginated_result = document.get_array("paginatedResults")?;
+	paginated_result.into_iter().for_each(|rs| {
+		let pool_str = serde_json::to_string(&rs).expect("Failed Parse Game to String");
+		let pool: Pool = serde_json::from_str(&pool_str).expect("Failed to Parse to Game");
+		list_pools.push(pool.into());
+	});
+	let count_arr = document.get_array("totalCount")?;
+	let count_0 = count_arr.get(0).ok_or("get count");
+	let mut count = 0;
+	match count_0 {
+		Ok(c) => {
+			count = c.as_document().ok_or("as document")?.get_i32("count")?;
+		},
+		Err(_) => {},
 	}
-	let total = get_total_page(list_pool.len(), params.size).await;
 	Ok(Some(Page::<PoolDTO> {
 		message: EMPTY_STR.to_string(),
-		data: list_pool,
+		data: list_pools,
 		page: params.page,
 		size: params.size,
-		total,
+		total: count as u64,
 	}))
 }

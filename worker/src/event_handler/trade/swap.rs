@@ -1,9 +1,9 @@
 use mongodb::bson::Decimal128;
+pub use shared::Result;
 use shared::{
 	constant::{EVENT_SET_SWAP, EVENT_SWAP_CLAIMED},
 	models,
 };
-pub use shared::Result;
 
 use crate::{
 	gafi,

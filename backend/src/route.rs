@@ -16,7 +16,8 @@ pub fn route_config(cfg: &mut web::ServiceConfig) {
 			)))
 			.service(modules::auth::controller::endpoints(scope("/auth")))
 			.service(modules::transaction::controller::endpoints(scope("/tx")))
-			.service(modules::pool::controller::endpoints(scope("/pool"))),
+			.service(modules::pool::controller::endpoints(scope("/pool")))
+			.service(modules::trade::controller::endpoints(scope("/trade"))),
 	)
 	.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![(
 		Url::new("v1", "/api-docs/api.json"),

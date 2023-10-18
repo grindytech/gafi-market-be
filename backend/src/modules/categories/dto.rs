@@ -11,7 +11,7 @@ pub struct CategoriesDTO {
 	pub id: Option<ObjectId>,
 	pub name: String,
 	pub slug: String,
-	#[schema(format = "date-time",value_type=String )]
+
 	pub create_at: i64,
 }
 #[allow(non_snake_case)]
@@ -28,5 +28,6 @@ impl From<Categories> for CategoriesDTO {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryCategory {
+	/// Name of Category
 	pub name: String,
 }

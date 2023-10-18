@@ -93,11 +93,6 @@ impl FromRequest for JWTMiddleWare {
 							return ready(Err(ErrorUnauthorized(json_error)));
 						},
 					}
-					/* let json_error = ErrorResponse {
-						status: "fail".to_string(),
-						message: "Access Token has expired".to_string(),
-					};
-					return ready(Err(actix_web::error::ErrorUnauthorized(json_error))); */
 				},
 				_ => {
 					let json_error = ErrorResponse {
@@ -114,3 +109,4 @@ impl FromRequest for JWTMiddleWare {
 		Self::from_request(req, &mut actix_web::dev::Payload::None)
 	}
 }
+// !todo Refactor from request check

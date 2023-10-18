@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{nft, BaseDocument};
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTOwner {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,

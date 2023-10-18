@@ -21,6 +21,7 @@ pub struct GameDTO {
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
 	pub name: Option<String>,
+	pub collections: Option<Vec<String>>,
 }
 
 impl From<Game> for GameDTO {
@@ -42,6 +43,7 @@ impl From<Game> for GameDTO {
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
 			name: value.name,
+			collections: value.collections,
 		}
 	}
 }
@@ -69,7 +71,10 @@ impl DBQuery for QueryFindGame {
 		}
 		if let Some(name) = &self.name {
 			criteria.push(doc! {
-				"name": name
+				"name":{
+					 "$regex": name.to_string(),
+					 "$options":"i"
+				}
 			});
 		}
 		if let Some(collection_id) = &self.collection {
