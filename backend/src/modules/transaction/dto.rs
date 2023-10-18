@@ -62,56 +62,35 @@ pub struct QueryFindTX {
 }
 impl DBQuery for QueryFindTX {
 	fn to_doc(&self) -> Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
 
 		if let Some(collection_id) = &self.collection_id {
-			criteria.push(doc! {
-				"collection_id": collection_id
-			});
+			criteria.insert("collection_id", collection_id);
 		}
 		if let Some(trade_id) = &self.trade_id {
-			criteria.push(doc! {
-				"trade_id": trade_id
-			});
+			criteria.insert("trade_id", trade_id);
 		}
 		if let Some(trade_type) = &self.trade_type {
-			criteria.push(doc! {
-				"trade_type": trade_type
-			});
+			criteria.insert("trade_type", trade_type);
 		}
 		if let Some(event) = &self.event {
-			criteria.push(doc! {
-				"event": event
-			});
+			criteria.insert("event", event);
 		}
 		if let Some(address) = &self.address {
-			criteria.push(doc! {
-				"$or":[
-					{"from": address},
-					{"to":address}
-				]
-
-			});
+			criteria.insert("$or", vec![doc! {"from": address}, doc! {"to": address}]);
 		}
 		if let Some(token_id) = &self.token_id {
-			criteria.push(doc! {
-				"nfts": {
+			criteria.insert(
+				"nfts",
+				doc! {
 					"$in":[token_id]
-				}
-			});
+				},
+			);
 		}
 		if let Some(pool_id) = &self.pool_id {
-			criteria.push(doc! {
-				"pool": pool_id
-			});
+			criteria.insert("pool", pool_id);
 		}
 
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }

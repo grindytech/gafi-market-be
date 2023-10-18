@@ -1,5 +1,5 @@
 use crate::{
-	app_state::{self, AppState},
+	app_state::AppState,
 	common::ResponseBody,
 	modules::categories::{
 		dto::{CategoriesDTO, QueryCategory},

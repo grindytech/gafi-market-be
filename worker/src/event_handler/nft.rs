@@ -11,7 +11,8 @@ use shared::{
 };
 
 use crate::{
-	gafi, services,
+	gafi,
+	services::{self, nft_service},
 	workers::{EventHandle, HandleParams},
 };
 
@@ -72,10 +73,28 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 		let mut need_refetch_amount = HashMap::<String, u32>::new();
 		let mut nfts = vec![];
 
+		let config = shared::config::Config::init();
+		let amount = ev.amount;
+		let price = ev.price;
+		let price_str = shared::utils::string_decimal_to_number(
+			&price.to_string(),
+			config.chain_decimal as i32,
+		);
+		let price_decimal: Decimal128 = price_str.parse()?;
+		let total_value = price_str.parse::<f64>()? * f64::from(amount);
+		let value_in_decimal: Decimal128 = total_value.to_string().parse()?;
+
 		for item in ev.nfts {
 			let key = format!("{}:{}", item.collection, item.item).to_string();
 			let amount = need_refetch_amount.get(&key).unwrap_or(&0);
 			need_refetch_amount.insert(key, amount + 1);
+			/* 	nft_service::upsert_nft_min_price(
+				&item.item.to_string(),
+				&item.collection.to_string(),
+				value_in_decimal,
+				params.db,
+			)
+			.await?; */
 		}
 		//get balances & update
 		for key in need_refetch_amount.keys() {
@@ -105,16 +124,6 @@ async fn on_mint_nft(params: HandleParams<'_>) -> Result<()> {
 			)
 			.await?;
 		}
-		let config = shared::config::Config::init();
-		let amount = ev.amount;
-		let price = ev.price;
-		let price_str = shared::utils::string_decimal_to_number(
-			&price.to_string(),
-			config.chain_decimal as i32,
-		);
-		let price_decimal: Decimal128 = price_str.parse()?;
-		let total_value = price_str.parse::<f64>()? * f64::from(amount);
-		let value_in_decimal: Decimal128 = total_value.to_string().parse()?;
 
 		services::history_service::upsert(
 			HistoryTx {
