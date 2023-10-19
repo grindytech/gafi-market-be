@@ -91,6 +91,10 @@ use super::{
     servers(
         (url = "/api/v1"),
     ),
+    tags(
+        (name="AccountEndpoints",description="Account Endpoint Update information"),
+        (name="AuthenticationEndpoints", description="Authentication Verify Endpoints")
+    )
 )]
 
 pub struct ApiDoc;

@@ -24,6 +24,7 @@
   "author": "grindy",
   "license": "MIT",
   "dependencies": {
-    "mongodb-memory-server": "^8.14.0"
+    "mongodb-memory-server": "^8.14.0",
+    "swagger-typescript-api": "^13.0.3"
   }
 }

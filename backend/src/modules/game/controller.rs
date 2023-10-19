@@ -13,7 +13,7 @@ use crate::{
 	modules::game::service::find_games_by_query,
 };
 use shared::constant::EMPTY_STR;
-
+/// Search Game From Database By Query
 #[utoipa::path(
 	post,
     tag = "GameEndpoints",
@@ -46,9 +46,8 @@ pub async fn search_games_by_query(
 ) -> Result<HttpResponse, AWError> {
 	let list_games = find_games_by_query(path.0, app_state.db.clone()).await;
 	match list_games {
-		Ok(Some(games)) => {
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games))
-		},
+		Ok(Some(games)) =>
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(games)),
 		Ok(None) => {
 			let rsp = ResponseBody::<Option<GameDTO>>::new("Not found", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)

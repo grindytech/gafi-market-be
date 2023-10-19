@@ -20,6 +20,8 @@ pub struct GameDTO {
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+	pub cover_url: Option<String>,
+
 	pub name: Option<String>,
 	pub collections: Option<Vec<String>>,
 }
@@ -42,6 +44,7 @@ impl From<Game> for GameDTO {
 			description: value.description,
 			logo_url: value.logo_url,
 			banner_url: value.banner_url,
+			cover_url: value.cover_url,
 			name: value.name,
 			collections: value.collections,
 		}

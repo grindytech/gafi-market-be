@@ -1,6 +1,6 @@
-use mongodb::bson::Document;
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::{history_tx::Nft, Trade};
+use shared::{history_tx::Nft, LootTableNft, Trade};
 use utoipa::ToSchema;
 
 use crate::common::DBQuery;
@@ -66,7 +66,7 @@ pub struct QueryFindTrade {
 	pub bundle: Option<String>, // Search Bundle
 	pub status: Option<String>,
 	pub highest_bid: Option<String>,
-	pub token_id: Option<String>,
+	pub nft: Option<LootTableNft>,
 }
 
 impl DBQuery for QueryFindTrade {
@@ -83,6 +83,15 @@ impl DBQuery for QueryFindTrade {
 		}
 		if let Some(status) = &self.status {
 			criteria.insert("status", status);
+		}
+		if let Some(nft) = &self.nft {
+			criteria.insert(
+				"$and",
+				vec![doc! {
+				"nft.item":nft.item.clone().parse::<i32>().unwrap(),
+				"nft.collection":nft.collection.clone().parse::<i32>().unwrap()
+				}],
+			);
 		}
 
 		if let Some(bundle) = &self.bundle {

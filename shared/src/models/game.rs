@@ -19,6 +19,8 @@ pub struct Game {
 	pub description: Option<String>,
 	pub logo_url: Option<String>,
 	pub banner_url: Option<String>,
+	pub cover_url: Option<String>,
+
 	pub name: Option<String>,
 
 	pub updated_at: DateTime,

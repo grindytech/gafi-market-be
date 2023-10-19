@@ -174,8 +174,11 @@ pub async fn update_metadata(
 				Ok((_doc, obj)) => {
 					let empty_val = Value::String("".to_string());
 					let banner_url =
-						obj.get("banner_url").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let logo_url = obj.get("logo_url").unwrap_or(&empty_val).as_str().unwrap_or("");
+						obj.get("media_banner").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let logo_url =
+						obj.get("media_avatar").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let cover_url =
+						obj.get("media_cover").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let description =
 						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
@@ -183,6 +186,7 @@ pub async fn update_metadata(
 							"$set": {
 							"banner_url": banner_url.to_string(),
 							"logo_url": logo_url.to_string(),
+							"cover_url":cover_url.to_string(),
 							"description": description.to_string(),
 							"name": name.to_string(),
 							"updated_at": DateTime::now(),

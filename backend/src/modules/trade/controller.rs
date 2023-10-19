@@ -15,7 +15,7 @@ use actix_web::{
 	tag="TradeEndpoints",
 	context_path="/trade",
 	request_body(
-		content=QueryPool,description="Search Trade By Query Data", content_type="application/json",
+		content=QueryTrade,description="Search Trade By Query Data", content_type="application/json",
 		example=json!({
         "search":"",
 		"page": 1,
@@ -24,7 +24,7 @@ use actix_web::{
 		"desc": true,
 		"query":{
 			"trade_id":null,
-			"token_id":null,
+		
 		}
 		})
 	),
@@ -40,9 +40,8 @@ pub async fn search_list_trades(
 ) -> Result<HttpResponse, AWError> {
 	let list_trade = find_trade_by_query(req.0, app_state.db.clone()).await;
 	match list_trade {
-		Ok(Some(trade)) => {
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(trade))
-		},
+		Ok(Some(trade)) =>
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(trade)),
 		Ok(None) => {
 			let rsp = ResponseBody::<Option<TradeDTO>>::new("Trade Not found", None, false);
 			Ok(HttpResponse::build(StatusCode::NOT_FOUND)

@@ -10,7 +10,7 @@ use actix_web::{
 	web::{self, Data},
 	Error as AWError, HttpResponse, Result, post,
 };
-
+/// Get The information of address account
 #[utoipa::path(
         tag = "AccountEndpoints",
         context_path = "/account",
