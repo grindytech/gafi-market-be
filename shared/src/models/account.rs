@@ -7,8 +7,8 @@ use crate::BaseDocument;
 pub struct SocialInfo {
 	pub twitter: Option<String>,
 	pub web: Option<String>,
-	pub medium: Option<String>,
-	pub facebook: Option<String>,
+	/* 	pub medium: Option<String>,
+	pub facebook: Option<String>, */
 	pub discord: Option<String>,
 }
 
@@ -17,8 +17,8 @@ impl Into<Document> for SocialInfo {
 		doc! {
 			"twitter":self.twitter,
 			"web": self.web,
-			"medium": self.medium,
-			"facebook": self.facebook,
+		/* 	"medium": self.medium,
+			"facebook": self.facebook, */
 			"discord": self.discord,
 		}
 	}
@@ -52,8 +52,8 @@ pub struct Account {
 	pub bio: Option<String>,
 	pub social: SocialInfo,
 
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub banner: Option<String>,
 
 	pub favorites: Option<Vec<Favorites>>,
 

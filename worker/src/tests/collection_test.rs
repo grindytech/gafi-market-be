@@ -22,8 +22,8 @@ async fn collection_metadata_set() {
 	let (mut db_process, db) = tests::utils::get_test_db(60000).await;
 	let metadata = r#"
 		{
-			"title": "chess",
-			"image": "/chess.svg",
+			"name": "chess",
+			"logo": "/chess.svg",
 			"external_url": "https://chess.com"
 		}
 	"#;
@@ -49,13 +49,13 @@ async fn collection_metadata_set() {
 			.unwrap()
 			.unwrap();
 
-	assert_eq!(nft_collection.banner_url, Some("".to_string()));
+	assert_eq!(nft_collection.banner, Some("".to_string()));
 	assert_eq!(nft_collection.name, Some("chess".to_string()));
 	assert_eq!(
 		nft_collection.external_url,
 		Some("https://chess.com".to_string())
 	);
-	assert_eq!(nft_collection.logo_url, Some("/chess.svg".to_string()));
+	assert_eq!(nft_collection.logo, Some("/chess.svg".to_string()));
 
 	//meta data not in json format
 	let metadata = r#""other": "other data""#;
@@ -70,10 +70,10 @@ async fn collection_metadata_set() {
 			.unwrap()
 			.unwrap();
 
-	assert_eq!(nft_collection.banner_url, None);
+	assert_eq!(nft_collection.banner, None);
 	assert_eq!(nft_collection.name, None);
 	assert_eq!(nft_collection.external_url, None);
-	assert_eq!(nft_collection.logo_url, None);
+	assert_eq!(nft_collection.logo, None);
 
 	let _ = db_process.kill();
 }
@@ -84,7 +84,7 @@ async fn collection_metadata_cleared() {
 	let metadata = r#"
 		{
 			"title": "chess",
-			"image": "/chess.svg",
+			"logo": "/chess.svg",
 			"external_url": "https://chess.com",
 			"other": "other data"
 		}
@@ -114,10 +114,10 @@ async fn collection_metadata_cleared() {
 			.unwrap()
 			.unwrap();
 
-	assert_eq!(nft_collection.banner_url, None);
+	assert_eq!(nft_collection.banner, None);
 	assert_eq!(nft_collection.name, None);
 	assert_eq!(nft_collection.external_url, None);
-	assert_eq!(nft_collection.logo_url, None);
+	assert_eq!(nft_collection.logo, None);
 
 	let _ = db_process.kill();
 }

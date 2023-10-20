@@ -8,6 +8,7 @@ pub struct Pool {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
 	pub id: Option<ObjectId>,
 	pub pool_id: String,
+
 	pub owner: String,
 	pub type_pool: String,
 
@@ -43,6 +44,7 @@ impl Into<Document> for Pool {
 			.collect();
 		doc! {
 			"pool_id": self.pool_id,
+
 			"owner": self.owner,
 			"type_pool": self.type_pool,
 			"loot_table": loot_table,

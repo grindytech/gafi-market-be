@@ -14,11 +14,12 @@ pub struct Game {
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
-	pub slug: Option<String>,
 
 	pub description: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub banner: Option<String>,
+	pub cover: Option<String>,
+
 	pub name: Option<String>,
 
 	pub updated_at: DateTime,
@@ -48,13 +49,12 @@ impl Into<Document> for Game {
 			"is_verified":self.is_verified,
 			"social":social,
 			"category":self.category,
-			"slug": self.slug,
 			"updated_at": DateTime::now(),
-		/* 	"created_at": self.created_at, */
 			"collections": self.collections,
 			"description": self.description,
-			"logo_url": self.logo_url,
-			"banner_url": self.banner_url,
+			"logo": self.logo,
+			"banner": self.banner,
+			"cover": self.cover,
 			"name": self.name,
 		}
 	}

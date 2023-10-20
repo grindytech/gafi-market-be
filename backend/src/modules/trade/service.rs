@@ -16,6 +16,7 @@ pub async fn find_trade_by_query(
 	let filter_match = doc! {
 		"$match":query_find,
 	};
+
 	let paging = doc! {
 	  "$facet":{
 			"paginatedResults": [ { "$skip": params.skip() }, { "$limit": params.size() } ],

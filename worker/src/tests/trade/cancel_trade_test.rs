@@ -1,7 +1,7 @@
 use mongodb::bson::Decimal128;
 use shared::{
-	constant::{EVENT_TRADE_CANCELLED, TRADE_STATUS_CANCELED, TRADE_SET_PRICE},
-	tests, models,
+	constant::{EVENT_TRADE_CANCELLED, TRADE_SET_PRICE, TRADE_STATUS_CANCELED},
+	models, tests,
 };
 
 use crate::{
@@ -14,8 +14,8 @@ pub async fn cancel_sale() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 1,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let unit_price_decimal: Decimal128 = "100".parse().unwrap();
 	let trade_id = 0;

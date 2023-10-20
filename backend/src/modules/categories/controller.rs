@@ -24,6 +24,8 @@ use shared::constant::EMPTY_STR;
     )
 
 )]
+
+/// Get the information current category supported
 #[get("/list")]
 pub async fn get_list_categories(app_state: Data<AppState>) -> Result<HttpResponse, AWError> {
 	let list_categories = get_categories(app_state.db.clone()).await;

@@ -16,8 +16,10 @@ pub struct NFTCollection {
 	pub games: Option<Vec<String>>,
 
 	pub name: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub cover: Option<String>,
+	pub banner: Option<String>,
+
 	pub external_url: Option<String>,
 }
 
@@ -41,8 +43,9 @@ impl Into<Document> for NFTCollection {
 			"games": self.games,
 
 			"name": self.name,
-			"logo_url": self.logo_url,
-			"banner_url": self.banner_url,
+			"logo": self.logo,
+			"banner": self.banner,
+			"cover": self.cover,
 			"external_url": self.external_url,
 		}
 	}

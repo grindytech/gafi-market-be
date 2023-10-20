@@ -36,14 +36,12 @@ pub async fn update_nonce(address: &String, db: Database) -> Result<String, mong
 				is_verified: None,
 				name: address.to_string(),
 				bio: None,
-				logo_url: None,
-				banner_url: None,
+				logo: None,
+				banner: None,
 				updated_at: Utc::now().timestamp_millis(),
 				created_at: Utc::now().timestamp_millis(),
 				social: SocialInfo {
 					discord: None,
-					facebook: None,
-					medium: None,
 					twitter: None,
 					web: None,
 				},
@@ -87,7 +85,7 @@ pub async fn verify_signature(
 			None => (),
 		}
 	} else {
-		return Ok(None);
+		return Ok(None)
 	}
 
 	let message = generate_message_sign_in(&address, &nonce_value);
@@ -105,7 +103,7 @@ pub async fn verify_signature(
 		subxt_signer::sr25519::verify(&Signature(log_fe), message, &PublicKey(public_key.0));
 
 	if result == false {
-		return Ok(None);
+		return Ok(None)
 	};
 	let new_nonce = generate_uuid();
 

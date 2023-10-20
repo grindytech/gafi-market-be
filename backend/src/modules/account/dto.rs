@@ -19,8 +19,8 @@ pub struct AccountDTO {
 	pub name: String,
 	pub bio: Option<String>,
 
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub banner: Option<String>,
 
 	pub updated_at: i64,
 	pub created_at: i64,
@@ -40,8 +40,8 @@ impl From<Account> for AccountDTO {
 			is_verified: value.is_verified,
 			name: value.name,
 			bio: value.bio,
-			logo_url: value.logo_url,
-			banner_url: value.banner_url,
+			logo: value.logo,
+			banner: value.banner,
 			updated_at: value.updated_at,
 			created_at: value.created_at,
 			social: value.social.into(),

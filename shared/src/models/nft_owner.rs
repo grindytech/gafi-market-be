@@ -11,7 +11,7 @@ pub struct NFTOwner {
 	pub token_id: String,
 	pub collection_id: String,
 	pub address: String,
-	pub amount: i32,
+	pub amount: u32,
 	pub nft: Option<Vec<nft::NFT>>,
 }
 impl BaseDocument for NFTOwner {

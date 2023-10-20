@@ -18,8 +18,8 @@ async fn set_wishlist() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let trade_id = 0;
 	let price_decimal: Decimal128 = "100".parse().unwrap();
@@ -75,8 +75,8 @@ async fn set_wishlist_filled() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let trade_id = 0;
 	let price_decimal: Decimal128 = "100".parse().unwrap();

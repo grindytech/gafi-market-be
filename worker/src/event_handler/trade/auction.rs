@@ -103,8 +103,8 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 		let mut source: Vec<models::trade::Nft> = vec![];
 		for nft in ev.source {
 			source.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}

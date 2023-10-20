@@ -15,7 +15,7 @@ use actix_web::{
 };
 
 
-
+/// Search all NFT follow owner 
 #[utoipa::path(
     post,
     tag = "NftEndpoints",
@@ -69,6 +69,7 @@ pub async fn get_owner_nfts(
 	}
 }
 
+/// Search NFTs follow query
 #[utoipa::path(
     post,
     tag = "NftEndpoints",

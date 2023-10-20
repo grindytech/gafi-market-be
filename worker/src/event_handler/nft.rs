@@ -157,8 +157,8 @@ async fn on_item_transfer(params: HandleParams<'_>) -> Result<()> {
 	if let Some(ev) = event_parse {
 		let nft = shared::history_tx::Nft {
 			amount: ev.amount.into(),
-			collection: ev.collection,
-			item: ev.item,
+			collection: ev.collection.to_string(),
+			item: ev.item.to_string(),
 		};
 		services::history_service::upsert(
 			HistoryTx {

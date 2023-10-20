@@ -13,13 +13,14 @@ pub struct GameDTO {
 	pub is_verified: Option<bool>,
 	pub social: Option<SocialInfo>,
 	pub category: Option<String>,
-	pub slug: Option<String>,
 
 	pub updated_at: Option<i64>,
 
 	pub description: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub banner: Option<String>,
+	pub cover: Option<String>,
+
 	pub name: Option<String>,
 	pub collections: Option<Vec<String>>,
 }
@@ -36,12 +37,12 @@ impl From<Game> for GameDTO {
 				None => None,
 			},
 			category: value.category,
-			slug: value.slug,
 
 			updated_at: Some(value.updated_at.timestamp_millis()),
 			description: value.description,
-			logo_url: value.logo_url,
-			banner_url: value.banner_url,
+			logo: value.logo,
+			banner: value.banner,
+			cover: value.cover,
 			name: value.name,
 			collections: value.collections,
 		}

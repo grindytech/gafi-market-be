@@ -62,8 +62,8 @@ async fn on_wishlist_set(params: HandleParams<'_>) -> Result<()> {
 		let mut wish_list: Vec<models::trade::Nft> = vec![];
 		for nft in ev.wishlist {
 			wish_list.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}

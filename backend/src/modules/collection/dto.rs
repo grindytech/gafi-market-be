@@ -20,8 +20,9 @@ pub struct NFTCollectionDTO {
 	pub games: Option<Vec<String>>,
 
 	pub name: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
+	pub logo: Option<String>,
+	pub banner: Option<String>,
+	pub cover: Option<String>,
 	pub external_url: Option<String>,
 	/* pub nfts: Option<Vec<NFTDTO>>, */
 }
@@ -41,8 +42,9 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			id: Some(value.id.unwrap().to_string()),
 			updated_at: Some(value.updated_at.unwrap().timestamp_millis()),
 			games: value.games,
-			logo_url: value.logo_url,
-			banner_url: value.banner_url,
+			logo: value.logo,
+			banner: value.banner,
+			cover: value.cover,
 			external_url: value.external_url,
 		}
 	}

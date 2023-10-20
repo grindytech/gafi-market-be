@@ -1,12 +1,10 @@
 use crate::{
 	gafi::{self, runtime_types::gafi_support::game::types::PoolType},
 	services::pool_service,
-	workers::{HandleParams, EventHandle},
+	workers::{EventHandle, HandleParams},
 };
 use mongodb::bson::DateTime;
-use shared::{
-	constant::EVENT_MINING_POOL_CREATED, types::Result, LootTable, LootTableNft, Pool,
-};
+use shared::{constant::EVENT_MINING_POOL_CREATED, types::Result, LootTable, LootTableNft, Pool};
 
 async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::MiningPoolCreated>()?;
@@ -59,6 +57,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			created_at: DateTime::now().timestamp_millis(),
 			end_at: pool_detail.mint_settings.end_block.unwrap_or(0).into(),
 			id: None,
+
 			loot_table: loot_table.clone(),
 			mint_type: mint_type.to_string(),
 			minting_fee: mining_fee.parse()?,
@@ -68,7 +67,7 @@ async fn on_pool_created(params: HandleParams<'_>) -> Result<()> {
 			type_pool: pool_type.to_string(),
 			updated_at: DateTime::now().timestamp_millis(),
 		};
-		
+
 		pool_service::upsert_pool(pool, params.db).await?;
 		log::info!(
 			"MiningPoolCreated created {} {}, who: {}, loot_table: {:?}",
