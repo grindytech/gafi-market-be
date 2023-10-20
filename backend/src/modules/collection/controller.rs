@@ -33,7 +33,7 @@ use crate::{
 			"name":null,
 			"owner":null,
 			"collection_id":null,
-			"game_id":["2"],
+			"games":["2"],
 		}
     })),
     responses(

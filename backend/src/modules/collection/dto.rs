@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::common::DBQuery;
+use crate::{common::DBQuery, modules::game};
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -55,47 +55,37 @@ pub struct QueryFindCollections {
 	pub name: Option<String>,
 	pub collection_id: Option<String>,
 	pub owner: Option<String>,
-	pub game_id: Option<Vec<String>>,
+	pub games: Option<Vec<String>>,
 }
 impl DBQuery for QueryFindCollections {
 	fn to_doc(&self) -> Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
 
 		if let Some(collection_id) = &self.collection_id {
-			criteria.push(doc! {
-				"collection_id": collection_id
-			});
+			criteria.insert("collection_id", collection_id);
 		}
 
 		if let Some(owner) = &self.owner {
-			criteria.push(doc! {
-				"owner": owner
-			});
+			criteria.insert("owner", owner);
 		}
 		if let Some(name) = &self.name {
-			criteria.push(doc! {
-				"name":{
-					 "$regex": name.to_string(),
-					 "$options":"i"
-				}
-
-			});
+			criteria.insert(
+				"name",
+				doc! {
+						 "$regex": name.to_string(),
+						 "$options":"i"
+				},
+			);
 		}
-		if let Some(game_id) = &self.game_id {
-			criteria.push(doc! {
-				"games": {
-					"$in":[game_id]
-				}
-			});
+		if let Some(game_id) = &self.games {
+			criteria.insert(
+				"games",
+				doc! {
+					"$all":game_id
+				},
+			);
 		}
-
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }
 
