@@ -21,8 +21,8 @@ async fn set_price() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 1,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let unit_price_decimal: Decimal128 = "100".parse().unwrap();
 	let trade_id = 0;
@@ -78,8 +78,8 @@ async fn set_buy() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 1,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let unit_price_decimal: Decimal128 = "100".parse().unwrap();
 	let trade_id = 0;
@@ -135,8 +135,8 @@ async fn set_price_item_bought() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let unit_price_decimal: Decimal128 = "100".parse().unwrap();
 	let trade_id = 0;
@@ -221,8 +221,8 @@ async fn set_buy_item_bought() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let unit_price_decimal: Decimal128 = "100".parse().unwrap();
 	let trade_id = 0;

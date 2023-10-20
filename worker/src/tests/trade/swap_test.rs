@@ -18,13 +18,13 @@ pub async fn set_and_claim_swap() {
 	let (_, pk) = tests::utils::mock_account_id32();
 	let nft = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	};
 	let nft1 = models::trade::Nft {
 		amount: 10,
-		collection: 0,
-		item: 1,
+		collection: "0".to_string(),
+		item: "1".to_string(),
 	};
 	let maybe_price: Decimal128 = "10".parse().unwrap();
 	let trade_id = 0;

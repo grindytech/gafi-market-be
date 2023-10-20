@@ -41,9 +41,9 @@ pub async fn create_account(
 	let entity: Account = Account {
 		address: account.address,
 		balance: account.balance,
-		banner_url: account.banner_url,
+		banner: account.banner,
 		bio: account.bio,
-		logo_url: account.logo_url,
+		logo: account.logo,
 		name: account.name,
 		id: None,
 		is_verified: None,

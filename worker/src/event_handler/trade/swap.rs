@@ -87,15 +87,15 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 		let mut required: Vec<models::trade::Nft> = vec![];
 		for nft in ev.source {
 			source.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}
 		for nft in ev.required {
 			required.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}

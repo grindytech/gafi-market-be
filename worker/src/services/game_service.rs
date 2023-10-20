@@ -173,22 +173,21 @@ pub async fn update_metadata(
 			match parsed_obj {
 				Ok((_doc, obj)) => {
 					let empty_val = Value::String("".to_string());
-					let banner_url =
-						obj.get("media_banner").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let logo_url =
-						obj.get("media_avatar").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let cover_url =
-						obj.get("media_cover").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let banner = obj.get("banner").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let logo = obj.get("logo").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let cover = obj.get("cover").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let description =
 						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let category = obj.get("category").unwrap_or(&empty_val).as_str().unwrap_or("");
 					update = doc! {
 							"$set": {
-							"banner_url": banner_url.to_string(),
-							"logo_url": logo_url.to_string(),
-							"cover_url":cover_url.to_string(),
+							"banner": banner.to_string(),
+							"logo": logo.to_string(),
+							"cover":cover.to_string(),
 							"description": description.to_string(),
 							"name": name.to_string(),
+							"category":category.to_string(),
 							"updated_at": DateTime::now(),
 						}
 					};
@@ -196,8 +195,10 @@ pub async fn update_metadata(
 				Err(_) => {
 					update = doc! {
 							"$set": {
-							"banner_url": Bson::Null,
-							"logo_url": Bson::Null,
+							"banner": Bson::Null,
+							"logo": Bson::Null,
+							"cover":Bson::Null,
+							"category":Bson::Null,
 							"description": Bson::Null,
 							"name":  Bson::Null,
 							"updated_at": DateTime::now(),
@@ -232,8 +233,8 @@ pub async fn clear_metadata(
 	let update = doc! {
 			"$set": {
 				"updated_at": DateTime::now(),
-				"banner_url": Bson::Null,
-				"logo_url": Bson::Null,
+				"banner": Bson::Null,
+				"logo": Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
 		}

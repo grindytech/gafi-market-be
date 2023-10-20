@@ -64,8 +64,8 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 		let mut bundle: Vec<models::trade::Nft> = vec![];
 		for nft in ev.bundle {
 			bundle.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}

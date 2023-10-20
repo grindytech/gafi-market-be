@@ -6,8 +6,8 @@ use crate::BaseDocument;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct Nft {
-	pub collection: u32,
-	pub item: u32,
+	pub collection: String,
+	pub item: String,
 	pub amount: u32,
 }
 

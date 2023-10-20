@@ -114,7 +114,7 @@ pub struct NFTOwnerOfDto {
 	pub token_id: String,
 	pub collection_id: String,
 	pub address: String,
-	pub amount: i32,
+	pub amount: u32,
 	pub nft: NFTDTO,
 }
 impl From<shared::models::NFTOwner> for NFTOwnerOfDto {

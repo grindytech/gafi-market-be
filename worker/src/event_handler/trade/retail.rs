@@ -64,8 +64,8 @@ async fn on_set_buy(params: HandleParams<'_>) -> Result<()> {
 		);
 		let nft = models::trade::Nft {
 			amount: ev.amount,
-			collection: ev.collection,
-			item: ev.item,
+			collection: ev.collection.to_string(),
+			item: ev.item.to_string(),
 		};
 		let unit_price_decimal: Decimal128 = unit_price.parse()?;
 		let set_buy_params = SetPriceParams {
@@ -90,8 +90,8 @@ async fn on_set_price(params: HandleParams<'_>) -> Result<()> {
 	if let Some(ev) = event_parse {
 		let nft = models::trade::Nft {
 			amount: ev.amount,
-			collection: ev.collection,
-			item: ev.item,
+			collection: ev.collection.to_string(),
+			item: ev.item.to_string(),
 		};
 		let config = shared::config::Config::init();
 		let unit_price = shared::utils::string_decimal_to_number(

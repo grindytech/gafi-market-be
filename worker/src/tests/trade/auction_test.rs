@@ -13,8 +13,8 @@ async fn do_auction(db: &Database) {
 	let (_, public_key) = tests::utils::mock_account_id32();
 	let nfts: Vec<models::trade::Nft> = vec![models::trade::Nft {
 		amount: 1,
-		collection: 0,
-		item: 0,
+		collection: "0".to_string(),
+		item: "0".to_string(),
 	}];
 	trade_service::auction_set(
 		AuctionSetParams {
@@ -50,8 +50,8 @@ async fn create_auction_test() {
     "nft": null,
     "source": [
       {
-        "collection": 0,
-        "item": 0,
+        "collection": "0",
+        "item": "0",
         "amount": 1
       }
     ],
@@ -82,8 +82,8 @@ async fn create_auction_test() {
     "trade_type": "SetAuction",
     "source": [
       {
-        "collection": 0,
-        "item": 0,
+        "collection": "0",
+        "item": "0",
         "amount": 1
       }
     ]
