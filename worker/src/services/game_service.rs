@@ -194,7 +194,7 @@ pub async fn update_metadata(
 				},
 				Err(_) => {
 					update = doc! {
-							"$set": {
+						"$set": {
 							"banner": Bson::Null,
 							"logo": Bson::Null,
 							"cover":Bson::Null,
@@ -208,10 +208,13 @@ pub async fn update_metadata(
 			}
 		},
 		Err(_) => {
-			update = doc! {"$set": {
+			update = doc! {
+			"$set": {
 				"updated_at": DateTime::now(),
-				"banner_url": Bson::Null,
-				"logo_url": Bson::Null,
+				"banner": Bson::Null,
+				"logo": Bson::Null,
+				"cover":Bson::Null,
+				"category":Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
 			}};
@@ -235,6 +238,8 @@ pub async fn clear_metadata(
 				"updated_at": DateTime::now(),
 				"banner": Bson::Null,
 				"logo": Bson::Null,
+				"category":Bson::Null,
+				"cover":Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
 		}

@@ -43,9 +43,10 @@ pub async fn create_collection_without_metadata(
 				is_verified: None,
 				slug: None,
 				category: None,
-				banner_url: None,
+				banner: None,
 				external_url: None,
-				logo_url: None,
+				logo: None,
+				cover: None,
 				name: None,
 			},
 			option,
@@ -90,40 +91,50 @@ pub async fn update_collection_metadata(
 				Ok((_doc, obj)) => {
 					let empty_val = Value::String("".to_string());
 					let banner = obj.get("banner").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let image = obj.get("image").unwrap_or(&empty_val).as_str().unwrap_or("");
-					let title = obj.get("title").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let logo = obj.get("logo").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let cover = obj.get("cover").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let description =
+						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let external_url =
 						obj.get("external_url").unwrap_or(&empty_val).as_str().unwrap_or("");
 					update = doc! {
 							"$set": {
-								"logo_url": image.to_string(),
-								"name": title.to_string(),
+								"logo": logo.to_string(),
+								"banner":banner.to_string(),
+								"cover":cover.to_string(),
+								"name": name.to_string(),
+								"description":description.to_string(),
 								"external_url": external_url.to_string(),
 								"updated_at": DateTime::now(),
-								"banner_url": banner.to_string(),
 							}
 					};
 				},
 				Err(_) => {
 					update = doc! {
 					"$set": {
-						"updated_at": DateTime::now(),
-						"logo_url": Bson::Null,
+						"logo": Bson::Null,
+						"banner": Bson::Null,
+						"cover":Bson::Null,
 						"name": Bson::Null,
+						"description":Bson::Null,
 						"external_url": Bson::Null,
-						"banner_url": Bson::Null,
+						"updated_at": DateTime::now(),
 						}
 					};
 				},
 			}
 		},
 		Err(_) => {
-			update = doc! {"$set": {
-				"updated_at": DateTime::now(),
-				"logo_url": Bson::Null,
-				"name": Bson::Null,
-				"banner_url": Bson::Null,
-				"external_url": Bson::Null,
+			update = doc! {
+				"$set": {
+						"logo": Bson::Null,
+						"banner": Bson::Null,
+						"cover":Bson::Null,
+						"name": Bson::Null,
+						"description":Bson::Null,
+						"external_url": Bson::Null,
+						"updated_at": DateTime::now(),
 			}};
 		},
 	}
@@ -145,10 +156,12 @@ pub async fn clear_metadata(
 	let query = doc! {"collection_id": collection_id.to_string()};
 	let new_collection = doc! {
 			"$set": {
-				"logo_url": Bson::Null,
+				"logo": Bson::Null,
+				"banner": Bson::Null,
+				"description":Bson::Null,
+				"cover":Bson::Null,
 				"name": Bson::Null,
 				"external_url": Bson::Null,
-				"banner_url": Bson::Null,
 				"updated_at": DateTime::now(),
 		}
 	};

@@ -41,6 +41,7 @@ use crate::{
         (status=StatusCode::NOT_FOUND,description="Collections was not found")
     )
 )]
+/// Search collection by query
 #[post("/search")]
 pub async fn search_list_collections(
 	app_state: Data<AppState>,
@@ -78,6 +79,7 @@ pub async fn search_list_collections(
 			(status = StatusCode::NOT_FOUND, description = "Failed et Volume  Collection", body = NoData)
         ),
     )]
+/// Get Volume a Collection Data (min_pice, max_price , volume, sold)
 #[get("/volume_data/{collection_id}")]
 pub async fn get_collection_volume_data(
 	app_state: Data<AppState>,
@@ -86,9 +88,8 @@ pub async fn get_collection_volume_data(
 	let collection_id = path.into_inner();
 	let result = find_collection_volume_data(collection_id, app_state.db.clone()).await;
 	match result {
-		Ok(Some(v)) => {
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(v))
-		},
+		Ok(Some(v)) =>
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(v)),
 		Ok(None) => {
 			let rsp: ResponseBody<Option<NFTCollectionVolumeDTO>> =
 				ResponseBody::<Option<NFTCollectionVolumeDTO>>::new("Invalid Data", None, false);
@@ -115,6 +116,7 @@ pub async fn get_collection_volume_data(
 			(status = StatusCode::NOT_FOUND, description = "Failed et Suppply Data Collection", body = NoData)
         ),
     )]
+/// Get Collection Analysis Data Include Number owner ,total_supply
 #[get("/supply_data/{collection_id}")]
 pub async fn get_collection_supply_data(
 	app_state: Data<AppState>,
@@ -123,9 +125,8 @@ pub async fn get_collection_supply_data(
 	let collection_id = path.into_inner();
 	let result = find_collection_supply_data(collection_id, app_state.db.clone()).await;
 	match result {
-		Ok(Some(v)) => {
-			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(v))
-		},
+		Ok(Some(v)) =>
+			Ok(HttpResponse::build(StatusCode::OK).content_type("application/json").json(v)),
 		Ok(None) => {
 			let rsp: ResponseBody<Option<NFTCollectionSupplyDTO>> =
 				ResponseBody::<Option<NFTCollectionSupplyDTO>>::new("Invalid Data", None, false);
