@@ -88,8 +88,8 @@ impl DBQuery for QueryFindTrade {
 			criteria.insert(
 				"$and",
 				vec![doc! {
-				"nft.item":nft.item.clone().parse::<i32>().unwrap(),
-				"nft.collection":nft.collection.clone().parse::<i32>().unwrap()
+				"nft.item":nft.item.clone(),
+				"nft.collection":nft.collection.clone()
 				}],
 			);
 		}
