@@ -3,6 +3,9 @@ kind: pipeline
 type: docker
 name: deploy dev
 
+clone:
+  disable: true
+  
 trigger:
   branch:
     - dev
