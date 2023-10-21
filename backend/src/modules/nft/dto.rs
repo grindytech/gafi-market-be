@@ -4,7 +4,11 @@ use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use shared::models::nft::NFT;
+use shared::{
+	models::nft::NFT,
+	utils::{decimal128_to_string, string_decimal_to_number},
+	Property,
+};
 
 use crate::common::DBQuery;
 
@@ -35,15 +39,19 @@ pub struct NFTDTO {
 	pub external_url: Option<String>,
 	pub image: Option<String>,
 	pub animation_url: Option<String>,
+
+	pub price: Option<String>,
 }
 impl Into<NFT> for NFTDTO {
 	fn into(self) -> NFT {
+		let config = shared::config::Config::init();
 		NFT {
 			token_id: self.token_id,
 			id: None,
 			collection_id: self.collection_id,
 			is_burn: self.is_burn,
 			status: self.status,
+			price: None,
 			visitor_count: self.visitor_count,
 			favorite_count: self.favorite_count,
 			created_at: DateTime::from_millis(self.created_at),
@@ -65,6 +73,16 @@ impl Into<NFT> for NFTDTO {
 }
 impl From<NFT> for NFTDTO {
 	fn from(value: NFT) -> Self {
+		let config = shared::config::Config::init();
+
+		let price: Option<String> = match value.price {
+			Some(v) => Some(decimal128_to_string(
+				&v.to_string(),
+				config.chain_decimal as i32,
+			)),
+			None => None,
+		};
+
 		NFTDTO {
 			id: Some(value.id.unwrap().to_string()),
 			token_id: value.token_id,
@@ -85,6 +103,7 @@ impl From<NFT> for NFTDTO {
 			external_url: value.external_url,
 			image: value.image,
 			animation_url: value.animation_url,
+			price,
 		}
 	}
 }
@@ -95,7 +114,7 @@ pub struct NFTOwnerOfDto {
 	pub token_id: String,
 	pub collection_id: String,
 	pub address: String,
-	pub amount: i32,
+	pub amount: u32,
 	pub nft: NFTDTO,
 }
 impl From<shared::models::NFTOwner> for NFTOwnerOfDto {
@@ -114,22 +133,69 @@ impl From<shared::models::NFTOwner> for NFTOwnerOfDto {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct QueryFindNFts {
-	pub address: Option<String>,
+	pub created_by: Option<String>,
 	pub name: Option<String>,
 	pub token_id: Option<String>,
 	pub collection_id: Option<String>,
+	pub attributes: Option<Vec<Property>>,
+	pub price: Option<String>,
+	pub onsale: Option<bool>,
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
 		let mut criteria = Document::new();
-		if let Some(address) = &self.address {
-			criteria.insert("address", address);
+		if let Some(created_by) = &self.created_by {
+			criteria.insert("created_by", created_by);
 		}
 		if let Some(name) = &self.name {
-			criteria.insert("name", name);
+			criteria.insert(
+				"name",
+				mongodb::bson::Regex {
+					pattern: name.to_string(),
+					options: "i".to_string(),
+				},
+			);
 		}
 		if let Some(token_id) = &self.token_id {
 			criteria.insert("token_id", token_id);
+		}
+		if let Some(price) = &self.price {
+			let config = shared::config::Config::init();
+			let min_price = string_decimal_to_number(&price, config.chain_decimal as i32);
+			let min_decimal: mongodb::bson::Decimal128 = min_price.parse().unwrap();
+
+			criteria.insert(
+				"price",
+				doc! {
+					"$gte":min_decimal
+				},
+			);
+		}
+
+		if let Some(onsale) = &self.onsale {
+			criteria.insert(
+				"price",
+				doc! {
+					"$exists":onsale
+
+				},
+			);
+		}
+		if let Some(attributes) = &self.attributes {
+			let attr_value: Vec<Document> = attributes
+				.into_iter()
+				.map(|doc_v| {
+					doc! {
+						"attributes.key":{
+							"$regex":doc_v.key.clone(),"$options":"i"
+						},
+					"attributes.value":
+						{
+							"$regex":doc_v.value.clone(),"$options":"i"
+					}}
+				})
+				.collect();
+			criteria.insert("$and", attr_value);
 		}
 		if let Some(collection_id) = &self.collection_id {
 			criteria.insert("collection_id", collection_id);

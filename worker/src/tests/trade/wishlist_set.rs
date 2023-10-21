@@ -1,0 +1,144 @@
+use mongodb::bson::Decimal128;
+use shared::{
+	constant::{
+		EVENT_SET_WISH_LIST, EVENT_WIST_LIST_FILLED, TRADE_SET_WIST_LIST, TRADE_STATUS_FOR_SALE,
+		TRADE_STATUS_SOLD,
+	},
+	models, tests,
+};
+
+use crate::{
+	services::{history_service, trade_service},
+	types::{WishlistFilledParams, WishlistSetParams},
+};
+
+#[tokio::test]
+async fn set_wishlist() {
+	let (mut db_process, db) = tests::utils::get_test_db(10000).await;
+	let (_, pk) = tests::utils::mock_account_id32();
+	let nft = models::trade::Nft {
+		amount: 10,
+		collection: "0".to_string(),
+		item: "0".to_string(),
+	};
+	let trade_id = 0;
+	let price_decimal: Decimal128 = "100".parse().unwrap();
+	trade_service::set_wishlist(
+		WishlistSetParams {
+			block_height: 0,
+			event_index: 0,
+			start_block: Some(1),
+			end_block: Some(100),
+			extrinsic_index: 0,
+			price: Some(price_decimal),
+			trade_id: trade_id.to_string(),
+			who: pk.clone(),
+			wish_list: vec![nft.clone()],
+		},
+		&db,
+	)
+	.await
+	.unwrap();
+
+	let trade = trade_service::get_by_trade_id(&db, &trade_id.to_string())
+		.await
+		.unwrap()
+		.unwrap();
+
+	assert_eq!(trade.trade_id, trade_id.to_string());
+	assert_eq!(trade.price, Some(price_decimal));
+	assert_eq!(trade.wish_list, Some(vec![nft.clone()]));
+	assert_eq!(trade.owner, pk);
+	assert_eq!(trade.start_block, Some(1));
+	assert_eq!(trade.end_block, Some(100));
+	assert_eq!(trade.status, TRADE_STATUS_FOR_SALE.to_string());
+	assert_eq!(trade.trade_type, TRADE_SET_WIST_LIST.to_string());
+
+	let history = history_service::get_history_by_trade_id(&trade_id.to_string(), None, &db)
+		.await
+		.unwrap();
+	assert_eq!(history[0].trade_id, Some(trade_id.to_string()));
+	assert_eq!(history[0].event_index, 0);
+	assert_eq!(history[0].block_height, 0);
+	assert_eq!(history[0].extrinsic_index, 0);
+	assert_eq!(history[0].nfts, Some(vec![nft]));
+	assert_eq!(history[0].price, Some(price_decimal));
+	assert_eq!(history[0].event, EVENT_SET_WISH_LIST);
+	assert_eq!(history[0].trade_type, Some(TRADE_SET_WIST_LIST.to_string()));
+
+	let _ = db_process.kill();
+}
+
+#[tokio::test]
+async fn set_wishlist_filled() {
+	let (mut db_process, db) = tests::utils::get_test_db(10000).await;
+	let (_, pk) = tests::utils::mock_account_id32();
+	let nft = models::trade::Nft {
+		amount: 10,
+		collection: "0".to_string(),
+		item: "0".to_string(),
+	};
+	let trade_id = 0;
+	let price_decimal: Decimal128 = "100".parse().unwrap();
+	trade_service::set_wishlist(
+		WishlistSetParams {
+			block_height: 0,
+			event_index: 0,
+			start_block: Some(1),
+			end_block: Some(100),
+			extrinsic_index: 0,
+			price: Some(price_decimal),
+			trade_id: trade_id.to_string(),
+			who: pk.clone(),
+			wish_list: vec![nft.clone()],
+		},
+		&db,
+	)
+	.await
+	.unwrap();
+
+	let trade = trade_service::get_by_trade_id(&db, &trade_id.to_string())
+		.await
+		.unwrap()
+		.unwrap();
+
+	let who_filled = "0000";
+
+	trade_service::wishlist_filled(
+		WishlistFilledParams {
+			block_height: 1,
+			event_index: 0,
+			extrinsic_index: 0,
+			trade,
+			who: who_filled.to_string(),
+		},
+		&db,
+	)
+	.await
+	.unwrap();
+
+	let trade = trade_service::get_by_trade_id(&db, &trade_id.to_string())
+		.await
+		.unwrap()
+		.unwrap();
+
+	assert_eq!(trade.status, TRADE_STATUS_SOLD.to_string());
+
+	let histories = history_service::get_history_by_trade_id(&trade_id.to_string(), None, &db)
+		.await
+		.unwrap();
+	let history = histories.iter().find(|h| h.event == EVENT_WIST_LIST_FILLED).unwrap();
+
+	assert_eq!(history.trade_id, Some(trade_id.to_string()));
+	assert_eq!(history.event_index, 0);
+	assert_eq!(history.block_height, 1);
+	assert_eq!(history.extrinsic_index, 0);
+	assert_eq!(history.nfts, Some(vec![nft.clone()]));
+	assert_eq!(history.price, Some(price_decimal));
+	assert_eq!(history.event, EVENT_WIST_LIST_FILLED);
+	assert_eq!(history.trade_type, Some(TRADE_SET_WIST_LIST.to_string()));
+	assert_eq!(history.from, pk);
+	assert_eq!(history.to, Some(who_filled.to_string()));
+
+	let _ = db_process.kill();
+}

@@ -1,13 +1,7 @@
-use mongodb::{
-	bson::{doc, Decimal128, Document},
-	options::UpdateOptions,
-};
+use mongodb::bson::Decimal128;
 use shared::{
-	constant::{
-		EVENT_BUNDLE_BOUGHT, EVENT_SET_BUNDLE, TRADE_SET_BUNDLE, TRADE_STATUS_FOR_SALE,
-		TRADE_STATUS_SOLD,
-	},
-	history_tx, models, BaseDocument, Trade,
+	constant::{EVENT_BUNDLE_BOUGHT, EVENT_SET_BUNDLE},
+	models,
 };
 pub use shared::{
 	constant::{TRADE_SET_AUCTION, TRADE_SET_WIST_LIST},
@@ -15,48 +9,31 @@ pub use shared::{
 };
 
 use crate::{
-	gafi, services,
+	gafi,
+	services::{self, trade_service},
+	types::{BundleBoughtParams, BundleSetParams},
 	workers::{EventHandle, HandleParams},
 };
 
 async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::BundleBought>()?;
 	if let Some(ev) = event_parse {
-		let trade_db = params.db.collection::<Trade>(Trade::name().as_str());
-		let query = doc! {
-		  "trade_id": ev.trade,
-		};
-		let trade = trade_db.find_one(query.clone(), None).await?.unwrap();
-		let update = doc! {
-		  "status": TRADE_STATUS_SOLD,
-		};
-		let config = shared::config::Config::init();
-		trade_db.update_one(query.clone(), update, None).await?;
-		let history = history_tx::HistoryTx {
-			id: None,
-			amount: None,
-			price: trade.price,
-			block_height: params.block.height,
-			event: EVENT_BUNDLE_BOUGHT.to_string(),
-			event_index: params.ev.index(),
-			extrinsic_index: params.extrinsic_index.unwrap(),
-			from: trade.owner.clone(),
-			to: Some(hex::encode(ev.who.0)),
-			nfts: trade.bundle.clone(),
-			pool: None,
-			source: None,
-			trade_id: Some(trade.trade_id),
-			trade_type: Some(trade.trade_type),
-			tx_hash: None,
-			value: Some(
-				shared::utils::string_decimal_to_number(
-					&ev.bid_price.to_string(),
-					config.chain_decimal as i32,
-				)
-				.parse()?,
-			),
-		};
-		services::history_service::upsert(history, params.db).await?;
+		let trade = trade_service::get_trade_by_trade_id(&ev.trade.to_string(), params.db)
+			.await?
+			.ok_or("trade not found")?;
+
+		trade_service::bundle_bought(
+			BundleBoughtParams {
+				block_height: params.block.height,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				trade: trade.clone(),
+				who: hex::encode(ev.who.0),
+			},
+			params.db,
+		)
+		.await?;
+
 		for nft in trade.bundle.unwrap() {
 			services::nft_service::refresh_balance(
 				ev.who.clone(),
@@ -80,14 +57,15 @@ async fn on_bundle_bought(params: HandleParams<'_>) -> Result<()> {
 	}
 	Ok(())
 }
+
 async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::BundleSet>()?;
 	if let Some(ev) = event_parse {
 		let mut bundle: Vec<models::trade::Nft> = vec![];
 		for nft in ev.bundle {
 			bundle.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}
@@ -97,40 +75,22 @@ async fn on_bundle_set(params: HandleParams<'_>) -> Result<()> {
 			config.chain_decimal as i32,
 		);
 		let price_decimal: Decimal128 = price.parse()?;
-		let trade: Document = Trade {
-			id: None,
-			nft: None,
-			maybe_required: None,
-			source: None,
-			bundle: Some(bundle.clone()),
-			wish_list: None,
 
-			price: Some(price_decimal),
-
-			owner: hex::encode(ev.who.0),
-
-			start_block: ev.start_block,
-			end_block: ev.end_block,
-			duration: None,
-
-			trade_id: ev.trade.to_string(),
-			trade_type: TRADE_SET_BUNDLE.to_string(),
-
-			status: TRADE_STATUS_FOR_SALE.to_string(),
-			highest_bid: None,
-		}
-		.into();
-
-		//create sale
-		let trade_db = params.db.collection::<Trade>(&Trade::name());
-		let options = UpdateOptions::builder().upsert(true).build();
-		let query = doc! {
-		  "trade_id": ev.trade.to_string(),
-		};
-		let upsert = doc! {
-		  "$set": trade,
-		};
-		trade_db.update_one(query, upsert, options).await?;
+		trade_service::set_bundle(
+			BundleSetParams {
+				block_height: params.block.height,
+				end_block: ev.end_block,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				nfts: bundle.clone(),
+				price: Some(price_decimal),
+				start_block: ev.start_block,
+				trade_id: ev.trade.to_string(),
+				who: hex::encode(ev.who.0),
+			},
+			params.db,
+		)
+		.await?;
 		//refetch balance
 		for nft in bundle {
 			services::nft_service::refresh_balance(

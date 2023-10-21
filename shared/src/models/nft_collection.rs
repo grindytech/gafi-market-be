@@ -1,7 +1,7 @@
 use mongodb::bson::{doc, oid::ObjectId, DateTime, Document};
 use serde::{Deserialize, Serialize};
 
-use crate::{BaseDocument, NFT};
+use crate::BaseDocument;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct NFTCollection {
 	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -16,11 +16,11 @@ pub struct NFTCollection {
 	pub games: Option<Vec<String>>,
 
 	pub name: Option<String>,
-	pub logo_url: Option<String>,
-	pub banner_url: Option<String>,
-	pub external_url: Option<String>,
+	pub logo: Option<String>,
+	pub cover: Option<String>,
+	pub banner: Option<String>,
 
-	pub nfts: Option<Vec<NFT>>,
+	pub external_url: Option<String>,
 }
 
 impl BaseDocument for NFTCollection {
@@ -43,8 +43,9 @@ impl Into<Document> for NFTCollection {
 			"games": self.games,
 
 			"name": self.name,
-			"logo_url": self.logo_url,
-			"banner_url": self.banner_url,
+			"logo": self.logo,
+			"banner": self.banner,
+			"cover": self.cover,
 			"external_url": self.external_url,
 		}
 	}

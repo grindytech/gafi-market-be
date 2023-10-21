@@ -103,8 +103,8 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 		let mut source: Vec<models::trade::Nft> = vec![];
 		for nft in ev.source {
 			source.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}
@@ -142,6 +142,10 @@ async fn on_auction_set(params: HandleParams<'_>) -> Result<()> {
 async fn on_auction_bid(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::Bid>()?;
 	if let Some(ev) = event_parse {
+		let trade = trade_service::get_trade_by_trade_id(&ev.trade.to_string(), params.db)
+			.await?
+			.ok_or("trade not found")?;
+
 		let config = shared::config::Config::init();
 		let bid_price = string_decimal_to_number(&ev.bid.to_string(), config.chain_decimal as i32);
 		let bid_price_decimal128: Decimal128 = bid_price.parse()?;
@@ -151,7 +155,7 @@ async fn on_auction_bid(params: HandleParams<'_>) -> Result<()> {
 				block_height: params.block.height,
 				event_index: params.ev.index(),
 				extrinsic_index: params.extrinsic_index.unwrap(),
-				trade_id: ev.trade.to_string(),
+				trade,
 				who: hex::encode(ev.who.0).to_string(),
 			},
 			params.db,

@@ -1,62 +1,34 @@
-use mongodb::{
-	bson::{doc, Decimal128, Document},
-	options::UpdateOptions,
-};
+use mongodb::bson::Decimal128;
+pub use shared::Result;
 use shared::{
-	constant::{
-		EVENT_SET_SWAP, EVENT_SWAP_CLAIMED, TRADE_SET_SWAP, TRADE_STATUS_FOR_SALE,
-		TRADE_STATUS_SOLD,
-	},
-	models, BaseDocument, Trade,
-};
-pub use shared::{
-	constant::{TRADE_SET_AUCTION, TRADE_SET_WIST_LIST},
-	types::Result,
+	constant::{EVENT_SET_SWAP, EVENT_SWAP_CLAIMED},
+	models,
 };
 
 use crate::{
 	gafi,
-	services::{self},
+	services::{self, trade_service},
+	types::SwapSetParams,
 	workers::{EventHandle, HandleParams},
 };
 
 async fn on_swap_claimed(params: HandleParams<'_>) -> Result<()> {
 	let event_parse = params.ev.as_event::<gafi::game::events::SwapClaimed>()?;
 	if let Some(ev) = event_parse {
-		let trade_db = params.db.collection::<Trade>(Trade::name().as_str());
-		let query = doc! {
-		  "trade_id": ev.trade,
-		};
-		let trade = trade_db.find_one(query.clone(), None).await?.unwrap();
-		let update = doc! {
-		  "status": TRADE_STATUS_SOLD,
-		};
-		trade_db.update_one(query.clone(), update, None).await?;
-		let config = shared::config::Config::init();
-		let maybe_price: Decimal128 = shared::utils::string_decimal_to_number(
-			&ev.maybe_bid_price.unwrap_or(0u128).to_string(),
-			config.chain_decimal as i32,
+		let trade = trade_service::get_trade_by_trade_id(&ev.trade.to_string(), params.db)
+			.await?
+			.ok_or("trade not found")?;
+		trade_service::claim_swap(
+			crate::types::SwapClaimedParams {
+				block_height: params.block.height,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				who: hex::encode(ev.who.0),
+				trade: trade.clone(),
+			},
+			params.db,
 		)
-		.parse()?;
-		let history = models::HistoryTx {
-			amount: None,
-			block_height: params.block.height,
-			event: EVENT_SWAP_CLAIMED.to_string(),
-			event_index: params.ev.index(),
-			extrinsic_index: params.extrinsic_index.unwrap(),
-			from: trade.owner.clone(),
-			to: Some(hex::encode(ev.who.0)),
-			id: None,
-			nfts: trade.maybe_required.clone(),
-			source: trade.source.clone(),
-			pool: None,
-			price: Some(maybe_price),
-			trade_id: Some(ev.trade.to_string()),
-			trade_type: None,
-			tx_hash: None,
-			value: Some(maybe_price),
-		};
-		services::history_service::upsert(history, params.db).await?;
+		.await?;
 
 		//refresh balance
 		if trade.maybe_required.is_some() {
@@ -115,15 +87,15 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 		let mut required: Vec<models::trade::Nft> = vec![];
 		for nft in ev.source {
 			source.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}
 		for nft in ev.required {
 			required.push(models::trade::Nft {
-				collection: nft.collection,
-				item: nft.item,
+				collection: nft.collection.to_string(),
+				item: nft.item.to_string(),
 				amount: nft.amount,
 			});
 		}
@@ -139,40 +111,23 @@ async fn on_swap_set(params: HandleParams<'_>) -> Result<()> {
 			None => None,
 		};
 		let maybe_price_decimal: Decimal128 = maybe_price.unwrap_or("0".to_string()).parse()?;
-		let trade: Document = Trade {
-			id: None,
-			nft: None,
-			maybe_required: Some(required),
-			source: Some(source.clone()),
-			bundle: None,
-			wish_list: None,
 
-			price: Some(maybe_price_decimal),
-
-			owner: hex::encode(ev.who.0),
-
-			start_block: ev.start_block,
-			end_block: ev.end_block,
-			duration: None,
-
-			trade_id: ev.trade.to_string(),
-			trade_type: TRADE_SET_SWAP.to_string(),
-
-			status: TRADE_STATUS_FOR_SALE.to_string(),
-			highest_bid: None,
-		}
-		.into();
-
-		//create sale
-		let trade_db = params.db.collection::<Trade>(&Trade::name());
-		let options = UpdateOptions::builder().upsert(true).build();
-		let query = doc! {
-		  "trade_id": ev.trade.to_string(),
-		};
-		let upsert = doc! {
-		  "$set": trade,
-		};
-		trade_db.update_one(query, upsert, options).await?;
+		trade_service::set_swap(
+			SwapSetParams {
+				block_height: params.block.height,
+				start_block: ev.start_block,
+				end_block: ev.end_block,
+				event_index: params.ev.index(),
+				extrinsic_index: params.extrinsic_index.unwrap(),
+				price: Some(maybe_price_decimal),
+				required,
+				source: source.clone(),
+				trade_id: ev.trade.to_string(),
+				who: hex::encode(ev.who.0),
+			},
+			params.db,
+		)
+		.await?;
 
 		//refetch balance
 		for nft in source {

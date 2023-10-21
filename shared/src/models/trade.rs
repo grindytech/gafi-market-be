@@ -1,21 +1,13 @@
 use mongodb::bson::{doc, oid::ObjectId, Decimal128, Document};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::BaseDocument;
 
-pub enum TradeType {
-	SetPrice,
-	Swap,
-	SetBuy,
-	Wishlist,
-	Bundle,
-	Auction,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct Nft {
-	pub collection: u32,
-	pub item: u32,
+	pub collection: String,
+	pub item: String,
 	pub amount: u32,
 }
 

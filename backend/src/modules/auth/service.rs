@@ -15,20 +15,19 @@ use subxt_signer::sr25519::{PublicKey, Signature};
 
 use super::dto::QueryAuth;
 
-pub async fn update_nonce(
-	address: &String,
-	nonce: String,
-	db: Database,
-) -> Result<String, mongodb::error::Error> {
+pub async fn update_nonce(address: &String, db: Database) -> Result<String, mongodb::error::Error> {
 	let col: Collection<AccountDTO> = db.collection(models::account::Account::name().as_str());
+	let nonce = generate_uuid();
 
 	let filter = doc! {"address":address};
 	let update = doc! {
-		"$set":{"nonce":nonce.clone()}
+		"$set":{"nonce":&nonce.clone()}
 	};
-
-	if let Ok(Some(account)) = col.find_one_and_update(filter, update, None).await {
-		Ok(account.address)
+	let options = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+	if let Ok(Some(account)) = col.find_one_and_update(filter, update, options).await {
+		Ok(account.nonce.unwrap_or("Error Nonce".to_string()))
 	} else {
 		let new_account = create_account(
 			AccountDTO {
@@ -37,19 +36,17 @@ pub async fn update_nonce(
 				is_verified: None,
 				name: address.to_string(),
 				bio: None,
-				logo_url: None,
-				banner_url: None,
+				logo: None,
+				banner: None,
 				updated_at: Utc::now().timestamp_millis(),
 				created_at: Utc::now().timestamp_millis(),
 				social: SocialInfo {
 					discord: None,
-					facebook: None,
-					medium: None,
 					twitter: None,
 					web: None,
 				},
 				favorites: None,
-				nonce: Some(nonce),
+				nonce: Some(nonce.clone()),
 				refresh_token: None,
 			},
 			db.clone(),
@@ -57,7 +54,7 @@ pub async fn update_nonce(
 		.await;
 
 		match new_account {
-			Ok(account) => Ok(account),
+			Ok(account) => Ok(nonce),
 			Err(e) => Err(e),
 		}
 	}
@@ -88,7 +85,7 @@ pub async fn verify_signature(
 			None => (),
 		}
 	} else {
-		return Ok(None);
+		return Ok(None)
 	}
 
 	let message = generate_message_sign_in(&address, &nonce_value);
@@ -106,7 +103,7 @@ pub async fn verify_signature(
 		subxt_signer::sr25519::verify(&Signature(log_fe), message, &PublicKey(public_key.0));
 
 	if result == false {
-		return Ok(None);
+		return Ok(None)
 	};
 	let new_nonce = generate_uuid();
 
@@ -142,9 +139,25 @@ pub async fn refresh_access_token(
 		],
 
 	};
-	let account = collection.find_one(filter.clone(), None).await;
+	let refresh_token =
+		generate_jwt_token(address, app.config.clone(), app.config.jwt_refresh_time);
+	let update = doc! {
+		"$set":{
+			"refresh_token":refresh_token.unwrap_or("refresh token error".to_string())
+		}
+	};
 
-	account
+	let update_option = FindOneAndUpdateOptions::builder()
+		.return_document(mongodb::options::ReturnDocument::After)
+		.build();
+
+	if let Ok(Some(account_detail)) =
+		collection.find_one_and_update(filter, update, update_option).await
+	{
+		Ok(Some(account_detail))
+	} else {
+		Ok(None)
+	}
 }
 
 pub async fn delete_refresh_token(

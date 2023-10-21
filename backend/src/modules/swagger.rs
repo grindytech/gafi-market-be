@@ -10,14 +10,14 @@ use crate::{
 };
 
 
-use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft};
+use shared::{SocialInfo,Favorites, Property, LootTable, LootTableNft, history_tx::Nft};
 use utoipa::OpenApi;
 
 use super::{
 	auth::dto::{QueryAuth, QueryNonce, TokenDTO},
 	game::dto::QueryFindGame,
 	pool::dto::{PoolDTO, QueryFindPool},
-	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::QueryFindCollections, nft::dto::QueryFindNFts,
+	transaction::dto::QueryFindTX, account::dto::QueryFindAccount, collection::dto::{QueryFindCollections, NFTCollectionSupplyDTO, NFTCollectionVolumeDTO}, nft::dto::QueryFindNFts, trade::dto::{QueryFindTrade, TradeDTO},
 };
 
 #[derive(OpenApi)]
@@ -25,22 +25,31 @@ use super::{
     paths(
         crate::modules::account::controller::get_account,
         crate::modules::account::controller::update_favorite,
-        crate::modules::game::controller::search_games_by_query,
+      
         crate::modules::categories::controller::create_new_category,
         crate::modules::categories::controller::get_list_categories,
-        crate::modules::game::controller::get_game,
-        crate::modules::nft::controller::get_nft,
-        crate::modules::nft::controller::get_list_nft,
+        
+
+        crate::modules::game::controller::search_games_by_query,
+
+        crate::modules::nft::controller::get_owner_nfts,
         crate::modules::nft::controller::search_list_nfts,
-        crate::modules::collection::controller::get_collection,
+
         crate::modules::collection::controller::search_list_collections,
-        crate::modules::transaction::controller::get_history_tx,
+        crate::modules::collection::controller::get_collection_volume_data,
+        crate::modules::collection::controller::get_collection_supply_data,
+        
+       
         crate::modules::transaction::controller::search_history_tx,
+
         crate::modules::auth::controller::get_random_nonce,
         crate::modules::auth::controller::get_verify_token,
         crate::modules::auth::controller::refresh_token,
         crate::modules::auth::controller::logout,
+
         crate::modules::pool::controller::search_list_pools,
+
+        crate::modules::trade::controller::search_list_trades
     ),
    /*  tags(
             (name = "CollectionEndpoints", description = "NFT Collections  endpoints.")
@@ -51,12 +60,16 @@ use super::{
             AccountDTO,
             GameDTO,
             PoolDTO,
+            TradeDTO,
             SocialInfo,
             Property,
             LootTable,
             LootTableNft,
+            Nft, // history nft
             NFTDTO,
             NFTCollectionDTO,
+            NFTCollectionVolumeDTO,
+            NFTCollectionSupplyDTO,
             ResponseBody<()>,
             Page<()>,
             QueryNonce,
@@ -65,6 +78,7 @@ use super::{
             QueryFindGame,
             QueryFindTX,
             QueryFindNFts,
+            QueryFindTrade,
             QueryFindPool,
             QueryFindCollections,
             QueryPage<()>,
@@ -77,6 +91,10 @@ use super::{
     servers(
         (url = "/api/v1"),
     ),
+    tags(
+        (name="AccountEndpoints",description="Account Endpoint Update information"),
+        (name="AuthenticationEndpoints", description="Authentication Verify Endpoints")
+    )
 )]
 
 pub struct ApiDoc;
