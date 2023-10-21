@@ -37,7 +37,10 @@ impl From<Pool> for PoolDTO {
 
 		PoolDTO {
 			pool_id: value.pool_id,
-			owner: value.owner,
+			owner: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.owner).expect("Failed to decode"),
+			))
+			.to_string(),
 			type_pool: value.type_pool,
 			admin: value.admin,
 

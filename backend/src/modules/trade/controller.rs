@@ -23,8 +23,7 @@ use actix_web::{
 		"order_by": "trade_id",
 		"desc": true,
 		"query":{
-			"trade_id":null,
-		
+			"trade_id":null,		
 		}
 		})
 	),

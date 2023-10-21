@@ -1,7 +1,7 @@
 use crate::common::DBQuery;
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::{models::game::Game, SocialInfo};
+use shared::{models::game::Game, utils::vec_to_array, SocialInfo};
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
@@ -27,10 +27,11 @@ pub struct GameDTO {
 
 impl From<Game> for GameDTO {
 	fn from(value: Game) -> Self {
+		let decode_value = hex::decode(value.owner).expect("Failed to decode");
 		GameDTO {
 			id: Some(value.id.unwrap().to_string()),
 			game_id: value.game_id,
-			owner: value.owner,
+			owner: subxt::utils::AccountId32(vec_to_array(decode_value)).to_string(),
 			is_verified: value.is_verified,
 			social: match value.social {
 				Some(s) => Some(s.into()),
