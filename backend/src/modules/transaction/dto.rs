@@ -35,8 +35,19 @@ impl From<HistoryTx> for HistoryTxDTO {
 			value: None,
 
 			event: value.event,
-			from: value.from,
-			to: value.to,
+			from: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.from).expect("Failed to decode"),
+			))
+			.to_string(),
+			to: match value.to {
+				Some(to_address) => Some(
+					subxt::utils::AccountId32(shared::utils::vec_to_array(
+						hex::decode(to_address).expect("Failed to decode"),
+					))
+					.to_string(),
+				),
+				None => None,
+			},
 			block_height: value.block_height,
 			event_index: value.event_index,
 			extrinsic_index: value.extrinsic_index,

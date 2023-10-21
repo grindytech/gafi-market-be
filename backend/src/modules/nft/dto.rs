@@ -94,7 +94,10 @@ impl From<NFT> for NFTDTO {
 			supply: value.supply,
 			updated_at: Some(value.updated_at.unwrap_or(value.created_at).timestamp_millis()),
 			created_at: value.created_at.timestamp_millis(),
-			created_by: value.created_by,
+			created_by: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.created_by).expect("Failed to decode"),
+			))
+			.to_string(),
 			attributes: Some(shared::utils::vec_property_to_hashmap(
 				value.attributes.unwrap_or(vec![]),
 			)),
@@ -121,7 +124,10 @@ impl From<shared::models::NFTOwner> for NFTOwnerOfDto {
 	fn from(value: shared::models::NFTOwner) -> Self {
 		let nft = value.nft.unwrap_or(vec![]).get(0).expect("nft not found").to_owned();
 		Self {
-			address: value.address,
+			address: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.address).expect("Failed to decode"),
+			))
+			.to_string(),
 			amount: value.amount,
 			collection_id: value.collection_id,
 			id: Some(value.id.unwrap().to_string()),

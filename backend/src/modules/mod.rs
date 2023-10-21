@@ -1,6 +1,5 @@
 pub mod account;
 pub mod auth;
-pub mod categories;
 pub mod collection;
 pub mod game;
 pub mod nft;

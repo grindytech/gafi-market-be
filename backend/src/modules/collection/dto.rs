@@ -37,7 +37,10 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			name: value.name,
 			is_verified: value.is_verified,
 			category: value.category,
-			owner: value.owner,
+			owner: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.owner).expect("Failed to decode"),
+			))
+			.to_string(),
 			created_at: value.created_at.timestamp_millis(),
 			id: Some(value.id.unwrap().to_string()),
 			updated_at: Some(value.updated_at.unwrap().timestamp_millis()),

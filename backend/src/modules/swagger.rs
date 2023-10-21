@@ -26,10 +26,6 @@ use super::{
         crate::modules::account::controller::get_account,
         crate::modules::account::controller::update_favorite,
       
-        crate::modules::categories::controller::create_new_category,
-        crate::modules::categories::controller::get_list_categories,
-        
-
         crate::modules::game::controller::search_games_by_query,
 
         crate::modules::nft::controller::get_owner_nfts,

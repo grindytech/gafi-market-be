@@ -38,7 +38,10 @@ impl From<Trade> for TradeDTO {
 		TradeDTO {
 			trade_id: value.trade_id,
 			trade_type: value.trade_type,
-			owner: value.owner,
+			owner: subxt::utils::AccountId32(shared::utils::vec_to_array(
+				hex::decode(value.owner).expect("Failed to decode"),
+			))
+			.to_string(),
 			start_block: value.start_block,
 			end_block: value.end_block,
 			duration: value.duration,
