@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
@@ -67,9 +69,9 @@ impl DBQuery for QueryFindCollections {
 		if let Some(collection_id) = &self.collection_id {
 			criteria.insert("collection_id", collection_id);
 		}
-
 		if let Some(owner) = &self.owner {
-			criteria.insert("owner", owner);
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(

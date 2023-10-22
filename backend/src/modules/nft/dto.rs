@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
@@ -151,7 +151,9 @@ impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
 		let mut criteria = Document::new();
 		if let Some(created_by) = &self.created_by {
-			criteria.insert("created_by", created_by);
+			let public_key =
+				subxt::utils::AccountId32::from_str(&created_by).expect("Failed to decode");
+			criteria.insert("created_by", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(

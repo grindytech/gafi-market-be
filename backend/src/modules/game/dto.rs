@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::common::DBQuery;
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
@@ -60,36 +62,26 @@ pub struct QueryFindGame {
 
 impl DBQuery for QueryFindGame {
 	fn to_doc(&self) -> Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
 		if let Some(game_id) = &self.game_id {
-			criteria.push(doc! {
-				"game_id": game_id
-			});
+			criteria.insert("game_id", game_id);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.push(doc! {
-				"owner": owner
-			});
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
-			criteria.push(doc! {
-				"name":{
+			criteria.insert(
+				"name",
+				doc! {
 					 "$regex": name.to_string(),
 					 "$options":"i"
-				}
-			});
+				},
+			);
 		}
 		if let Some(collection_id) = &self.collection {
-			criteria.push(doc! {
-				"collection_id": collection_id
-			});
+			criteria.insert("collection_id", collection_id);
 		}
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }

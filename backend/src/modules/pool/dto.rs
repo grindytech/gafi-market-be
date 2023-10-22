@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::{LootTable, Pool};
@@ -70,7 +72,8 @@ impl DBQuery for QueryFindPool {
 			criteria.insert("pool_id", pool_id);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.insert("owner", owner);
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(type_pool) = &self.type_pool {
 			criteria.insert("type_pool", type_pool);

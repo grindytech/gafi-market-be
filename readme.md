@@ -44,11 +44,12 @@ To install and set up the project locally, follow these steps:
    The server should now be running on `http://localhost:8080`.
 
 7. Start the worker
+
    ```shell
    cargo run -p worker
    ```
 
-7. (Optional) We use `mongodb-memory-server` to unit test, so if you want to run unit tests, you need to install Node.js and the required dependencies. Run the following commands:
+8. (Optional) We use `mongodb-memory-server` to unit test, so if you want to run unit tests, you need to install Node.js and the required dependencies. Run the following commands:
 
    ```shell
    npm install
@@ -74,10 +75,13 @@ The project uses environment variables for configuration. Create a `.env` file i
 
 - `MONGODB_URI`: The URI for connecting to the MongoDB database.
 - `MONGODB_DB_NAME`: The name of the MongoDB database.
-- `JWT_TOKEN_SECRET`: The secret key used for JWT token generation and validation.
-- `JWT_EXPIRE_TIME`: The expiration time for JWT tokens.
+- `JWT_ACCESS_SECRET`: The secret key used for JWT Access token generation and validation.
+- `JWT_REFRESH_SECRET`: The secret key used for JWT Refresh token generation and validation.
+- `JWT_ACCESS_TIME`: The expiration time for JWT Access tokens.
+- `JWT_REFRESH_TIME`: The expiration time for JWT Refresh tokens.
 - `START_BLOCK`: The block height that worker begin handle.
 - `RPC`: The websocket rpc uri.
+- `CHAIN_DECIMAL`: Default 10
 
 ## Architecture
 
@@ -93,11 +97,11 @@ package "Blockchain" {
 node "Worker" {
   [Event handlers]
   "Event handlers" <-- Events  : Process blockchain Events
-  
+
 }
 
 note as EventHandleNote
- mint, transfer, burn, 
+ mint, transfer, burn,
  metdata, trade, game,
  collecction, etc..
 end note
@@ -110,7 +114,7 @@ node "Backend" {
 HTTP ..> APIs : use RESTful APIs
 
 database "MongoDB" {
-	"Event handlers" <-> "MongoDB"  
+	"Event handlers" <-> "MongoDB"
 	"Backend" <-> "MongoDB"
 }
 
@@ -126,8 +130,8 @@ database "MongoDB" {
 ```plantuml
 @startuml
 skinparam linetype ortho
-object block 
-block : height: u32 
+object block
+block : height: u32
 block : hash: String
 
 object game
@@ -236,13 +240,13 @@ history : trade_id: Option<String>
 history : trade_type: Option<String>
 history : source: Option<Vec<Nft>> #swap,
 
-pool  ..{ request_mint 
-pool  ..{ loot_table 
-nft  ..{ loot_table 
-game  }..{ nft_collection 
-nft  }.. nft_collection 
-nft_owner  }.. nft 
-nft_owner  }.. account 
+pool  ..{ request_mint
+pool  ..{ loot_table
+nft  ..{ loot_table
+game  }..{ nft_collection
+nft  }.. nft_collection
+nft_owner  }.. nft
+nft_owner  }.. account
 trade }.. nft
 history }.. nft
 history }.. trade
@@ -268,4 +272,3 @@ If you would like to contribute to the project, please follow these guidelines:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
