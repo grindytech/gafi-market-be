@@ -20,7 +20,7 @@ use actix_web::{
         "search":"",
 		"page": 1,
 		"size": 10,
-		"order_by": "trade_id",
+		"order_by": "trade_type",
 		"desc": true,
 		"query":{
 			"trade_id":null,		

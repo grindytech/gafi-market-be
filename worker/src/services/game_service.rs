@@ -180,11 +180,17 @@ pub async fn update_metadata(
 						obj.get("description").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let name = obj.get("name").unwrap_or(&empty_val).as_str().unwrap_or("");
 					let category = obj.get("category").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let twitter = obj.get("twitter").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let website = obj.get("website").unwrap_or(&empty_val).as_str().unwrap_or("");
+					let discord = obj.get("discord").unwrap_or(&empty_val).as_str().unwrap_or("");
 					update = doc! {
 							"$set": {
 							"banner": banner.to_string(),
 							"logo": logo.to_string(),
 							"cover":cover.to_string(),
+							"twitter":twitter.to_string(),
+							"website":website.to_string(),
+							"discord":discord.to_string(),
 							"description": description.to_string(),
 							"name": name.to_string(),
 							"category":category.to_string(),
@@ -200,6 +206,9 @@ pub async fn update_metadata(
 							"cover":Bson::Null,
 							"category":Bson::Null,
 							"description": Bson::Null,
+							"twitter":Bson::Null,
+							"website":Bson::Null,
+							"discord":Bson::Null,
 							"name":  Bson::Null,
 							"updated_at": DateTime::now(),
 						}
@@ -215,6 +224,9 @@ pub async fn update_metadata(
 				"logo": Bson::Null,
 				"cover":Bson::Null,
 				"category":Bson::Null,
+				"twitter":Bson::Null,
+				"website":Bson::Null,
+				"discord":Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
 			}};
@@ -240,6 +252,9 @@ pub async fn clear_metadata(
 				"logo": Bson::Null,
 				"category":Bson::Null,
 				"cover":Bson::Null,
+				"twitter":Bson::Null,
+				"website":Bson::Null,
+				"discord":Bson::Null,
 				"description": Bson::Null,
 				"name":  Bson::Null,
 		}

@@ -17,8 +17,8 @@ pub struct PoolDTO {
 
 	pub minting_fee: String,
 
-	pub begin_at: i64,
-	pub end_at: i64,
+	pub start_block: i64,
+	pub end_block: i64,
 
 	pub owner_deposit: String,
 
@@ -46,8 +46,8 @@ impl From<Pool> for PoolDTO {
 			type_pool: value.type_pool,
 			admin: value.admin,
 
-			begin_at: value.begin_at,
-			end_at: value.end_at,
+			start_block: value.start_block,
+			end_block: value.end_block,
 			owner_deposit: value.owner_deposit,
 			updated_at: value.updated_at,
 			created_at: value.created_at,

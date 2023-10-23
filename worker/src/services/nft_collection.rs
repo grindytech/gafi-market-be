@@ -48,6 +48,7 @@ pub async fn create_collection_without_metadata(
 				logo: None,
 				cover: None,
 				name: None,
+				description: None,
 			},
 			option,
 		)

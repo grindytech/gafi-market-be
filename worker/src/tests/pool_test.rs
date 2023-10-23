@@ -12,8 +12,9 @@ const MOCK_POOL: &str = r#"
   "minting_fee": {
     "$numberDecimal": "20.000000000000000000"
   },
-  "begin_at": 218076,
-  "end_at": 419676,
+  "title":"What Title",
+  "start_block": 218076,
+  "end_block": 419676,
   "owner_deposit": "3000000000000000000",
   "updated_at": 1695264049557,
   "created_at": 1695264049557,
@@ -44,3 +45,6 @@ pub async fn upsert_pool() {
 	assert_eq!(Some(pool), pool_in_db);
 	let _ = db_process.kill();
 }
+
+#[tokio::test]
+pub async fn pool_metadata_set() {}

@@ -7,8 +7,7 @@ use crate::BaseDocument;
 pub struct SocialInfo {
 	pub twitter: Option<String>,
 	pub web: Option<String>,
-	/* 	pub medium: Option<String>,
-	pub facebook: Option<String>, */
+
 	pub discord: Option<String>,
 }
 

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::{common::DBQuery, modules::game};
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -26,6 +26,7 @@ pub struct NFTCollectionDTO {
 	pub banner: Option<String>,
 	pub cover: Option<String>,
 	pub external_url: Option<String>,
+	pub description: Option<String>,
 	/* pub nfts: Option<Vec<NFTDTO>>, */
 }
 impl From<NFTCollection> for NFTCollectionDTO {
@@ -37,6 +38,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			collection_id: value.collection_id,
 			slug: value.slug,
 			name: value.name,
+			description: value.description,
 			is_verified: value.is_verified,
 			category: value.category,
 			owner: subxt::utils::AccountId32(shared::utils::vec_to_array(

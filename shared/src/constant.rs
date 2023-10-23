@@ -49,3 +49,5 @@ pub const EVENT_SWAP_CLAIMED: &str = "Game:SwapClaimed";
 pub const EVENT_TRADE_CANCELLED: &str = "Game:TradeCanceled";
 
 pub const EVENT_MINING_POOL_CREATED: &str = "Game:MiningPoolCreated";
+pub const EVENT_POOL_METADATA_SET: &str = "Game:PoolSetMetadata";
+pub const EVENT_POOL_METADATA_CLEARED: &str = "Game:PoolSetMetadataCleared";
