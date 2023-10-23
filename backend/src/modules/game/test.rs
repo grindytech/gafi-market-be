@@ -22,3 +22,13 @@ async fn decode_address() {
 
 	println!("Original string: {}", original_string);
 }
+
+#[tokio::test]
+async fn endcode_address() {
+	let address = "5DXb57gvDof4GYjhKSmzKiBRX1pWhKZ3ysASgaRGRTTK9BJw";
+	let encoded_string = "40bd0488c36036a0ca2d4d10e9d031de6248796f6dde1e8991f7bf248fbccf47";
+
+	let public_key = subxt::utils::AccountId32::from_str(address).unwrap();
+	let encode_value = hex::encode(public_key);
+	println!("Vaalue : {}", encode_value);
+}

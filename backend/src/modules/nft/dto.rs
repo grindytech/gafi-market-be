@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use mongodb::bson::{doc, DateTime, Document};
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,7 @@ use crate::common::DBQuery;
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
 pub struct NFTDTO {
 	pub id: Option<String>,
-	pub token_id: String,
+	pub nft_id: String,
 	pub collection_id: String,
 
 	pub is_burn: Option<bool>,
@@ -44,9 +44,8 @@ pub struct NFTDTO {
 }
 impl Into<NFT> for NFTDTO {
 	fn into(self) -> NFT {
-		let config = shared::config::Config::init();
 		NFT {
-			token_id: self.token_id,
+			token_id: self.nft_id,
 			id: None,
 			collection_id: self.collection_id,
 			is_burn: self.is_burn,
@@ -85,7 +84,7 @@ impl From<NFT> for NFTDTO {
 
 		NFTDTO {
 			id: Some(value.id.unwrap().to_string()),
-			token_id: value.token_id,
+			nft_id: value.token_id,
 			collection_id: value.collection_id,
 			is_burn: value.is_burn,
 			status: value.status,
@@ -146,12 +145,15 @@ pub struct QueryFindNFts {
 	pub attributes: Option<Vec<Property>>,
 	pub price: Option<String>,
 	pub onsale: Option<bool>,
+	pub is_infinity_supply: Option<bool>,
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
 		let mut criteria = Document::new();
 		if let Some(created_by) = &self.created_by {
-			criteria.insert("created_by", created_by);
+			let public_key =
+				subxt::utils::AccountId32::from_str(&created_by).expect("Failed to decode");
+			criteria.insert("created_by", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(
@@ -177,7 +179,13 @@ impl DBQuery for QueryFindNFts {
 				},
 			);
 		}
-
+		if let Some(is_infinity_supply) = &self.is_infinity_supply {
+			if *is_infinity_supply {
+				criteria.insert("supply", mongodb::bson::Bson::Null);
+			} else {
+				criteria.insert("supply", doc! { "$ne": mongodb::bson::Bson::Null });
+			}
+		}
 		if let Some(onsale) = &self.onsale {
 			criteria.insert(
 				"price",

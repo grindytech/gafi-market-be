@@ -1,7 +1,9 @@
+use std::str::FromStr;
+
 use crate::common::DBQuery;
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
-use shared::{models::game::Game, utils::vec_to_array, SocialInfo};
+use shared::{models::game::Game, utils::vec_to_array};
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, ToSchema)]
@@ -11,7 +13,11 @@ pub struct GameDTO {
 	pub id: Option<String>,
 
 	pub is_verified: Option<bool>,
-	pub social: Option<SocialInfo>,
+	pub twitter: Option<String>,
+	pub website: Option<String>,
+
+	pub discord: Option<String>,
+
 	pub category: Option<String>,
 
 	pub updated_at: Option<i64>,
@@ -33,10 +39,10 @@ impl From<Game> for GameDTO {
 			game_id: value.game_id,
 			owner: subxt::utils::AccountId32(vec_to_array(decode_value)).to_string(),
 			is_verified: value.is_verified,
-			social: match value.social {
-				Some(s) => Some(s.into()),
-				None => None,
-			},
+			twitter: value.twitter,
+			discord: value.discord,
+			website: value.website,
+
 			category: value.category,
 
 			updated_at: Some(value.updated_at.timestamp_millis()),
@@ -60,36 +66,26 @@ pub struct QueryFindGame {
 
 impl DBQuery for QueryFindGame {
 	fn to_doc(&self) -> Document {
-		let mut criteria: Vec<Document> = vec![];
+		let mut criteria = Document::new();
 		if let Some(game_id) = &self.game_id {
-			criteria.push(doc! {
-				"game_id": game_id
-			});
+			criteria.insert("game_id", game_id);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.push(doc! {
-				"owner": owner
-			});
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
-			criteria.push(doc! {
-				"name":{
+			criteria.insert(
+				"name",
+				doc! {
 					 "$regex": name.to_string(),
 					 "$options":"i"
-				}
-			});
+				},
+			);
 		}
 		if let Some(collection_id) = &self.collection {
-			criteria.push(doc! {
-				"collection_id": collection_id
-			});
+			criteria.insert("collection_id", collection_id);
 		}
-		if criteria.len() == 0 {
-			doc! {}
-		} else {
-			doc! {
-				"$and": criteria
-			}
-		}
+		criteria
 	}
 }

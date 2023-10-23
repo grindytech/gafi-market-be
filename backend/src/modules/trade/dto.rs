@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::{history_tx::Nft, LootTableNft, Trade};
@@ -82,7 +84,8 @@ impl DBQuery for QueryFindTrade {
 			criteria.insert("trade_type", trade_type);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.insert("owner", owner);
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(status) = &self.status {
 			criteria.insert("status", status);

@@ -16,13 +16,15 @@ pub struct Pool {
 	pub admin: String,
 
 	pub minting_fee: Decimal128,
-	pub begin_at: i64,
-	pub end_at: i64,
+	pub start_block: i64,
+	pub end_block: i64,
 
 	pub owner_deposit: String,
 
 	pub updated_at: i64,
 	pub created_at: i64,
+	pub title: Option<String>,
+	pub description: Option<String>,
 
 	pub loot_table: Vec<LootTable>,
 }
@@ -44,15 +46,16 @@ impl Into<Document> for Pool {
 			.collect();
 		doc! {
 			"pool_id": self.pool_id,
-
 			"owner": self.owner,
 			"type_pool": self.type_pool,
 			"loot_table": loot_table,
 			"admin": self.admin,
+			"title":self.title,
+			"description":self.description,
 			"mint_type":	self.mint_type,
 			"minting_fee": self.minting_fee,
-			"begin_at": self.begin_at,
-			"end_at":  self.end_at,
+			"start_block": self.start_block,
+			"end_block":  self.end_block,
 			"owner_deposit": self.owner_deposit,
 			"updated_at": self.updated_at,
 			"created_at": self.created_at,

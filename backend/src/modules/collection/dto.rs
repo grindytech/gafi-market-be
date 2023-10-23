@@ -1,9 +1,11 @@
+use std::str::FromStr;
+
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::models::nft_collection::NFTCollection;
 use utoipa::ToSchema;
 
-use crate::{common::DBQuery, modules::game};
+use crate::common::DBQuery;
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
 pub struct NFTCollectionDTO {
@@ -24,6 +26,7 @@ pub struct NFTCollectionDTO {
 	pub banner: Option<String>,
 	pub cover: Option<String>,
 	pub external_url: Option<String>,
+	pub description: Option<String>,
 	/* pub nfts: Option<Vec<NFTDTO>>, */
 }
 impl From<NFTCollection> for NFTCollectionDTO {
@@ -35,6 +38,7 @@ impl From<NFTCollection> for NFTCollectionDTO {
 			collection_id: value.collection_id,
 			slug: value.slug,
 			name: value.name,
+			description: value.description,
 			is_verified: value.is_verified,
 			category: value.category,
 			owner: subxt::utils::AccountId32(shared::utils::vec_to_array(
@@ -67,9 +71,9 @@ impl DBQuery for QueryFindCollections {
 		if let Some(collection_id) = &self.collection_id {
 			criteria.insert("collection_id", collection_id);
 		}
-
 		if let Some(owner) = &self.owner {
-			criteria.insert("owner", owner);
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(

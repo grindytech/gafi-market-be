@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::{LootTable, Pool};
@@ -15,8 +17,8 @@ pub struct PoolDTO {
 
 	pub minting_fee: String,
 
-	pub begin_at: i64,
-	pub end_at: i64,
+	pub start_block: i64,
+	pub end_block: i64,
 
 	pub owner_deposit: String,
 
@@ -44,8 +46,8 @@ impl From<Pool> for PoolDTO {
 			type_pool: value.type_pool,
 			admin: value.admin,
 
-			begin_at: value.begin_at,
-			end_at: value.end_at,
+			start_block: value.start_block,
+			end_block: value.end_block,
 			owner_deposit: value.owner_deposit,
 			updated_at: value.updated_at,
 			created_at: value.created_at,
@@ -70,7 +72,8 @@ impl DBQuery for QueryFindPool {
 			criteria.insert("pool_id", pool_id);
 		}
 		if let Some(owner) = &self.owner {
-			criteria.insert("owner", owner);
+			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
+			criteria.insert("owner", hex::encode(public_key));
 		}
 		if let Some(type_pool) = &self.type_pool {
 			criteria.insert("type_pool", type_pool);
