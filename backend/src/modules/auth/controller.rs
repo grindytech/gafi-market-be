@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::{
 	app_state:: AppState,
 	common::{
@@ -38,15 +40,26 @@ pub async fn get_random_nonce(
 	app_state: Data<AppState>,
 	query: web::Query<GetNonce>,
 ) -> Result<HttpResponse, AWError> {
-	if query.address.len() < 32 {
-		return Ok(
-			HttpResponse::BadRequest().json("Address must have a minimum length of 32 characters.")
+
+
+	let address = query.0.address;
+	let  public_key;
+	let public_encode=subxt::utils::AccountId32::from_str(&address);	
+
+	match public_encode {
+    Ok(public_key_val) => {
+		 public_key=hex::encode(public_key_val);
+		
+	},
+    Err(_) => {
+			return Ok(
+			HttpResponse::BadRequest().json("Address Invalid")
 		);
+		},
 	}
 
-	
-	let address = query.0.address;
-	let result = update_nonce(&address, app_state.db.clone()).await;
+	log::info!("Current Public Key {:?}",public_key);
+	let result = update_nonce(&public_key, app_state.db.clone()).await;
 	
 	let data = generate_message_sign_in(&address, &result.unwrap());
 

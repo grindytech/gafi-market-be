@@ -15,11 +15,14 @@ use subxt_signer::sr25519::{PublicKey, Signature};
 
 use super::dto::QueryAuth;
 
-pub async fn update_nonce(address: &String, db: Database) -> Result<String, mongodb::error::Error> {
+pub async fn update_nonce(
+	public_key: &String,
+	db: Database,
+) -> Result<String, mongodb::error::Error> {
 	let col: Collection<AccountDTO> = db.collection(models::account::Account::name().as_str());
 	let nonce = generate_uuid();
 
-	let filter = doc! {"address":address};
+	let filter = doc! {"address":public_key};
 	let update = doc! {
 		"$set":{"nonce":&nonce.clone()}
 	};
@@ -31,10 +34,10 @@ pub async fn update_nonce(address: &String, db: Database) -> Result<String, mong
 	} else {
 		let new_account = create_account(
 			AccountDTO {
-				address: address.clone(),
+				address: public_key.clone(),
 				balance: None,
 				is_verified: None,
-				name: address.to_string(),
+				name: public_key.to_string(),
 				bio: None,
 				logo: None,
 				banner: None,
@@ -69,12 +72,22 @@ pub async fn verify_signature(
 		app.db.clone().collection(models::Account::name().as_str());
 
 	let address = params.address;
+	// Decode address to public key
+	let public_key;
+	let public_encode = subxt::utils::AccountId32::from_str(&address);
+
+	match public_encode {
+		Ok(public_key_val) => {
+			public_key = hex::encode(public_key_val);
+		},
+		Err(_) => return Ok(None),
+	}
 	let signature = params.signature;
 
 	let mut nonce_value: String = "".to_string();
 	let filter = doc! {
 		"$and": [
-			{"address": &address},
+			{"address": &public_key},
 		],
 
 	};
@@ -90,7 +103,6 @@ pub async fn verify_signature(
 
 	let message = generate_message_sign_in(&address, &nonce_value);
 
-	// decodate address from public account 32
 	let public_key = subxt::utils::AccountId32::from_str(&address).unwrap();
 
 	let sign = &signature[2..].to_string();
@@ -132,10 +144,18 @@ pub async fn refresh_access_token(
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let collection: Collection<Account> =
 		app.db.clone().collection(models::Account::name().as_str());
+	let public_key;
+	let public_encode = subxt::utils::AccountId32::from_str(&address);
 
+	match public_encode {
+		Ok(public_key_val) => {
+			public_key = hex::encode(public_key_val);
+		},
+		Err(_) => return Ok(None),
+	}
 	let filter = doc! {
 		"$and": [
-			{"address": &address},
+			{"address": &public_key},
 		],
 
 	};
@@ -166,10 +186,18 @@ pub async fn delete_refresh_token(
 ) -> Result<Option<Account>, mongodb::error::Error> {
 	let collection: Collection<Account> =
 		app.db.clone().collection(models::Account::name().as_str());
+	let public_key;
+	let public_encode = subxt::utils::AccountId32::from_str(&address);
 
+	match public_encode {
+		Ok(public_key_val) => {
+			public_key = hex::encode(public_key_val);
+		},
+		Err(_) => return Ok(None),
+	}
 	let filter = doc! {
 		"$and": [
-			{"address": &address},
+			{"address": &public_key},
 		],
 
 	};

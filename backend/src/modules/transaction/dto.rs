@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use mongodb::bson::{doc, Decimal128, Document};
+use mongodb::bson::{doc, Document};
 use serde::{Deserialize, Serialize};
 use shared::history_tx::{self, HistoryTx};
 use utoipa::ToSchema;
@@ -90,13 +90,19 @@ impl DBQuery for QueryFindTX {
 			criteria.insert("event", event);
 		}
 		if let Some(address) = &self.address {
-			let public_key =
-				subxt::utils::AccountId32::from_str(&address).expect("Failed to decode");
-			let address_value = hex::encode(public_key);
-			criteria.insert(
-				"$or",
-				vec![doc! {"from": &address_value}, doc! {"to": &address_value}],
-			);
+			let account32 = subxt::utils::AccountId32::from_str(&address);
+			match account32 {
+				Ok(public_key) => {
+					let address_value = hex::encode(public_key);
+					criteria.insert(
+						"$or",
+						vec![doc! {"from": &address_value}, doc! {"to": &address_value}],
+					);
+				},
+				Err(_) => {
+					criteria.insert("from", "error");
+				},
+			}
 		}
 		if let Some(token_id) = &self.token_id {
 			criteria.insert(

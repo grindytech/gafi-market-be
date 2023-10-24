@@ -72,8 +72,16 @@ impl DBQuery for QueryFindPool {
 			criteria.insert("pool_id", pool_id);
 		}
 		if let Some(owner) = &self.owner {
-			let public_key = subxt::utils::AccountId32::from_str(&owner).expect("Failed to decode");
-			criteria.insert("owner", hex::encode(public_key));
+			let account32 = subxt::utils::AccountId32::from_str(&owner);
+			match account32 {
+				Ok(public_key) => {
+					criteria.insert("owner", hex::encode(public_key));
+				},
+				Err(_) => {
+					// This account ID not valid will not return any match
+					criteria.insert("owner", "");
+				},
+			}
 		}
 		if let Some(type_pool) = &self.type_pool {
 			criteria.insert("type_pool", type_pool);

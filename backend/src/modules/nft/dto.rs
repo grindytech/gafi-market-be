@@ -146,14 +146,35 @@ pub struct QueryFindNFts {
 	pub price: Option<String>,
 	pub onsale: Option<bool>,
 	pub is_infinity_supply: Option<bool>,
+
+	// Use for NFT Owner
+	pub address: Option<String>,
 }
 impl DBQuery for QueryFindNFts {
 	fn to_doc(&self) -> Document {
 		let mut criteria = Document::new();
 		if let Some(created_by) = &self.created_by {
-			let public_key =
-				subxt::utils::AccountId32::from_str(&created_by).expect("Failed to decode");
-			criteria.insert("created_by", hex::encode(public_key));
+			let account32 = subxt::utils::AccountId32::from_str(&created_by);
+			match account32 {
+				Ok(public_key) => {
+					criteria.insert("created_by", hex::encode(public_key));
+				},
+				Err(_) => {
+					// This account ID not valid will not return any match
+					criteria.insert("created_by", "");
+				},
+			}
+		};
+		if let Some(address) = &self.address {
+			let public_key = subxt::utils::AccountId32::from_str(&address);
+			match public_key {
+				Ok(account32) => {
+					criteria.insert("address", hex::encode(account32));
+				},
+				Err(_) => {
+					criteria.insert("address", "");
+				},
+			}
 		}
 		if let Some(name) = &self.name {
 			criteria.insert(
